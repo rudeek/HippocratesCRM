@@ -37,7 +37,7 @@
         </Style>
         <Style TargetType="DataGridColumnHeader">
             <Setter Property="Background"      Value="#1B5E20"/>
-            <Setter Property="Foreground"      Value="#C8E6C9"/>
+            <Setter Property="Foreground"      Value="white"/>
             <Setter Property="FontWeight"      Value="SemiBold"/>
             <Setter Property="FontSize"        Value="12"/>
             <Setter Property="Padding"         Value="10 8"/>
@@ -212,7 +212,8 @@
                     </Grid>
                     <DataGrid Grid.Row="1" x:Name="ManufacturersGrid"
                               ItemsSource="{Binding ManufacturersVM.View}"
-                              LoadingRow="DataGrid_LoadingRow">
+                              LoadingRow="DataGrid_LoadingRow"
+                              UnloadingRow="DataGrid_UnloadingRow">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="№" Width="50">
                                 <DataGridTemplateColumn.CellTemplate>
@@ -255,7 +256,8 @@
                     </Grid>
                     <DataGrid Grid.Row="1" x:Name="ProductsGrid"
                               ItemsSource="{Binding ProductsVM.View}"
-                              LoadingRow="DataGrid_LoadingRow">
+                              LoadingRow="DataGrid_LoadingRow"
+                              UnloadingRow="DataGrid_UnloadingRow">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="№" Width="50">
                                 <DataGridTemplateColumn.CellTemplate>
@@ -300,7 +302,8 @@
                     </Grid>
                     <DataGrid Grid.Row="1" x:Name="PharmaciesGrid"
                               ItemsSource="{Binding PharmaciesVM.View}"
-                              LoadingRow="DataGrid_LoadingRow">
+                              LoadingRow="DataGrid_LoadingRow"
+                              UnloadingRow="DataGrid_UnloadingRow">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="№" Width="50">
                                 <DataGridTemplateColumn.CellTemplate>
@@ -339,7 +342,8 @@
                     </Grid>
                     <DataGrid Grid.Row="1" x:Name="EmployeesGrid"
                               ItemsSource="{Binding EmployeesVM.View}"
-                              LoadingRow="DataGrid_LoadingRow">
+                              LoadingRow="DataGrid_LoadingRow"
+                              UnloadingRow="DataGrid_UnloadingRow">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="№" Width="50">
                                 <DataGridTemplateColumn.CellTemplate>
@@ -380,7 +384,8 @@
                     </Grid>
                     <DataGrid Grid.Row="1" x:Name="ReceiptsGrid"
                               ItemsSource="{Binding ReceiptsVM.View}"
-                              LoadingRow="DataGrid_LoadingRow">
+                              LoadingRow="DataGrid_LoadingRow"
+                              UnloadingRow="DataGrid_UnloadingRow">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="№" Width="50">
                                 <DataGridTemplateColumn.CellTemplate>
@@ -422,7 +427,8 @@
                     </Grid>
                     <DataGrid Grid.Row="1" x:Name="OrderItemsGrid"
                               ItemsSource="{Binding OrderItemsVM.View}"
-                              LoadingRow="DataGrid_LoadingRow">
+                              LoadingRow="DataGrid_LoadingRow"
+                              UnloadingRow="DataGrid_UnloadingRow">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="№" Width="50">
                                 <DataGridTemplateColumn.CellTemplate>
@@ -469,7 +475,7 @@
                     </Grid>
                     <DataGrid x:Name="StockGrid"
                               ItemsSource="{Binding StockBalanceVM.View}"
-                              LoadingRow="DataGrid_LoadingRow" Grid.ColumnSpan="2" Margin="0,39,0,0" Grid.RowSpan="2">
+                              LoadingRow="DataGrid_LoadingRow" UnloadingRow="DataGrid_UnloadingRow" Grid.ColumnSpan="2" Margin="0,39,0,0" Grid.RowSpan="2">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="№" Width="50">
                                 <DataGridTemplateColumn.CellTemplate>

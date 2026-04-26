@@ -17,6 +17,17 @@ namespace MyHippocrates
             e.Row.Header = (e.Row.GetIndex() + 1).ToString();
         }
 
+        private void DataGrid_UnloadingRow(object sender, DataGridRowEventArgs e)
+        {
+            if (sender is not DataGrid dg) return;
+            foreach (var item in dg.Items)
+            {
+                var row = dg.ItemContainerGenerator.ContainerFromItem(item) as DataGridRow;
+                if (row != null)
+                    row.Header = (row.GetIndex() + 1).ToString();
+            }
+        }
+
         private int _lastTabIndex = -1;
 
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
