@@ -1,13 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MyHippocrates.Commands;
-using MyHippocrates.Data;
-using MyHippocrates.Models;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Data;
+using Microsoft.EntityFrameworkCore;
+using MyHippocrates.Commands;
+using MyHippocrates.Data;
+using MyHippocrates.Models;
 
 namespace MyHippocrates.ViewModels
 {
@@ -76,23 +76,30 @@ namespace MyHippocrates.ViewModels
             {
                 entity.Pharmacy = _pharmacies.FirstOrDefault(p => p.Id == entity.PharmacyId);
                 entity.Product = _products.FirstOrDefault(p => p.Id == entity.ProductId);
-                _items.Add(entity); View.Refresh();
+                _items.Add(entity);
+                View.Refresh();
             }
         }
 
         private void Edit(StockBalance? s)
         {
             if (s == null) return;
-            _ctx.Entry(s).State = EntityState.Detached;
+
+            // Запоминаем старый ключ
+            var oldPharmacyId = s.PharmacyId;
+            var oldProductId = s.ProductId;
+
             var copy = new StockBalance
             {
                 PharmacyId = s.PharmacyId,
                 ProductId = s.ProductId,
                 RemainingQty = s.RemainingQty
             };
+
             var vm = new StockBalanceEditorViewModel(copy, _pharmacies, _products);
             var dlg = new Views.EditDialog(vm, _ctx, isNew: false)
             { Owner = Application.Current.MainWindow, Title = "Редактировать остаток" };
+
             if (dlg.ShowDialog() == true)
             {
                 copy.Pharmacy = _pharmacies.FirstOrDefault(p => p.Id == copy.PharmacyId);
@@ -101,17 +108,26 @@ namespace MyHippocrates.ViewModels
                 if (idx >= 0) _items[idx] = copy;
                 View.Refresh();
             }
-            else _ctx.Entry(s).State = EntityState.Unchanged;
         }
 
         private void Delete(StockBalance? s)
         {
             if (s == null) return;
             var name = s.Product?.Name ?? $"ProductId={s.ProductId}";
-            if (MessageBox.Show($"Удалить остаток «{name}»?", "Подтверждение",
-                MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
-            try { _ctx.StockBalances.Remove(s); _ctx.SaveChanges(); _items.Remove(s); }
-            catch (Exception ex) { MessageBox.Show(ex.InnerException?.Message ?? ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
+            var res = MessageBox.Show(
+                $"Удалить остаток «{name}»?",
+                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (res != MessageBoxResult.Yes) return;
+            try
+            {
+                DbProcedures.DeleteStockBalance(_ctx, s.PharmacyId, s.ProductId);
+                _items.Remove(s);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.InnerException?.Message ?? ex.Message,
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

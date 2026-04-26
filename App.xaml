@@ -134,6 +134,26 @@
             </StackPanel>
         </DataTemplate>
 
+        <!-- RECEIPT (ORDER) -->
+        <DataTemplate DataType="{x:Type vm:ReceiptEditorViewModel}">
+            <StackPanel Width="440">
+                <Label Content="Номер чека *"/>
+                <TextBox Text="{Binding Entity.ReceiptNumber, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <Label Content="Аптека *" Margin="0,10,0,0"/>
+                <ComboBox ItemsSource="{Binding Pharmacies}"
+                  DisplayMemberPath="Address"
+                  SelectedValuePath="Id"
+                  SelectedValue="{Binding Entity.PharmacyId, Mode=TwoWay}"/>
+
+                <Label Content="Сотрудник *" Margin="0,10,0,0"/>
+                <ComboBox ItemsSource="{Binding Employees}"
+                  DisplayMemberPath="FullName"
+                  SelectedValuePath="Id"
+                  SelectedValue="{Binding Entity.EmployeeId, Mode=TwoWay}"/>
+            </StackPanel>
+        </DataTemplate>
+
         <!-- ORDER ITEM (через обёртку) -->
         <DataTemplate DataType="{x:Type vm:OrderItemEditorViewModel}">
             <StackPanel Width="440">

@@ -1,14 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MyHippocrates.Commands;
-using MyHippocrates.Data;
-using MyHippocrates.Models;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Data;
-
+using Microsoft.EntityFrameworkCore;
+using MyHippocrates.Commands;
+using MyHippocrates.Data;
+using MyHippocrates.Models;
+ 
 namespace MyHippocrates.ViewModels
 {
     internal class OrderItemsViewModel : BaseViewModel
@@ -76,14 +76,19 @@ namespace MyHippocrates.ViewModels
             {
                 entity.Receipt = _receipts.FirstOrDefault(r => r.Id == entity.ReceiptId);
                 entity.Product = _products.FirstOrDefault(p => p.Id == entity.ProductId);
-                _items.Add(entity); View.Refresh();
+                _items.Add(entity);
+                View.Refresh();
             }
         }
 
         private void Edit(OrderItem? o)
         {
             if (o == null) return;
-            _ctx.Entry(o).State = EntityState.Detached;
+
+            // Запоминаем старый ключ
+            var oldReceiptId = o.ReceiptId;
+            var oldProductId = o.ProductId;
+
             var copy = new OrderItem
             {
                 ReceiptId = o.ReceiptId,
@@ -93,9 +98,11 @@ namespace MyHippocrates.ViewModels
                 Discount = o.Discount,
                 TotalPrice = o.TotalPrice
             };
+
             var vm = new OrderItemEditorViewModel(copy, _receipts, _products);
             var dlg = new Views.EditDialog(vm, _ctx, isNew: false)
             { Owner = Application.Current.MainWindow, Title = "Редактировать позицию" };
+
             if (dlg.ShowDialog() == true)
             {
                 copy.Receipt = _receipts.FirstOrDefault(r => r.Id == copy.ReceiptId);
@@ -104,17 +111,26 @@ namespace MyHippocrates.ViewModels
                 if (idx >= 0) _items[idx] = copy;
                 View.Refresh();
             }
-            else _ctx.Entry(o).State = EntityState.Unchanged;
         }
 
         private void Delete(OrderItem? o)
         {
             if (o == null) return;
             var name = o.Product?.Name ?? $"ProductId={o.ProductId}";
-            if (MessageBox.Show($"Удалить позицию «{name}»?", "Подтверждение",
-                MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
-            try { _ctx.OrderItems.Remove(o); _ctx.SaveChanges(); _items.Remove(o); }
-            catch (Exception ex) { MessageBox.Show(ex.InnerException?.Message ?? ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
+            var res = MessageBox.Show(
+                $"Удалить позицию «{name}»?",
+                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (res != MessageBoxResult.Yes) return;
+            try
+            {
+                DbProcedures.DeleteOrderItem(_ctx, o.ReceiptId, o.ProductId);
+                _items.Remove(o);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.InnerException?.Message ?? ex.Message,
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

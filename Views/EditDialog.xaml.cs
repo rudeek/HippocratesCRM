@@ -11,17 +11,33 @@ namespace MyHippocrates.Views
         private readonly AppDbContext _ctx;
         private readonly bool _isNew;
 
+        // Для OrderItem и StockBalance нам нужно помнить старый ключ (составной PK)
+        private int _oldReceiptId, _oldProductId;
+        private int _oldPharmacyId, _oldStockProductId;
+
         public EditDialog(object dataContext, AppDbContext ctx, bool isNew)
         {
             InitializeComponent();
             DataContext = dataContext;
             _ctx = ctx;
             _isNew = isNew;
+
+            // Запоминаем старые ключи для составных PK
+            if (dataContext is OrderItemEditorViewModel ovm && !isNew)
+            {
+                _oldReceiptId = ovm.Entity.ReceiptId;
+                _oldProductId = ovm.Entity.ProductId;
+            }
+            if (dataContext is StockBalanceEditorViewModel svm && !isNew)
+            {
+                _oldPharmacyId = svm.Entity.PharmacyId;
+                _oldStockProductId = svm.Entity.ProductId;
+            }
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            //Извлекаем реальную сущность из обёртки
+            // Извлекаем реальную сущность из обёртки
             var entity = DataContext switch
             {
                 ProductEditorViewModel vm => (object)vm.Entity,
@@ -31,32 +47,76 @@ namespace MyHippocrates.Views
                 _ => DataContext
             };
 
-            //Валидация
+            // Валидация
             var error = Validate(entity);
             if (error != null)
             {
-                MessageBox.Show(error, "Ошибка валидации", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(error, "Ошибка валидации",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             try
             {
-                if (_isNew)
-                    _ctx.Add(entity);
-                else
-                    _ctx.Update(entity);
-
-                _ctx.SaveChanges();
+                ExecuteProcedure(entity);
                 DialogResult = true;
             }
             catch (Exception ex)
             {
                 var msg = ex.Message;
                 if (ex.InnerException != null) msg += "\n\n" + ex.InnerException.Message;
-                if (ex.InnerException?.InnerException != null) msg += "\n" + ex.InnerException.InnerException.Message;
-                MessageBox.Show(msg, "Ошибка сохранения", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (ex.InnerException?.InnerException != null)
+                    msg += "\n" + ex.InnerException.InnerException.Message;
+                MessageBox.Show(msg, "Ошибка сохранения",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        /// <summary>
+        /// Вызывает нужную процедуру (Add или Update) в зависимости от типа сущности.
+        /// </summary>
+        private void ExecuteProcedure(object entity)
+        {
+            switch (entity)
+            {
+                case Manufacturer m:
+                    if (_isNew) m.Id = DbProcedures.AddManufacturer(_ctx, m);
+                    else DbProcedures.UpdateManufacturer(_ctx, m);
+                    break;
+
+                case Product p:
+                    if (_isNew) p.Id = DbProcedures.AddProduct(_ctx, p);
+                    else DbProcedures.UpdateProduct(_ctx, p);
+                    break;
+
+                case Pharmacy ph:
+                    if (_isNew) ph.Id = DbProcedures.AddPharmacy(_ctx, ph);
+                    else DbProcedures.UpdatePharmacy(_ctx, ph);
+                    break;
+
+                case Employee emp:
+                    if (_isNew) emp.Id = DbProcedures.AddEmployee(_ctx, emp);
+                    else DbProcedures.UpdateEmployee(_ctx, emp);
+                    break;
+
+                case Receipt r:
+                    if (_isNew) r.Id = DbProcedures.AddReceipt(_ctx, r);
+                    else DbProcedures.UpdateReceipt(_ctx, r);
+                    break;
+
+                case OrderItem o:
+                    if (_isNew) DbProcedures.AddOrderItem(_ctx, o);
+                    else DbProcedures.UpdateOrderItem(_ctx, _oldReceiptId, _oldProductId, o);
+                    break;
+
+                case StockBalance s:
+                    if (_isNew) DbProcedures.AddStockBalance(_ctx, s);
+                    else DbProcedures.UpdateStockBalance(_ctx, _oldPharmacyId, _oldStockProductId, s);
+                    break;
+            }
+        }
+
+        // ─── Валидация (без изменений) ────────────────────────────
 
         private static string? Validate(object entity) => entity switch
         {
@@ -147,9 +207,6 @@ namespace MyHippocrates.Views
             return true;
         }
 
-        private void Cancel_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
-        }
+        private void Cancel_Click(object sender, RoutedEventArgs e) => DialogResult = false;
     }
 }

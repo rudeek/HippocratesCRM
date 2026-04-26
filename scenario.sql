@@ -10,7 +10,7 @@ CREATE TABLE manufacturer (
 CREATE TABLE product (
     product_id            SERIAL PRIMARY KEY,
     name                  VARCHAR(150)  NOT NULL,
-    manufacturer_id       INT           NOT NULL REFERENCES manufacturer(manufacturer_id),
+    manufacturer_id       INT           NOT NULL REFERENCES manufacturer(manufacturer_id) ON DELETE CASCADE,
     expiration_date       DATE          NOT NULL,
     production_date       DATE          NOT NULL,
     unit                  VARCHAR(50)   DEFAULT 'шт',
@@ -39,17 +39,17 @@ CREATE TABLE employee (
 
 CREATE TABLE receipt (
     receipt_id     SERIAL PRIMARY KEY,
-    receipt_number INT           NOT NULL,
-    pharmacy_id    INT           NOT NULL REFERENCES pharmacy(pharmacy_id),
-    employee_id    INT           NOT NULL REFERENCES employee(employee_id),
+    receipt_number INT           NOT NULL UNIQUE,
+    pharmacy_id    INT           NOT NULL REFERENCES pharmacy(pharmacy_id) ON DELETE CASCADE,
+    employee_id    INT           NOT NULL REFERENCES employee(employee_id) ON DELETE CASCADE,
     total_amount   NUMERIC(10,2) NOT NULL DEFAULT 0,
     date           DATE          NOT NULL DEFAULT CURRENT_DATE,
     time           TIME          NOT NULL DEFAULT CURRENT_TIME
 );
 
 CREATE TABLE order_item (
-    receipt_id  INT           NOT NULL REFERENCES receipt(receipt_id),
-    product_id  INT           NOT NULL REFERENCES product(product_id),
+    receipt_id  INT           NOT NULL REFERENCES receipt(receipt_id) ON DELETE CASCADE,
+    product_id  INT           NOT NULL REFERENCES product(product_id) ON DELETE CASCADE,
     quantity    INT           NOT NULL CHECK (quantity > 0),
     unit_price  NUMERIC(10,2) NOT NULL,
     total_price NUMERIC(10,2) GENERATED ALWAYS AS (quantity * unit_price * (1 - discount / 100.0)) STORED,
@@ -58,8 +58,8 @@ CREATE TABLE order_item (
 );
 
 CREATE TABLE stock_balance (
-    pharmacy_id   INT NOT NULL REFERENCES pharmacy(pharmacy_id),
-    product_id    INT NOT NULL REFERENCES product(product_id),
+    pharmacy_id   INT NOT NULL REFERENCES pharmacy(pharmacy_id) ON DELETE CASCADE,
+    product_id    INT NOT NULL REFERENCES product(product_id) ON DELETE CASCADE,
     remaining_qty INT NOT NULL DEFAULT 0 CHECK (remaining_qty >= 0),
     PRIMARY KEY (pharmacy_id, product_id)
 );
@@ -238,3 +238,367 @@ INSERT INTO stock_balance (pharmacy_id, product_id, remaining_qty) VALUES
 (18, 18,  95),
 (19, 19,  45),
 (20, 20, 210);
+
+
+
+CREATE OR REPLACE PROCEDURE sp_add_manufacturer(
+    p_name    VARCHAR, p_country VARCHAR,
+    p_address VARCHAR, p_phone   VARCHAR, p_email VARCHAR,
+    OUT p_id INT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO manufacturer(name, country, address, phone, email)
+    VALUES (p_name, p_country, p_address, p_phone, p_email)
+    RETURNING manufacturer_id INTO p_id;
+END;
+$$;
+ 
+CREATE OR REPLACE PROCEDURE sp_update_manufacturer(
+    p_id INT, p_name VARCHAR, p_country VARCHAR,
+    p_address VARCHAR, p_phone VARCHAR, p_email VARCHAR
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    UPDATE manufacturer
+    SET name=p_name, country=p_country, address=p_address,
+        phone=p_phone, email=p_email
+    WHERE manufacturer_id = p_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Производитель с id=% не найден', p_id;
+    END IF;
+END;
+$$;
+ 
+-- Каскадное удаление: manufacturer → product → order_item, stock_balance
+CREATE OR REPLACE PROCEDURE sp_delete_manufacturer(p_id INT)
+LANGUAGE plpgsql AS $$
+BEGIN
+    DELETE FROM manufacturer
+    WHERE manufacturer_id = p_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Производитель с id=% не найден', p_id;
+    END IF;
+END;
+$$;
+ 
+-- ──────────────────────────────────────────────────────────────────
+-- PRODUCT
+-- ──────────────────────────────────────────────────────────────────
+ 
+CREATE OR REPLACE PROCEDURE sp_add_product(
+    p_name VARCHAR, p_manufacturer_id INT,
+    p_production_date DATE, p_expiration_date DATE,
+    p_unit VARCHAR, p_description TEXT,
+    p_prescription_required BOOLEAN,
+    p_purchase_price NUMERIC, p_sale_price NUMERIC,
+    OUT p_id INT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO product(name, manufacturer_id, production_date, expiration_date,
+                        unit, description, prescription_required, purchase_price, sale_price)
+    VALUES (p_name, p_manufacturer_id, p_production_date, p_expiration_date,
+            p_unit, p_description, p_prescription_required, p_purchase_price, p_sale_price)
+    RETURNING product_id INTO p_id;
+END;
+$$;
+ 
+CREATE OR REPLACE PROCEDURE sp_update_product(
+    p_id INT, p_name VARCHAR, p_manufacturer_id INT,
+    p_production_date DATE, p_expiration_date DATE,
+    p_unit VARCHAR, p_description TEXT,
+    p_prescription_required BOOLEAN,
+    p_purchase_price NUMERIC, p_sale_price NUMERIC
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    UPDATE product
+    SET name=p_name, manufacturer_id=p_manufacturer_id,
+        production_date=p_production_date, expiration_date=p_expiration_date,
+        unit=p_unit, description=p_description,
+        prescription_required=p_prescription_required,
+        purchase_price=p_purchase_price, sale_price=p_sale_price
+    WHERE product_id = p_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Товар с id=% не найден', p_id;
+    END IF;
+END;
+$$;
+ 
+-- Каскадное удаление: product → order_item, stock_balance
+CREATE OR REPLACE PROCEDURE sp_delete_product(p_id INT)
+LANGUAGE plpgsql AS $$
+BEGIN
+    DELETE FROM product       WHERE product_id = p_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Товар с id=% не найден', p_id;
+    END IF;
+END;
+$$;
+ 
+-- ──────────────────────────────────────────────────────────────────
+-- PHARMACY
+-- ──────────────────────────────────────────────────────────────────
+ 
+CREATE OR REPLACE PROCEDURE sp_add_pharmacy(
+    p_address VARCHAR, p_phone VARCHAR, p_working_hours VARCHAR,
+    OUT p_id INT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO pharmacy(address, phone, working_hours)
+    VALUES (p_address, p_phone, p_working_hours)
+    RETURNING pharmacy_id INTO p_id;
+END;
+$$;
+ 
+CREATE OR REPLACE PROCEDURE sp_update_pharmacy(
+    p_id INT, p_address VARCHAR, p_phone VARCHAR, p_working_hours VARCHAR
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    UPDATE pharmacy
+    SET address=p_address, phone=p_phone, working_hours=p_working_hours
+    WHERE pharmacy_id = p_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Аптека с id=% не найдена', p_id;
+    END IF;
+END;
+$$;
+ 
+-- Каскадное удаление: pharmacy → receipt → order_item; pharmacy → stock_balance
+CREATE OR REPLACE PROCEDURE sp_delete_pharmacy(p_id INT)
+LANGUAGE plpgsql AS $$
+BEGIN
+    DELETE FROM pharmacy
+    WHERE pharmacy_id = p_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Аптека с id=% не найдена', p_id;
+    END IF;
+END;
+$$;
+ 
+-- ──────────────────────────────────────────────────────────────────
+-- EMPLOYEE
+-- ──────────────────────────────────────────────────────────────────
+ 
+CREATE OR REPLACE PROCEDURE sp_add_employee(
+    p_full_name VARCHAR, p_idnp VARCHAR, p_phone VARCHAR,
+    p_address VARCHAR, p_salary NUMERIC, p_position VARCHAR,
+    OUT p_id INT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO employee(full_name, idnp, phone, address, salary, position)
+    VALUES (p_full_name, p_idnp, p_phone, p_address, p_salary, p_position)
+    RETURNING employee_id INTO p_id;
+END;
+$$;
+ 
+CREATE OR REPLACE PROCEDURE sp_update_employee(
+    p_id INT, p_full_name VARCHAR, p_idnp VARCHAR, p_phone VARCHAR,
+    p_address VARCHAR, p_salary NUMERIC, p_position VARCHAR
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    UPDATE employee
+    SET full_name=p_full_name, idnp=p_idnp, phone=p_phone,
+        address=p_address, salary=p_salary, position=p_position
+    WHERE employee_id = p_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Сотрудник с id=% не найден', p_id;
+    END IF;
+END;
+$$;
+ 
+-- Каскадное удаление: employee → receipt → order_item
+CREATE OR REPLACE PROCEDURE sp_delete_employee(p_id INT)
+LANGUAGE plpgsql AS $$
+BEGIN
+    DELETE FROM employee
+    WHERE employee_id = p_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Сотрудник с id=% не найден', p_id;
+    END IF;
+END;
+$$;
+ 
+-- ──────────────────────────────────────────────────────────────────
+-- RECEIPT
+-- ──────────────────────────────────────────────────────────────────
+ 
+CREATE OR REPLACE PROCEDURE sp_add_receipt(
+    p_receipt_number INT, p_pharmacy_id INT, p_employee_id INT,
+    p_date DATE, p_time TIME,
+    OUT p_id INT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO receipt(receipt_number, pharmacy_id, employee_id, total_amount, date, time)
+    VALUES (p_receipt_number, p_pharmacy_id, p_employee_id, 0, p_date, p_time)
+    RETURNING receipt_id INTO p_id;
+END;
+$$;
+ 
+CREATE OR REPLACE PROCEDURE sp_update_receipt(
+    p_id INT, p_receipt_number INT, p_pharmacy_id INT,
+    p_employee_id INT, p_date DATE, p_time TIME
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    UPDATE receipt
+    SET receipt_number=p_receipt_number, pharmacy_id=p_pharmacy_id,
+        employee_id=p_employee_id, date=p_date, time=p_time
+    WHERE receipt_id = p_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Чек с id=% не найден', p_id;
+    END IF;
+END;
+$$;
+ 
+-- Каскадное удаление: receipt → order_item
+CREATE OR REPLACE PROCEDURE sp_delete_receipt(p_id INT)
+LANGUAGE plpgsql AS $$
+BEGIN
+    DELETE FROM receipt
+    WHERE receipt_id = p_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Чек с id=% не найден', p_id;
+    END IF;
+END;
+$$;
+-- ──────────────────────────────────────────────────────────────────
+-- ORDER ITEM
+-- ──────────────────────────────────────────────────────────────────
+ 
+CREATE OR REPLACE PROCEDURE sp_add_order_item(
+    p_receipt_id INT, p_product_id INT,
+    p_quantity INT, p_discount NUMERIC
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    -- unit_price заполнится триггером trg_set_unit_price
+    INSERT INTO order_item(receipt_id, product_id, quantity, discount)
+    VALUES (p_receipt_id, p_product_id, p_quantity, p_discount);
+ 
+    -- Обновляем total_amount чека
+    UPDATE receipt
+    SET total_amount = (
+        SELECT COALESCE(SUM(total_price), 0)
+        FROM order_item WHERE receipt_id = p_receipt_id
+    )
+    WHERE receipt_id = p_receipt_id;
+END;
+$$;
+ 
+CREATE OR REPLACE PROCEDURE sp_update_order_item(
+    p_receipt_id INT, p_product_id INT,
+    p_new_receipt_id INT, p_new_product_id INT,
+    p_quantity INT, p_discount NUMERIC
+)
+LANGUAGE plpgsql AS $$
+DECLARE
+    v_price NUMERIC;
+BEGIN
+    -- Если меняется ключ — удаляем старую запись и вставляем новую
+    IF p_receipt_id != p_new_receipt_id OR p_product_id != p_new_product_id THEN
+        DELETE FROM order_item WHERE receipt_id = p_receipt_id AND product_id = p_product_id;
+        SELECT sale_price INTO v_price FROM product WHERE product_id = p_new_product_id;
+        INSERT INTO order_item(receipt_id, product_id, quantity, unit_price, discount)
+        VALUES (p_new_receipt_id, p_new_product_id, p_quantity, v_price, p_discount);
+    ELSE
+        UPDATE order_item
+        SET quantity=p_quantity, discount=p_discount
+        WHERE receipt_id = p_receipt_id AND product_id = p_product_id;
+    END IF;
+ 
+    -- Пересчитываем total_amount для обоих чеков
+    UPDATE receipt
+    SET total_amount = (
+        SELECT COALESCE(SUM(total_price), 0)
+        FROM order_item WHERE receipt_id = receipt.receipt_id
+    )
+    WHERE receipt_id IN (p_receipt_id, p_new_receipt_id);
+END;
+$$;
+ 
+CREATE OR REPLACE PROCEDURE sp_delete_order_item(
+    p_receipt_id INT,
+    p_product_id INT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    DELETE FROM order_item
+    WHERE receipt_id = p_receipt_id
+      AND product_id = p_product_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Позиция не найдена (receipt_id=%, product_id=%)',
+        p_receipt_id, p_product_id;
+    END IF;
+
+    -- обновляем сумму чека
+    UPDATE receipt
+    SET total_amount = (
+        SELECT COALESCE(SUM(total_price), 0)
+        FROM order_item
+        WHERE receipt_id = p_receipt_id
+    )
+    WHERE receipt_id = p_receipt_id;
+END;
+$$;
+ 
+-- ──────────────────────────────────────────────────────────────────
+-- STOCK BALANCE
+-- ──────────────────────────────────────────────────────────────────
+ 
+CREATE OR REPLACE PROCEDURE sp_add_stock_balance(
+    p_pharmacy_id INT, p_product_id INT, p_remaining_qty INT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO stock_balance(pharmacy_id, product_id, remaining_qty)
+    VALUES (p_pharmacy_id, p_product_id, p_remaining_qty);
+END;
+$$;
+ 
+CREATE OR REPLACE PROCEDURE sp_update_stock_balance(
+    p_pharmacy_id INT, p_product_id INT,
+    p_new_pharmacy_id INT, p_new_product_id INT,
+    p_remaining_qty INT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    IF p_pharmacy_id != p_new_pharmacy_id OR p_product_id != p_new_product_id THEN
+        DELETE FROM stock_balance WHERE pharmacy_id = p_pharmacy_id AND product_id = p_product_id;
+        INSERT INTO stock_balance(pharmacy_id, product_id, remaining_qty)
+        VALUES (p_new_pharmacy_id, p_new_product_id, p_remaining_qty);
+    ELSE
+        UPDATE stock_balance
+        SET remaining_qty = p_remaining_qty
+        WHERE pharmacy_id = p_pharmacy_id AND product_id = p_product_id;
+    END IF;
+END;
+$$;
+ 
+CREATE OR REPLACE PROCEDURE sp_delete_stock_balance(
+    p_pharmacy_id INT,
+    p_product_id INT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    DELETE FROM stock_balance
+    WHERE pharmacy_id = p_pharmacy_id
+      AND product_id = p_product_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Остаток не найден (pharmacy_id=%, product_id=%)',
+        p_pharmacy_id, p_product_id;
+    END IF;
+END;
+$$;

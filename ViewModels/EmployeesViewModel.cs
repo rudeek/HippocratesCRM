@@ -1,13 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MyHippocrates.Commands;
-using MyHippocrates.Data;
-using MyHippocrates.Models;
+﻿// ══════════════════════════════════════════════════════════════════
+// EmployeesViewModel.cs
+// ══════════════════════════════════════════════════════════════════
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Windows;
 using System.Windows.Data;
+using MyHippocrates.Commands;
+using MyHippocrates.Data;
+using MyHippocrates.Models;
 
 namespace MyHippocrates.ViewModels
 {
@@ -56,8 +57,16 @@ namespace MyHippocrates.ViewModels
         private void Edit(Employee? e)
         {
             if (e == null) return;
-            _ctx.Entry(e).State = EntityState.Detached;
-            var copy = new Employee { Id = e.Id, FullName = e.FullName, Idnp = e.Idnp, Phone = e.Phone, Address = e.Address, Salary = e.Salary, Position = e.Position };
+            var copy = new Employee
+            {
+                Id = e.Id,
+                FullName = e.FullName,
+                Idnp = e.Idnp,
+                Phone = e.Phone,
+                Address = e.Address,
+                Salary = e.Salary,
+                Position = e.Position
+            };
             var dlg = new Views.EditDialog(copy, _ctx, isNew: false)
             { Owner = Application.Current.MainWindow, Title = "Редактировать сотрудника" };
             if (dlg.ShowDialog() == true)
@@ -66,16 +75,25 @@ namespace MyHippocrates.ViewModels
                 if (idx >= 0) _employees[idx] = copy;
                 View.Refresh();
             }
-            else _ctx.Entry(e).State = EntityState.Unchanged;
         }
 
         private void Delete(Employee? e)
         {
             if (e == null) return;
-            if (MessageBox.Show($"Удалить сотрудника «{e.FullName}»?", "Подтверждение",
-                MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
-            try { _ctx.Employees.Remove(e); _ctx.SaveChanges(); _employees.Remove(e); }
-            catch (Exception ex) { MessageBox.Show(ex.InnerException?.Message ?? ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
+            var res = MessageBox.Show(
+                $"Удалить сотрудника «{e.FullName}»?\n\nВнимание: все связанные чеки и позиции заказов будут удалены.",
+                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (res != MessageBoxResult.Yes) return;
+            try
+            {
+                DbProcedures.DeleteEmployee(_ctx, e.Id);
+                _employees.Remove(e);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.InnerException?.Message ?? ex.Message,
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

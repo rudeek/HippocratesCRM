@@ -1,13 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MyHippocrates.Commands;
-using MyHippocrates.Data;
-using MyHippocrates.Models;
+﻿// ══════════════════════════════════════════════════════════════════
+// ReceiptsViewModel.cs
+// ══════════════════════════════════════════════════════════════════
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Data;
+using Microsoft.EntityFrameworkCore;
+using MyHippocrates.Commands;
+using MyHippocrates.Data;
+using MyHippocrates.Models;
 
 namespace MyHippocrates.ViewModels
 {
@@ -17,7 +20,6 @@ namespace MyHippocrates.ViewModels
         private readonly ObservableCollection<Pharmacy> _pharmacies;
         private readonly ObservableCollection<Employee> _employees;
         private readonly ObservableCollection<Receipt> _receipts;
-
         public ICollectionView View { get; }
 
         private string _search = "";
@@ -36,10 +38,8 @@ namespace MyHippocrates.ViewModels
             ObservableCollection<Employee> employees,
             ObservableCollection<Receipt> receipts)
         {
-            _ctx = ctx;
-            _pharmacies = pharmacies;
-            _employees = employees;
-            _receipts = receipts;
+            _ctx = ctx; _pharmacies = pharmacies;
+            _employees = employees; _receipts = receipts;
 
             View = CollectionViewSource.GetDefaultView(_receipts);
             View.Filter = obj =>
@@ -62,8 +62,7 @@ namespace MyHippocrates.ViewModels
         {
             _receipts.Clear();
             foreach (var r in _ctx.Receipts
-                .Include(x => x.Pharmacy)
-                .Include(x => x.Employee)
+                .Include(x => x.Pharmacy).Include(x => x.Employee)
                 .OrderBy(x => x.Id).ToList())
                 _receipts.Add(r);
         }
@@ -85,7 +84,6 @@ namespace MyHippocrates.ViewModels
         private void Edit(Receipt? r)
         {
             if (r == null) return;
-            _ctx.Entry(r).State = EntityState.Detached;
             var copy = new Receipt
             {
                 Id = r.Id,
@@ -107,16 +105,18 @@ namespace MyHippocrates.ViewModels
                 if (idx >= 0) _receipts[idx] = copy;
                 View.Refresh();
             }
-            else _ctx.Entry(r).State = EntityState.Unchanged;
         }
 
         private void Delete(Receipt? r)
         {
             if (r == null) return;
-            if (MessageBox.Show($"Удалить чек №{r.ReceiptNumber}?", "Подтверждение",
-                MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
-            try { _ctx.Receipts.Remove(r); _ctx.SaveChanges(); _receipts.Remove(r); }
-            catch (Exception ex) { MessageBox.Show(ex.InnerException?.Message ?? ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
+            var res = MessageBox.Show(
+                $"Удалить чек №{r.ReceiptNumber}?\n\nВнимание: все позиции этого чека будут удалены.",
+                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (res != MessageBoxResult.Yes) return;
+            try { DbProcedures.DeleteReceipt(_ctx, r.Id); _receipts.Remove(r); }
+            catch (Exception ex)
+            { MessageBox.Show(ex.InnerException?.Message ?? ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
         }
     }
 }

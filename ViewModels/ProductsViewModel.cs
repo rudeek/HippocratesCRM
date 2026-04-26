@@ -1,14 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MyHippocrates.Commands;
-using MyHippocrates.Data;
-using MyHippocrates.Models;
-using MyHippocrates.Views;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Data;
+using Microsoft.EntityFrameworkCore;
+using MyHippocrates.Commands;
+using MyHippocrates.Data;
+using MyHippocrates.Models;
+using MyHippocrates.Views;
 
 namespace MyHippocrates.ViewModels
 {
@@ -17,7 +17,6 @@ namespace MyHippocrates.ViewModels
         private readonly AppDbContext _ctx;
         private readonly ObservableCollection<Manufacturer> _manufacturers;
         private readonly ObservableCollection<Product> _products;
-
         public ICollectionView View { get; }
 
         private string _search = "";
@@ -45,7 +44,7 @@ namespace MyHippocrates.ViewModels
                 if (string.IsNullOrWhiteSpace(_search)) return true;
                 if (obj is not Product p) return false;
                 return p.Name.ToLower().Contains(_search.ToLower())
-                    || (p.Manufacturer?.Name?.ToLower().Contains(_search.ToLower()) ?? false); 
+                    || (p.Manufacturer?.Name?.ToLower().Contains(_search.ToLower()) ?? false);
             };
 
             AddCommand = new RelayCommand(_ => Add());
@@ -71,14 +70,14 @@ namespace MyHippocrates.ViewModels
             if (dlg.ShowDialog() == true)
             {
                 entity.Manufacturer = _manufacturers.FirstOrDefault(m => m.Id == entity.ManufacturerId);
-                _products.Add(entity); View.Refresh();
+                _products.Add(entity);
+                View.Refresh();
             }
         }
 
         private void Edit(Product? p)
         {
             if (p == null) return;
-            _ctx.Entry(p).State = EntityState.Detached;
             var copy = new Product
             {
                 Id = p.Id,
@@ -102,16 +101,25 @@ namespace MyHippocrates.ViewModels
                 if (idx >= 0) _products[idx] = copy;
                 View.Refresh();
             }
-            else _ctx.Entry(p).State = EntityState.Unchanged;
         }
 
         private void Delete(Product? p)
         {
             if (p == null) return;
-            if (MessageBox.Show($"Удалить товар «{p.Name}»?", "Подтверждение",
-                MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
-            try { _ctx.Products.Remove(p); _ctx.SaveChanges(); _products.Remove(p); }
-            catch (Exception ex) { MessageBox.Show(ex.InnerException?.Message ?? ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
+            var res = MessageBox.Show(
+                $"Удалить товар «{p.Name}»?\n\nВнимание: все позиции заказов и остатки склада для этого товара будут удалены.",
+                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (res != MessageBoxResult.Yes) return;
+            try
+            {
+                DbProcedures.DeleteProduct(_ctx, p.Id);
+                _products.Remove(p);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.InnerException?.Message ?? ex.Message,
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }
