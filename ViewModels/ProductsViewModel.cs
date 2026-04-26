@@ -121,5 +121,13 @@ namespace MyHippocrates.ViewModels
                     "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        public void Reload()
+        {
+            _products.Clear();
+            foreach (var p in _ctx.Products.Include(x => x.Manufacturer).OrderBy(x => x.Id).ToList())
+                _products.Add(p);
+            View.Refresh();
+        }
     }
 }

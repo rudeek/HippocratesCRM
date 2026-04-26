@@ -58,6 +58,7 @@ namespace MyHippocrates.ViewModels
             Load();
         }
 
+        public void Reload() => Load();
         private void Load()
         {
             _receipts.Clear();

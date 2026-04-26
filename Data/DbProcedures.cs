@@ -9,11 +9,9 @@ namespace MyHippocrates.Data
 {
     public static class DbProcedures
     {
-        // ── helpers ────────────────────────────────────────────────
-        private static NpgsqlConnection OpenConnection(AppDbContext ctx)
+        private static NpgsqlConnection CreateConnection(AppDbContext ctx)
         {
-            ctx.Database.OpenConnection();
-            return (NpgsqlConnection)ctx.Database.GetDbConnection();
+            return new NpgsqlConnection(ctx.connectionString);
         }
 
         private static NpgsqlCommand Cmd(string proc, NpgsqlConnection cn, NpgsqlTransaction tx)
@@ -29,7 +27,8 @@ namespace MyHippocrates.Data
 
         public static int AddManufacturer(AppDbContext ctx, Manufacturer m)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -51,7 +50,8 @@ namespace MyHippocrates.Data
 
         public static void UpdateManufacturer(AppDbContext ctx, Manufacturer m)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -70,7 +70,8 @@ namespace MyHippocrates.Data
 
         public static void DeleteManufacturer(AppDbContext ctx, int id)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -86,7 +87,8 @@ namespace MyHippocrates.Data
 
         public static int AddProduct(AppDbContext ctx, Product p)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -112,7 +114,8 @@ namespace MyHippocrates.Data
 
         public static void UpdateProduct(AppDbContext ctx, Product p)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -135,7 +138,8 @@ namespace MyHippocrates.Data
 
         public static void DeleteProduct(AppDbContext ctx, int id)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -151,7 +155,8 @@ namespace MyHippocrates.Data
 
         public static int AddPharmacy(AppDbContext ctx, Pharmacy p)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -171,7 +176,8 @@ namespace MyHippocrates.Data
 
         public static void UpdatePharmacy(AppDbContext ctx, Pharmacy p)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -188,7 +194,8 @@ namespace MyHippocrates.Data
 
         public static void DeletePharmacy(AppDbContext ctx, int id)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -204,7 +211,8 @@ namespace MyHippocrates.Data
 
         public static int AddEmployee(AppDbContext ctx, Employee e)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -227,7 +235,8 @@ namespace MyHippocrates.Data
 
         public static void UpdateEmployee(AppDbContext ctx, Employee e)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -247,7 +256,8 @@ namespace MyHippocrates.Data
 
         public static void DeleteEmployee(AppDbContext ctx, int id)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -263,7 +273,8 @@ namespace MyHippocrates.Data
 
         public static int AddReceipt(AppDbContext ctx, Receipt r)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -285,7 +296,8 @@ namespace MyHippocrates.Data
 
         public static void UpdateReceipt(AppDbContext ctx, Receipt r)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -304,7 +316,8 @@ namespace MyHippocrates.Data
 
         public static void DeleteReceipt(AppDbContext ctx, int id)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -320,7 +333,8 @@ namespace MyHippocrates.Data
 
         public static void AddOrderItem(AppDbContext ctx, OrderItem o)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -338,7 +352,8 @@ namespace MyHippocrates.Data
         public static void UpdateOrderItem(AppDbContext ctx,
             int oldReceiptId, int oldProductId, OrderItem o)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -357,7 +372,8 @@ namespace MyHippocrates.Data
 
         public static void DeleteOrderItem(AppDbContext ctx, int receiptId, int productId)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -374,7 +390,8 @@ namespace MyHippocrates.Data
 
         public static void AddStockBalance(AppDbContext ctx, StockBalance s)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -391,7 +408,8 @@ namespace MyHippocrates.Data
         public static void UpdateStockBalance(AppDbContext ctx,
             int oldPharmacyId, int oldProductId, StockBalance s)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {
@@ -409,7 +427,8 @@ namespace MyHippocrates.Data
 
         public static void DeleteStockBalance(AppDbContext ctx, int pharmacyId, int productId)
         {
-            using var cn = OpenConnection(ctx);
+            using var cn = CreateConnection(ctx);
+            cn.Open();
             using var tx = cn.BeginTransaction();
             try
             {

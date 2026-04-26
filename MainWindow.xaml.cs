@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using MyHippocrates.ViewModels;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace MyHippocrates
@@ -14,6 +15,29 @@ namespace MyHippocrates
         private void DataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
             e.Row.Header = (e.Row.GetIndex() + 1).ToString();
+        }
+
+        private int _lastTabIndex = -1;
+
+        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DataContext is not MainViewModel vm) return;
+            if (sender is not TabControl tc) return;
+
+            // Срабатывает только при смене вкладки
+            if (tc.SelectedIndex == _lastTabIndex) return;
+            _lastTabIndex = tc.SelectedIndex;
+
+            switch (tc.SelectedIndex)
+            {
+                case 0: vm.ManufacturersVM.Reload(); break;
+                case 1: vm.ProductsVM.Reload(); break;
+                case 2: vm.PharmaciesVM.Reload(); break;
+                case 3: vm.EmployeesVM.Reload(); break;
+                case 4: vm.ReceiptsVM.Reload(); break;
+                case 5: vm.OrderItemsVM.Reload(); break;
+                case 6: vm.StockBalanceVM.Reload(); break;
+            }
         }
     }
 }

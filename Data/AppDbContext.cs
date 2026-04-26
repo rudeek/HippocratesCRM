@@ -10,7 +10,7 @@ namespace MyHippocrates.Data
 {
     public class AppDbContext : DbContext
     {
-        private readonly string connectionString;
+        public readonly string connectionString;
 
         public AppDbContext(string connectionString)
         {

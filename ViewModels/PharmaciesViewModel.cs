@@ -84,5 +84,13 @@ namespace MyHippocrates.ViewModels
                     "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        public void Reload()
+        {
+            _pharmacies.Clear();
+            foreach (var p in _ctx.Pharmacies.OrderBy(x => x.Id).ToList())
+                _pharmacies.Add(p);
+            View.Refresh();
+        }
     }
 }

@@ -95,5 +95,13 @@ namespace MyHippocrates.ViewModels
                     "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        public void Reload()
+        {
+            _employees.Clear();
+            foreach (var e in _ctx.Employees.OrderBy(x => x.Id).ToList())
+                _employees.Add(e);
+            View.Refresh();
+        }
     }
 }
