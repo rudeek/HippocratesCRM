@@ -602,3 +602,284 @@ BEGIN
     END IF;
 END;
 $$;
+
+
+
+
+-- ══════════════════════════════════════════════════════════════════
+-- PATCH: stock deduction on order_item insert/update/delete
+--        + dashboard analytics views
+-- ══════════════════════════════════════════════════════════════════
+
+-- ── Обновлённая процедура добавления позиции заказа ──────────────
+-- Проверяет наличие товара на складе аптеки и списывает его.
+
+CREATE OR REPLACE PROCEDURE sp_add_order_item(
+    p_receipt_id INT, p_product_id INT,
+    p_quantity INT, p_discount NUMERIC
+)
+LANGUAGE plpgsql AS $$
+DECLARE
+    v_pharmacy_id  INT;
+    v_stock        INT;
+BEGIN
+    -- Определяем аптеку по чеку
+    SELECT pharmacy_id INTO v_pharmacy_id
+    FROM receipt WHERE receipt_id = p_receipt_id;
+
+    IF v_pharmacy_id IS NULL THEN
+        RAISE EXCEPTION 'Чек с id=% не найден', p_receipt_id;
+    END IF;
+
+    -- Проверяем остаток на складе
+    SELECT remaining_qty INTO v_stock
+    FROM stock_balance
+    WHERE pharmacy_id = v_pharmacy_id AND product_id = p_product_id;
+
+    IF v_stock IS NULL THEN
+        RAISE EXCEPTION 'Товар отсутствует на складе этой аптеки';
+    END IF;
+
+    IF v_stock < p_quantity THEN
+        RAISE EXCEPTION 'Недостаточно товара на складе. Доступно: %', v_stock;
+    END IF;
+
+	
+
+    -- unit_price заполнится триггером trg_set_unit_price
+    INSERT INTO order_item(receipt_id, product_id, quantity, discount)
+	VALUES (p_receipt_id, p_product_id, p_quantity, p_discount)
+	ON CONFLICT (receipt_id, product_id)
+	DO UPDATE SET
+	    quantity = order_item.quantity + EXCLUDED.quantity,
+	    discount = EXCLUDED.discount;
+
+    -- Списываем со склада
+    UPDATE stock_balance
+    SET remaining_qty = remaining_qty - p_quantity
+    WHERE pharmacy_id = v_pharmacy_id AND product_id = p_product_id;
+
+    -- Обновляем total_amount чека
+    UPDATE receipt
+    SET total_amount = (
+        SELECT COALESCE(SUM(total_price), 0)
+        FROM order_item WHERE receipt_id = p_receipt_id
+    )
+    WHERE receipt_id = p_receipt_id;
+END;
+$$;
+
+
+-- ── Обновлённая процедура изменения позиции заказа ───────────────
+-- При изменении количества корректирует склад.
+
+CREATE OR REPLACE PROCEDURE sp_update_order_item(
+    p_receipt_id     INT, p_product_id     INT,
+    p_new_receipt_id INT, p_new_product_id INT,
+    p_quantity INT, p_discount NUMERIC
+)
+LANGUAGE plpgsql AS $$
+DECLARE
+    v_old_pharmacy_id  INT;
+    v_new_pharmacy_id  INT;
+    v_old_qty          INT;
+    v_stock            INT;
+    v_price            NUMERIC;
+BEGIN
+    -- Старая аптека
+    SELECT pharmacy_id INTO v_old_pharmacy_id
+    FROM receipt WHERE receipt_id = p_receipt_id;
+
+    -- Новая аптека
+    SELECT pharmacy_id INTO v_new_pharmacy_id
+    FROM receipt WHERE receipt_id = p_new_receipt_id;
+
+    -- Старое количество
+    SELECT quantity INTO v_old_qty
+    FROM order_item
+    WHERE receipt_id = p_receipt_id AND product_id = p_product_id;
+
+    -- Если меняется ключ (чек или товар) — удаляем старую запись, вставляем новую
+    IF p_receipt_id != p_new_receipt_id OR p_product_id != p_new_product_id THEN
+
+        -- Возвращаем старый товар на старый склад
+        UPDATE stock_balance
+        SET remaining_qty = remaining_qty + v_old_qty
+        WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
+
+        -- Проверяем наличие нового товара на новом складе
+        SELECT remaining_qty INTO v_stock
+        FROM stock_balance
+        WHERE pharmacy_id = v_new_pharmacy_id AND product_id = p_new_product_id;
+
+        IF v_stock IS NULL THEN
+            -- Откатываем возврат (чтобы не оставлять БД в некорректном состоянии)
+            UPDATE stock_balance
+            SET remaining_qty = remaining_qty - v_old_qty
+            WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
+            RAISE EXCEPTION 'Товар отсутствует на складе аптеки';
+        END IF;
+
+        IF v_stock < p_quantity THEN
+            UPDATE stock_balance
+            SET remaining_qty = remaining_qty - v_old_qty
+            WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
+            RAISE EXCEPTION 'Недостаточно товара на складе. Доступно: %', v_stock;
+        END IF;
+
+        DELETE FROM order_item
+        WHERE receipt_id = p_receipt_id AND product_id = p_product_id;
+
+        SELECT sale_price INTO v_price FROM product WHERE product_id = p_new_product_id;
+        INSERT INTO order_item(receipt_id, product_id, quantity, unit_price, discount)
+        VALUES (p_new_receipt_id, p_new_product_id, p_quantity, v_price, p_discount);
+
+        -- Списываем новый товар с нового склада
+        UPDATE stock_balance
+        SET remaining_qty = remaining_qty - p_quantity
+        WHERE pharmacy_id = v_new_pharmacy_id AND product_id = p_new_product_id;
+
+    ELSE
+        -- Ключ не меняется — только количество/скидка
+        DECLARE
+            v_delta INT := p_quantity - v_old_qty;
+        BEGIN
+            IF v_delta > 0 THEN
+                -- Нужно больше товара — проверяем склад
+                SELECT remaining_qty INTO v_stock
+                FROM stock_balance
+                WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
+
+                IF v_stock IS NULL OR v_stock < v_delta THEN
+                    RAISE EXCEPTION 'Недостаточно товара на складе. Доступно: %', COALESCE(v_stock, 0);
+                END IF;
+
+                UPDATE stock_balance
+                SET remaining_qty = remaining_qty - v_delta
+                WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
+            ELSIF v_delta < 0 THEN
+                -- Возвращаем разницу на склад
+                UPDATE stock_balance
+                SET remaining_qty = remaining_qty + ABS(v_delta)
+                WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
+            END IF;
+        END;
+
+        UPDATE order_item
+        SET quantity = p_quantity, discount = p_discount
+        WHERE receipt_id = p_receipt_id AND product_id = p_product_id;
+    END IF;
+
+    -- Пересчитываем total_amount для обоих чеков
+    UPDATE receipt
+    SET total_amount = (
+        SELECT COALESCE(SUM(total_price), 0)
+        FROM order_item WHERE receipt_id = receipt.receipt_id
+    )
+    WHERE receipt_id IN (p_receipt_id, p_new_receipt_id);
+END;
+$$;
+
+
+-- ── Обновлённая процедура удаления позиции заказа ────────────────
+-- Возвращает товар на склад при удалении.
+
+CREATE OR REPLACE PROCEDURE sp_delete_order_item(
+    p_receipt_id INT,
+    p_product_id INT
+)
+LANGUAGE plpgsql AS $$
+DECLARE
+    v_pharmacy_id INT;
+    v_qty         INT;
+BEGIN
+    SELECT pharmacy_id INTO v_pharmacy_id
+    FROM receipt WHERE receipt_id = p_receipt_id;
+
+    SELECT quantity INTO v_qty
+    FROM order_item
+    WHERE receipt_id = p_receipt_id AND product_id = p_product_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Позиция не найдена (receipt_id=%, product_id=%)',
+            p_receipt_id, p_product_id;
+    END IF;
+
+    DELETE FROM order_item
+    WHERE receipt_id = p_receipt_id AND product_id = p_product_id;
+
+    -- Возвращаем товар на склад
+    UPDATE stock_balance
+    SET remaining_qty = remaining_qty + v_qty
+    WHERE pharmacy_id = v_pharmacy_id AND product_id = p_product_id;
+
+    -- Обновляем сумму чека
+    UPDATE receipt
+    SET total_amount = (
+        SELECT COALESCE(SUM(total_price), 0)
+        FROM order_item WHERE receipt_id = p_receipt_id
+    )
+    WHERE receipt_id = p_receipt_id;
+END;
+$$;
+
+
+-- ══════════════════════════════════════════════════════════════════
+-- DASHBOARD VIEWS & QUERIES (используются из C# через raw SQL)
+-- ══════════════════════════════════════════════════════════════════
+
+-- Выручка по месяцам
+CREATE OR REPLACE VIEW vw_revenue_by_month AS
+SELECT
+    TO_CHAR(date, 'YYYY-MM') AS month,
+    SUM(total_amount)        AS total_revenue,
+    COUNT(*)                 AS receipt_count
+FROM receipt
+GROUP BY TO_CHAR(date, 'YYYY-MM')
+ORDER BY month;
+
+-- Выручка по аптекам
+CREATE OR REPLACE VIEW vw_revenue_by_pharmacy AS
+SELECT
+    ph.address,
+    SUM(r.total_amount) AS total_revenue,
+    COUNT(r.receipt_id) AS receipt_count,
+    AVG(r.total_amount) AS avg_receipt
+FROM receipt r
+JOIN pharmacy ph ON ph.pharmacy_id = r.pharmacy_id
+GROUP BY ph.pharmacy_id, ph.address
+ORDER BY total_revenue DESC;
+
+-- Топ продаж по товарам
+CREATE OR REPLACE VIEW vw_top_products AS
+SELECT
+    p.name,
+    SUM(oi.quantity)    AS total_qty,
+    SUM(oi.total_price) AS total_revenue,
+    AVG(oi.discount)    AS avg_discount
+FROM order_item oi
+JOIN product p ON p.product_id = oi.product_id
+GROUP BY p.product_id, p.name
+ORDER BY total_revenue DESC;
+
+-- Продажи по категории "рецепт / без рецепта"
+CREATE OR REPLACE VIEW vw_sales_by_prescription AS
+SELECT
+    CASE WHEN p.prescription_required THEN 'По рецепту' ELSE 'Без рецепта' END AS category,
+    SUM(oi.quantity)    AS total_qty,
+    SUM(oi.total_price) AS total_revenue
+FROM order_item oi
+JOIN product p ON p.product_id = oi.product_id
+GROUP BY p.prescription_required;
+
+-- Остатки ниже порога (для алертов)
+CREATE OR REPLACE VIEW vw_low_stock AS
+SELECT
+    ph.address AS pharmacy,
+    p.name     AS product,
+    sb.remaining_qty
+FROM stock_balance sb
+JOIN pharmacy ph ON ph.pharmacy_id = sb.pharmacy_id
+JOIN product  p  ON p.product_id  = sb.product_id
+WHERE sb.remaining_qty < 20
+ORDER BY sb.remaining_qty;

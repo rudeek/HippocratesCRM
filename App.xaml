@@ -167,23 +167,28 @@
             </StackPanel>
         </DataTemplate>
 
-        <!-- ORDER ITEM (через обёртку) -->
+        <!-- ORDER ITEM (через обёртку) — с фильтрацией по аптеке чека -->
         <DataTemplate DataType="{x:Type vm:OrderItemEditorViewModel}">
             <StackPanel Width="440">
                 <Label Content="Чек *"/>
                 <ComboBox ItemsSource="{Binding Receipts}"
-                          DisplayMemberPath="ReceiptNumber"
-                          SelectedValuePath="Id"
-                          SelectedValue="{Binding Entity.ReceiptId, Mode=TwoWay}"/>
-                <Label Content="Товар *" Margin="0,10,0,0"/>
-                <ComboBox ItemsSource="{Binding Products}"
-                          DisplayMemberPath="Name"
-                          SelectedValuePath="Id"
-                          SelectedValue="{Binding Entity.ProductId, Mode=TwoWay}"/>
+                  DisplayMemberPath="ReceiptNumber"
+                  SelectedValuePath="Id"
+                  SelectedItem="{Binding SelectedReceipt, Mode=TwoWay}"/>
+
+                <Label Content="Товар * (только из склада выбранной аптеки)" Margin="0,10,0,0"/>
+                <ComboBox ItemsSource="{Binding AvailableProducts}"
+                  DisplayMemberPath="Name"
+                  SelectedValuePath="Id"
+                  SelectedItem="{Binding SelectedProduct, Mode=TwoWay}"/>
+
                 <Label Content="Количество * (> 0)" Margin="0,10,0,0"/>
-                <TextBox Text="{Binding Entity.Quantity, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox Text="{Binding Entity.Quantity, UpdateSourceTrigger=PropertyChanged}"
+                 PreviewTextInput="OnlyDigits_PreviewTextInput"/>
+
                 <Label Content="Скидка % (0–100)" Margin="0,10,0,0"/>
-                <TextBox Text="{Binding Entity.Discount, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox Text="{Binding Entity.Discount, UpdateSourceTrigger=PropertyChanged}"
+                 PreviewTextInput="Price_PreviewTextInput"/>
             </StackPanel>
         </DataTemplate>
 
