@@ -1,6 +1,8 @@
 ﻿using MyHippocrates.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
+using MyHippocrates.Views;
+using MyHippocrates.Data;
 
 namespace MyHippocrates
 {
@@ -9,6 +11,16 @@ namespace MyHippocrates
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void OpenDashboard(object sender, RoutedEventArgs e)
+        {
+            var vm = (MainViewModel)DataContext;
+
+            var w = new DashboardWindow(vm.Db);
+
+            w.Owner = this;
+            w.Show();
         }
 
         // Нумерация строк в DataGrid через Header

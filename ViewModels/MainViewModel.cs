@@ -7,6 +7,8 @@ namespace MyHippocrates.ViewModels
 {
     internal class MainViewModel : BaseViewModel
     {
+        public AppDbContext Db { get; }
+
         // Общие справочники — одна коллекция на всё приложение.
         // Когда добавляешь аптеку в PharmaciesVM — она сразу появится в ComboBox у Receipts.
         public ObservableCollection<Manufacturer> Manufacturers { get; } = new();
@@ -25,6 +27,7 @@ namespace MyHippocrates.ViewModels
 
         public MainViewModel(AppDbContext dbContext)
         {
+            Db = dbContext;
             // Загружаем общие справочники один раз
             foreach (var m in dbContext.Manufacturers.OrderBy(x => x.Id).ToList()) Manufacturers.Add(m);
             foreach (var p in dbContext.Pharmacies.OrderBy(x => x.Id).ToList()) Pharmacies.Add(p);

@@ -70,7 +70,7 @@ namespace MyHippocrates.ViewModels
 
         private void Add()
         {
-            var entity = new Receipt { Date = DateTime.Today, Time = DateTime.Now.TimeOfDay };
+            var entity = new Receipt { Date = DateTime.Today, Time = DateTime.UtcNow.TimeOfDay };
             var vm = new ReceiptEditorViewModel(entity, _pharmacies, _employees);
             var dlg = new Views.EditDialog(vm, _ctx, isNew: true)
             { Owner = Application.Current.MainWindow, Title = "Добавить чек" };

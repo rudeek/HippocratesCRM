@@ -19,9 +19,9 @@ namespace MyHippocrates.ViewModels
             Entity = entity;
             Manufacturers = manufacturers;
             if (Entity.ProductionDate == default)
-                Entity.ProductionDate = DateTime.Today;
+                Entity.ProductionDate = DateTime.UtcNow;
             if (Entity.ExpirationDate == default)
-                Entity.ExpirationDate = DateTime.Today.AddYears(2);
+                Entity.ExpirationDate = DateTime.UtcNow.AddYears(2);
         }
     }
 

@@ -1,0 +1,85 @@
+﻿<Window x:Class="MyHippocrates.Views.DashboardWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:MyHippocrates.Controls"
+        Title="Dashboard"
+        Width="1200" Height="800"
+        Background="#121212">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- FILTER PANEL -->
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+            <DatePicker SelectedDate="{Binding DateFrom}" Width="130"/>
+            <TextBlock Text=" → " VerticalAlignment="Center" Foreground="White"/>
+            <DatePicker SelectedDate="{Binding DateTo}" Width="130"/>
+
+            <ComboBox ItemsSource="{Binding PharmacyOptions}"
+                      SelectedItem="{Binding SelectedPharmacy}"
+                      Width="180" Margin="10,0"/>
+
+            <ComboBox ItemsSource="{Binding CategoryOptions}"
+                      SelectedItem="{Binding SelectedCategory}"
+                      Width="150" Margin="10,0"/>
+
+            <Button Content="Применить"
+                    Command="{Binding ApplyFiltersCommand}"
+                    Margin="10,0"/>
+            <Button Content="Сброс"
+                    Command="{Binding ResetFiltersCommand}"
+                    Margin="5,0"/>
+        </StackPanel>
+
+        <!-- CONTENT -->
+        <ScrollViewer Grid.Row="1">
+            <StackPanel>
+
+                <!-- KPI -->
+                <ItemsControl ItemsSource="{Binding KpiCards}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="3"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="#1E1E1E" Margin="5" Padding="10" CornerRadius="8">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Icon}" FontSize="20"/>
+                                    <TextBlock Text="{Binding Title}" Foreground="Gray"/>
+                                    <TextBlock Text="{Binding Value}" FontSize="16" Foreground="White"/>
+                                    <TextBlock Text="{Binding SubValue}" Foreground="#888"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- CHARTS -->
+                <Grid Margin="0,20,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <local:BarChart Items="{Binding RevenueByMonth}"
+                                    Height="250"/>
+
+                    <local:PieChart Grid.Column="1"
+                                    Items="{Binding SalesByCategory}"
+                                    Height="250"/>
+                </Grid>
+
+                <local:LineChart Items="{Binding TopProductsChart}"
+                                 Height="250"
+                                 Margin="0,20,0,0"/>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

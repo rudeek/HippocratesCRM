@@ -172,13 +172,26 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <StackPanel>
-                        <Image Source="/logo.jpg" Width="308" Height="68"/>
 
-                    </StackPanel>
-                </StackPanel>
+                <!-- ЛОГО -->
+                <Image Source="/logo.jpg" Width="308" Height="68"/>
+
+                <!-- ПУСТОЕ ПРОСТРАНСТВО -->
+                <StackPanel Grid.Column="1"/>
+
+                <!-- КНОПКА DASHBOARD -->
+                <Button Grid.Column="2"
+                        Style="{StaticResource BtnAdd}"
+            Content="Dashboard"
+            Padding="14 6"
+            Margin="10 0"
+            Background="#2E7D32"
+            Foreground="White"
+            BorderThickness="0"
+            Cursor="Hand"
+            Click="OpenDashboard"/>
             </Grid>
         </Border>
 

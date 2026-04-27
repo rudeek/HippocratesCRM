@@ -76,8 +76,8 @@ namespace MyHippocrates.Models
         [Column("pharmacy_id")] public int PharmacyId { get; set; }
         [Column("employee_id")] public int EmployeeId { get; set; }
         [Column("total_amount")] public decimal TotalAmount { get; set; }
-        [Column("date")] public DateTime Date { get; set; } = DateTime.Today;
-        [Column("time")] public TimeSpan Time { get; set; } = DateTime.Now.TimeOfDay;
+        [Column("date")] public DateTime Date { get; set; } = DateTime.UtcNow;
+        [Column("time")] public TimeSpan Time { get; set; } = DateTime.UtcNow.TimeOfDay;
 
         public Pharmacy? Pharmacy { get; set; }
         public Employee? Employee { get; set; }
