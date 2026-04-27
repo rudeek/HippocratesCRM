@@ -48,6 +48,7 @@ namespace MyHippocrates.ViewModels
             var entity = new Pharmacy();
             var dlg = new Views.EditDialog(entity, _ctx, isNew: true)
             { Owner = Application.Current.MainWindow, Title = "Добавить аптеку" };
+            dlg.TxtTitle.Text = "Добавление записи";
             if (dlg.ShowDialog() == true) { _pharmacies.Add(entity); View.Refresh(); }
         }
 

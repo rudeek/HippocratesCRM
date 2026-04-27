@@ -67,6 +67,7 @@ namespace MyHippocrates.ViewModels
             var vm = new ProductEditorViewModel(entity, _manufacturers);
             var dlg = new EditDialog(vm, _ctx, isNew: true)
             { Owner = Application.Current.MainWindow, Title = "Добавить товар" };
+            dlg.TxtTitle.Text = "Добавление записи";
             if (dlg.ShowDialog() == true)
             {
                 entity.Manufacturer = _manufacturers.FirstOrDefault(m => m.Id == entity.ManufacturerId);

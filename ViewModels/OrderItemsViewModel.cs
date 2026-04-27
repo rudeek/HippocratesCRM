@@ -74,6 +74,7 @@ namespace MyHippocrates.ViewModels
             var vm = new OrderItemEditorViewModel(entity, _receipts, _products);
             var dlg = new Views.EditDialog(vm, _ctx, isNew: true)
             { Owner = Application.Current.MainWindow, Title = "Добавить позицию" };
+            dlg.TxtTitle.Text = "Добавление записи";
             if (dlg.ShowDialog() == true)
             {
                 entity.Receipt = _receipts.FirstOrDefault(r => r.Id == entity.ReceiptId);

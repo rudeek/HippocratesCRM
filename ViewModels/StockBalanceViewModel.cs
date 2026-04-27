@@ -74,6 +74,7 @@ namespace MyHippocrates.ViewModels
             var vm = new StockBalanceEditorViewModel(entity, _pharmacies, _products);
             var dlg = new Views.EditDialog(vm, _ctx, isNew: true)
             { Owner = Application.Current.MainWindow, Title = "Добавить остаток" };
+            dlg.TxtTitle.Text = "Добавление записи";
             if (dlg.ShowDialog() == true)
             {
                 entity.Pharmacy = _pharmacies.FirstOrDefault(p => p.Id == entity.PharmacyId);

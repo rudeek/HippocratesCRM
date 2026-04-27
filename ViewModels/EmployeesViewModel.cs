@@ -51,6 +51,7 @@ namespace MyHippocrates.ViewModels
             var entity = new Employee();
             var dlg = new Views.EditDialog(entity, _ctx, isNew: true)
             { Owner = Application.Current.MainWindow, Title = "Добавить сотрудника" };
+            dlg.TxtTitle.Text = "Добавление записи";
             if (dlg.ShowDialog() == true) { _employees.Add(entity); View.Refresh(); }
         }
 

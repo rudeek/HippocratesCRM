@@ -171,6 +171,7 @@ namespace MyHippocrates.Views
             if (p.PurchasePrice <= 0) return "Закупочная цена должна быть больше нуля.";
             if (p.SalePrice <= 0) return "Розничная цена должна быть больше нуля.";
             if (p.SalePrice < p.PurchasePrice) return "Розничная цена не может быть меньше закупочной.";
+            if (p.ProductionDate > DateTime.Now) return "Дата производства не может быть в будущем";
             if (p.ExpirationDate <= p.ProductionDate) return "Срок годности должен быть позже даты производства.";
             if (string.IsNullOrWhiteSpace(p.Unit)) return "Введите единицу измерения.";
             return null;

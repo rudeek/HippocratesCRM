@@ -10,11 +10,11 @@ namespace MyHippocrates.Data
 {
     public class AppDbContext : DbContext
     {
-        public readonly string connectionString;
+        public readonly string СonnectionString;
 
         public AppDbContext(string connectionString)
         {
-            this.connectionString = connectionString;
+            this.СonnectionString = connectionString;
         }
 
         public DbSet<Manufacturer> Manufacturers { get; set; } = null!;
@@ -27,7 +27,7 @@ namespace MyHippocrates.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql(connectionString);
+            optionsBuilder.UseNpgsql(СonnectionString);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

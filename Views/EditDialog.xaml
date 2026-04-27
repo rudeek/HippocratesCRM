@@ -36,7 +36,7 @@
         <!-- Заголовок -->
         <Border DockPanel.Dock="Top" Background="#1A3D1C" Padding="16 12">
             <TextBlock Text="✎  Редактирование записи"
-                       Foreground="White" FontSize="15" FontWeight="Bold"/>
+                       Foreground="White" FontSize="15" FontWeight="Bold" Name="TxtTitle"/>
         </Border>
 
         <!-- Кнопки снизу -->

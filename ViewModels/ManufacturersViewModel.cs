@@ -52,7 +52,8 @@ namespace MyHippocrates.ViewModels
         {
             var entity = new Manufacturer();
             var dlg = new EditDialog(entity, _ctx, isNew: true)
-            { Owner = Application.Current.MainWindow, Title = "Добавить производителя" };
+            { Owner = Application.Current.MainWindow, Title = "Добавить производителя"};
+            dlg.TxtTitle.Text = "Добавление записи";
             if (dlg.ShowDialog() == true) { _manufacturers.Add(entity); View.Refresh(); }
         }
 
