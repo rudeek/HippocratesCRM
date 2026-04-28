@@ -1,0 +1,303 @@
+﻿<Window x:Class="MyHippocrates.Views.ReportsWindow" 
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+        Title="Hippocrates — Отчёты" 
+        Width="1280" Height="860" 
+        WindowState="Maximized" 
+        WindowStartupLocation="CenterOwner" 
+        Background="#FAFAFA" 
+        Icon="/icon.ico">
+
+    <Window.Resources>
+        <!-- ── Кнопка-вкладка отчёта (светлая тема) ─────────────────────────── -->
+        <Style x:Key="TabBtn" TargetType="RadioButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#424242"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="18 10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" 
+                                Padding="{TemplateBinding Padding}" 
+                                BorderBrush="#2E7D32" BorderThickness="0 0 0 3">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#E8F5E9"/>
+                                <Setter TargetName="Bd" Property="BorderThickness" Value="0 0 0 3"/>
+                                <Setter Property="Foreground" Value="#1B5E20"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#C8E6C9"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ── Кнопка действия (зелёная) ──────────────────────────────── -->
+        <Style x:Key="ActionBtn" TargetType="Button">
+            <Setter Property="Background" Value="#2E7D32"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16 8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#388E3C"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#A5D6A7"/>
+                                <Setter Property="Foreground" Value="#757575"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ── Синяя кнопка ─────────────────────────────────── -->
+        <Style x:Key="BlueBtn" TargetType="Button" BasedOn="{StaticResource ActionBtn}">
+            <Setter Property="Background" Value="#1565C0"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1976D2"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- ── Label фильтра (тёмный текст для контраста) ─────────────────────────────────── -->
+        <Style x:Key="FilterLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#424242"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0 0 0 4"/>
+        </Style>
+
+        <!-- ── ComboBox фильтра (белый фон, тёмный текст) ──────────────────────────────── -->
+        <Style x:Key="FilterCombo" TargetType="ComboBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#212121"/>
+            <Setter Property="BorderBrush" Value="#2E7D32"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8 6"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="MinWidth" Value="180"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="ToggleButton" 
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                        ClickMode="Press">
+                                <ToggleButton.Style>
+                                    <Style TargetType="ToggleButton">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ToggleButton">
+                                                    <Border Background="{TemplateBinding Background}" 
+                                                            BorderBrush="{TemplateBinding BorderBrush}" 
+                                                            BorderThickness="{TemplateBinding BorderThickness}">
+                                                        <Path x:Name="Arrow" HorizontalAlignment="Right" VerticalAlignment="Center" 
+                                                              Margin="0,0,8,0" Data="M 0 0 L 4 4 L 8 0 Z" Fill="#424242"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ToggleButton.Style>
+                            </ToggleButton>
+                            <ContentPresenter x:Name="ContentSite" 
+                                            Content="{TemplateBinding SelectionBoxItem}"
+                                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                            Margin="8,2,28,2"
+                                            VerticalAlignment="Center"
+                                            TextElement.Foreground="{TemplateBinding Foreground}"/>
+                            <Popup x:Name="Popup" 
+                                   Placement="Bottom" 
+                                   IsOpen="{TemplateBinding IsDropDownOpen}" 
+                                   AllowsTransparency="True" 
+                                   Focusable="False" 
+                                   PopupAnimation="Slide">
+                                <Border x:Name="DropDownBorder" 
+                                        Background="White" 
+                                        BorderBrush="#2E7D32" 
+                                        BorderThickness="1" 
+                                        CornerRadius="4">
+                                    <ScrollViewer MaxHeight="200">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ── DatePicker фильтра (белый фон, тёмный текст) ────────────────────────────── -->
+        <Style x:Key="FilterDate" TargetType="DatePicker">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#212121"/>
+            <Setter Property="BorderBrush" Value="#2E7D32"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="MinWidth" Value="130"/>
+            <Setter Property="Padding" Value="4"/>
+        </Style>
+
+        <!-- ── TextBox фильтра (белый фон, тёмный текст) ───────────────────────────────── -->
+        <Style x:Key="FilterBox" TargetType="TextBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#212121"/>
+            <Setter Property="BorderBrush" Value="#2E7D32"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8 6"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="MinWidth" Value="80"/>
+            <Setter Property="CaretBrush" Value="#212121"/>
+        </Style>
+    </Window.Resources>
+
+    <DockPanel>
+        <!-- ══ ШАПКА ══════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Top" Background="White" BorderBrush="#2E7D32" BorderThickness="0 0 0 1" Padding="22 14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Background="#E8F5E9" CornerRadius="8" Padding="10 6" Margin="0 0 14 0" BorderBrush="#2E7D32" BorderThickness="1">
+                        <TextBlock Text="📄" FontSize="22"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="HIPPOCRATES" FontSize="20" FontWeight="Bold" Foreground="#1B5E20"/>
+                        <TextBlock Text="Модуль отчётов" FontSize="11" Foreground="#616161"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Кнопки экспорта -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="BtnPrint" Content="🖨 Печать" Style="{StaticResource BlueBtn}" Margin="0 0 8 0" Click="BtnPrint_Click"/>
+                    <Button x:Name="BtnSavePdf" Content="💾 Сохранить XPS" Style="{StaticResource ActionBtn}" Click="BtnSavePdf_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ══ ВКЛАДКИ ВЫБОРА ОТЧЁТА ══════════════════════════════ -->
+        <Border DockPanel.Dock="Top" Background="#F5F5F5" BorderBrush="#C8E6C9" BorderThickness="0 0 0 1">
+            <StackPanel Orientation="Horizontal">
+                <RadioButton x:Name="RbSales" Content="📊 Продажи за период" Style="{StaticResource TabBtn}" IsChecked="True" Checked="ReportType_Changed"/>
+                <RadioButton x:Name="RbProducts" Content="💊 Анализ товаров" Style="{StaticResource TabBtn}" Checked="ReportType_Changed"/>
+                <RadioButton x:Name="RbStock" Content="📦 Остатки склада" Style="{StaticResource TabBtn}" Checked="ReportType_Changed"/>
+            </StackPanel>
+        </Border>
+
+        <!-- ══ ПАНЕЛЬ ФИЛЬТРОВ ═════════════════════════════════════ -->
+        <Border DockPanel.Dock="Top" Background="White" BorderBrush="#C8E6C9" BorderThickness="0 0 0 1" Padding="16 12">
+            <StackPanel>
+                <!-- ── Фильтры: Продажи ───────────────────────── -->
+                <StackPanel x:Name="PanelSalesFilters" Orientation="Horizontal">
+                    <!-- Период -->
+                    <StackPanel Margin="0 0 20 0">
+                        <TextBlock Text="С даты" Style="{StaticResource FilterLabel}"/>
+                        <DatePicker x:Name="DpFrom" Style="{StaticResource FilterDate}"/>
+                    </StackPanel>
+                    <StackPanel Margin="0 0 20 0">
+                        <TextBlock Text="По дату" Style="{StaticResource FilterLabel}"/>
+                        <DatePicker x:Name="DpTo" Style="{StaticResource FilterDate}"/>
+                    </StackPanel>
+
+                    <!-- Аптека -->
+                    <StackPanel Margin="0 0 20 0">
+                        <TextBlock Text="Аптека" Style="{StaticResource FilterLabel}"/>
+                        <ComboBox x:Name="CbPharmacySales" Style="{StaticResource FilterCombo}"/>
+                    </StackPanel>
+
+                    <!-- Категория -->
+                    <StackPanel Margin="0 0 20 0">
+                        <TextBlock Text="Категория" Style="{StaticResource FilterLabel}"/>
+                        <ComboBox x:Name="CbCategorySales" Style="{StaticResource FilterCombo}" MinWidth="140"/>
+                    </StackPanel>
+
+                    <StackPanel VerticalAlignment="Bottom">
+                        <Button Content="▶ Сформировать" Style="{StaticResource ActionBtn}" Click="BtnGenerate_Click"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- ── Фильтры: Товары ────────────────────────── -->
+                <StackPanel x:Name="PanelProductFilters" Orientation="Horizontal" Visibility="Collapsed">
+                    <StackPanel Margin="0 0 20 0">
+                        <TextBlock Text="С даты" Style="{StaticResource FilterLabel}"/>
+                        <DatePicker x:Name="DpFromProd" Style="{StaticResource FilterDate}"/>
+                    </StackPanel>
+                    <StackPanel Margin="0 0 20 0">
+                        <TextBlock Text="По дату" Style="{StaticResource FilterLabel}"/>
+                        <DatePicker x:Name="DpToProd" Style="{StaticResource FilterDate}"/>
+                    </StackPanel>
+                    <StackPanel Margin="0 0 20 0">
+                        <TextBlock Text="Категория" Style="{StaticResource FilterLabel}"/>
+                        <ComboBox x:Name="CbCategoryProd" Style="{StaticResource FilterCombo}" MinWidth="140"/>
+                    </StackPanel>
+                    <StackPanel Margin="0 0 20 0">
+                        <TextBlock Text="Топ N товаров" Style="{StaticResource FilterLabel}"/>
+                        <TextBox x:Name="TbTopN" Text="10" Style="{StaticResource FilterBox}" MinWidth="70" PreviewTextInput="OnlyDigits_PreviewTextInput"/>
+                    </StackPanel>
+                    <StackPanel VerticalAlignment="Bottom">
+                        <Button Content="▶ Сформировать" Style="{StaticResource ActionBtn}" Click="BtnGenerate_Click"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- ── Фильтры: Склад ─────────────────────────── -->
+                <StackPanel x:Name="PanelStockFilters" Orientation="Horizontal" Visibility="Collapsed">
+                    <StackPanel Margin="0 0 20 0">
+                        <TextBlock Text="Аптека" Style="{StaticResource FilterLabel}"/>
+                        <ComboBox x:Name="CbPharmacyStock" Style="{StaticResource FilterCombo}"/>
+                    </StackPanel>
+                    <StackPanel Margin="0 0 20 0">
+                        <TextBlock Text="Порог низкого остатка" Style="{StaticResource FilterLabel}"/>
+                        <TextBox x:Name="TbLowThreshold" Text="20" Style="{StaticResource FilterBox}" MinWidth="80" PreviewTextInput="OnlyDigits_PreviewTextInput"/>
+                    </StackPanel>
+                    <StackPanel VerticalAlignment="Bottom">
+                        <Button Content="▶ Сформировать" Style="{StaticResource ActionBtn}" Click="BtnGenerate_Click"/>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- ══ ОБЛАСТЬ ПРОСМОТРА ОТЧЁТА ═══════════════════════════ -->
+        <Border Background="White" Padding="0" BorderBrush="#E0E0E0" BorderThickness="0 1 0 0">
+            <Grid>
+                <!-- Placeholder пока отчёт не сформирован -->
+                <StackPanel x:Name="PlaceholderPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="📄" FontSize="64" HorizontalAlignment="Center" Foreground="#BDBDBD"/>
+                    <TextBlock Text="Выберите параметры и нажмите «Сформировать»" Foreground="#757575" FontSize="16" HorizontalAlignment="Center" Margin="0 12 0 0"/>
+                </StackPanel>
+
+                <!-- FlowDocumentReader -->
+                <FlowDocumentReader x:Name="DocReader" Visibility="Collapsed" Background="White" ViewingMode="Scroll" Foreground="#212121"/>
+            </Grid>
+        </Border>
+    </DockPanel>
+</Window>

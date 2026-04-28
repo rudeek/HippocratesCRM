@@ -101,7 +101,7 @@ namespace MyHippocrates.Reports
             foreach (var ph in byPharmacy)
             {
                 AddTableRow(phTable, false,
-                    ph.Address, $"{ph.Revenue:F2}", $"{ph.Count}", $"{ph.Avg:F2}",
+                    ph.Address, $"{ph.Revenue:F2}", $"{ph.Count}", $"{ph.Avg:F2}","","",
                     alt ? AltRow : White);
                 alt = !alt;
             }
@@ -242,6 +242,7 @@ namespace MyHippocrates.Reports
             {
                 AddTableRow(mTable, false,
                     m.Manuf, $"{m.Revenue:F2}", $"{m.Qty}",
+                    "","","",
                     alt ? AltRow : White);
                 alt = !alt;
             }
@@ -265,7 +266,7 @@ namespace MyHippocrates.Reports
                 $"Порог низкого остатка: {lowStockThreshold} ед.   |   " +
                 $"Дата: {DateTime.Today:dd.MM.yyyy}");
 
-            var stockQ = ctx.StockBalances
+            IQueryable<StockBalance> stockQ = ctx.StockBalances
                 .Include(s => s.Pharmacy)
                 .Include(s => s.Product).ThenInclude(p => p!.Manufacturer);
 
@@ -301,7 +302,7 @@ namespace MyHippocrates.Reports
                         s.Product?.Name ?? "?",
                         s.Product?.Manufacturer?.Name ?? "—",
                         s.Pharmacy?.Address ?? "?",
-                        "0",
+                        "0", "","",
                         DangerBg);
             }
 
@@ -319,7 +320,7 @@ namespace MyHippocrates.Reports
                         s.Product?.Name ?? "?",
                         s.Product?.Manufacturer?.Name ?? "—",
                         s.Pharmacy?.Address ?? "?",
-                        $"{s.RemainingQty}",
+                        $"{s.RemainingQty}","","",
                         WarnBg);
             }
 
@@ -353,7 +354,7 @@ namespace MyHippocrates.Reports
                         s.Product?.Name ?? "?",
                         s.Product?.Manufacturer?.Name ?? "—",
                         s.Product?.Unit ?? "шт",
-                        $"{s.RemainingQty}",
+                        $"{s.RemainingQty}","","",
                         rowBg);
                     alt = !alt;
                 }

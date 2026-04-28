@@ -173,16 +173,24 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <!-- ЛОГО -->
                 <Image Source="/logo.jpg" Width="308" Height="68"/>
 
+                
+                
                 <!-- ПУСТОЕ ПРОСТРАНСТВО -->
                 <StackPanel Grid.Column="1"/>
 
+
+                <Button Grid.Column="2" Content="📄 Отчёты"
+        Width="140"
+        Height="40"
+        Click="OpenReports_Click"/>
                 <!-- КНОПКА DASHBOARD -->
-                <Button Grid.Column="2"
+                <Button Grid.Column="3"
                         Style="{StaticResource BtnAdd}"
             Content="Dashboard"
             Padding="14 6"

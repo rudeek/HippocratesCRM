@@ -23,6 +23,18 @@ namespace MyHippocrates
             w.Show();
         }
 
+        private void OpenReports_Click(object sender, RoutedEventArgs e)
+        {
+            var vm = (MainViewModel)DataContext;
+
+            var reportsWindow = new ReportsWindow(vm.Db) // ВАЖНО: передаём DbContext
+            {
+                Owner = this
+            };
+
+            reportsWindow.ShowDialog();
+        }
+
         // Нумерация строк в DataGrid через Header
         private void DataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
