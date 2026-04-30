@@ -57,6 +57,7 @@ namespace MyHippocrates.ViewModels
 
         private void Load()
         {
+            _ctx.ChangeTracker.Clear();
             _products.Clear();
             foreach (var p in _ctx.Products.Include(x => x.Manufacturer).OrderBy(x => x.Id).ToList())
                 _products.Add(p);
@@ -98,9 +99,24 @@ namespace MyHippocrates.ViewModels
             { Owner = Application.Current.MainWindow, Title = "Редактировать товар", Icon = new BitmapImage(new Uri("pack://application:,,,/edit.ico")) };
             if (dlg.ShowDialog() == true)
             {
-                copy.Manufacturer = _manufacturers.FirstOrDefault(m => m.Id == copy.ManufacturerId);
+                // Обновляем поля оригинального объекта
+                p.Name = copy.Name;
+                p.ManufacturerId = copy.ManufacturerId;
+                p.ExpirationDate = copy.ExpirationDate;
+                p.ProductionDate = copy.ProductionDate;
+                p.Unit = copy.Unit;
+                p.Description = copy.Description;
+                p.PrescriptionRequired = copy.PrescriptionRequired;
+                p.PurchasePrice = copy.PurchasePrice;
+                p.SalePrice = copy.SalePrice;
+                p.Manufacturer = _manufacturers.FirstOrDefault(m => m.Id == copy.ManufacturerId);
+
                 var idx = _products.IndexOf(p);
-                if (idx >= 0) _products[idx] = copy;
+                if (idx >= 0)
+                {
+                    _products.RemoveAt(idx);
+                    _products.Insert(idx, p);
+                }
                 View.Refresh();
             }
         }
@@ -126,6 +142,7 @@ namespace MyHippocrates.ViewModels
 
         public void Reload()
         {
+            _ctx.ChangeTracker.Clear();
             _products.Clear();
             foreach (var p in _ctx.Products.Include(x => x.Manufacturer).OrderBy(x => x.Id).ToList())
                 _products.Add(p);

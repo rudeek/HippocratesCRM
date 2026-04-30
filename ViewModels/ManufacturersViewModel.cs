@@ -56,7 +56,11 @@ namespace MyHippocrates.ViewModels
             var dlg = new EditDialog(entity, _ctx, isNew: true)
             { Owner = Application.Current.MainWindow, Title = "Добавить производителя", Icon = new BitmapImage(new Uri("pack://application:,,,/add.ico")) };
             dlg.TxtTitle.Text = "Добавление записи";
-            if (dlg.ShowDialog() == true) { _manufacturers.Add(entity); View.Refresh(); }
+            if (dlg.ShowDialog() == true)
+            {
+                _manufacturers.Add(entity);
+                View.Refresh();
+            }
         }
 
         private void Edit(Manufacturer? m)
@@ -75,8 +79,19 @@ namespace MyHippocrates.ViewModels
             { Owner = Application.Current.MainWindow, Title = "Редактировать производителя", Icon = new BitmapImage(new Uri("pack://application:,,,/edit.ico")) };
             if (dlg.ShowDialog() == true)
             {
+                // Обновляем оригинальный объект в коллекции напрямую
+                m.Name = copy.Name;
+                m.Country = copy.Country;
+                m.Address = copy.Address;
+                m.Phone = copy.Phone;
+                m.Email = copy.Email;
+
                 var idx = _manufacturers.IndexOf(m);
-                if (idx >= 0) _manufacturers[idx] = copy;
+                if (idx >= 0)
+                {
+                    _manufacturers.RemoveAt(idx);
+                    _manufacturers.Insert(idx, m);
+                }
                 View.Refresh();
             }
         }
@@ -102,6 +117,7 @@ namespace MyHippocrates.ViewModels
 
         public void Reload()
         {
+            _ctx.ChangeTracker.Clear();
             _manufacturers.Clear();
             foreach (var m in _ctx.Manufacturers.OrderBy(x => x.Id).ToList())
                 _manufacturers.Add(m);

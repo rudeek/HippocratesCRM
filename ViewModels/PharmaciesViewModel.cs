@@ -50,7 +50,11 @@ namespace MyHippocrates.ViewModels
             var dlg = new Views.EditDialog(entity, _ctx, isNew: true)
             { Owner = Application.Current.MainWindow, Title = "Добавить аптеку", Icon = new BitmapImage(new Uri("pack://application:,,,/add.ico")) };
             dlg.TxtTitle.Text = "Добавление записи";
-            if (dlg.ShowDialog() == true) { _pharmacies.Add(entity); View.Refresh(); }
+            if (dlg.ShowDialog() == true)
+            {
+                _pharmacies.Add(entity);
+                View.Refresh();
+            }
         }
 
         private void Edit(Pharmacy? p)
@@ -62,8 +66,16 @@ namespace MyHippocrates.ViewModels
             { Owner = Application.Current.MainWindow, Title = "Редактировать аптеку", Icon = new BitmapImage(new Uri("pack://application:,,,/edit.ico")) };
             if (dlg.ShowDialog() == true)
             {
+                p.Address = copy.Address;
+                p.Phone = copy.Phone;
+                p.WorkingHours = copy.WorkingHours;
+
                 var idx = _pharmacies.IndexOf(p);
-                if (idx >= 0) _pharmacies[idx] = copy;
+                if (idx >= 0)
+                {
+                    _pharmacies.RemoveAt(idx);
+                    _pharmacies.Insert(idx, p);
+                }
                 View.Refresh();
             }
         }
@@ -89,6 +101,7 @@ namespace MyHippocrates.ViewModels
 
         public void Reload()
         {
+            _ctx.ChangeTracker.Clear();
             _pharmacies.Clear();
             foreach (var p in _ctx.Pharmacies.OrderBy(x => x.Id).ToList())
                 _pharmacies.Add(p);

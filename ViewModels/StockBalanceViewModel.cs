@@ -61,6 +61,7 @@ namespace MyHippocrates.ViewModels
 
         private void Load()
         {
+            _ctx.ChangeTracker.Clear();
             _items.Clear();
             foreach (var s in _ctx.StockBalances
                 .Include(x => x.Pharmacy)
@@ -89,7 +90,6 @@ namespace MyHippocrates.ViewModels
         {
             if (s == null) return;
 
-            // Запоминаем старый ключ
             var oldPharmacyId = s.PharmacyId;
             var oldProductId = s.ProductId;
 
@@ -106,10 +106,18 @@ namespace MyHippocrates.ViewModels
 
             if (dlg.ShowDialog() == true)
             {
-                copy.Pharmacy = _pharmacies.FirstOrDefault(p => p.Id == copy.PharmacyId);
-                copy.Product = _products.FirstOrDefault(p => p.Id == copy.ProductId);
+                s.PharmacyId = copy.PharmacyId;
+                s.ProductId = copy.ProductId;
+                s.RemainingQty = copy.RemainingQty;
+                s.Pharmacy = _pharmacies.FirstOrDefault(p => p.Id == copy.PharmacyId);
+                s.Product = _products.FirstOrDefault(p => p.Id == copy.ProductId);
+
                 var idx = _items.IndexOf(s);
-                if (idx >= 0) _items[idx] = copy;
+                if (idx >= 0)
+                {
+                    _items.RemoveAt(idx);
+                    _items.Insert(idx, s);
+                }
                 View.Refresh();
             }
         }

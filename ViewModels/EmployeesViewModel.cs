@@ -1,7 +1,4 @@
-﻿// ══════════════════════════════════════════════════════════════════
-// EmployeesViewModel.cs
-// ══════════════════════════════════════════════════════════════════
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
@@ -53,7 +50,11 @@ namespace MyHippocrates.ViewModels
             var dlg = new Views.EditDialog(entity, _ctx, isNew: true)
             { Owner = Application.Current.MainWindow, Title = "Добавить сотрудника", Icon = new BitmapImage(new Uri("pack://application:,,,/add.ico")) };
             dlg.TxtTitle.Text = "Добавление записи";
-            if (dlg.ShowDialog() == true) { _employees.Add(entity); View.Refresh(); }
+            if (dlg.ShowDialog() == true)
+            {
+                _employees.Add(entity);
+                View.Refresh();
+            }
         }
 
         private void Edit(Employee? e)
@@ -73,8 +74,19 @@ namespace MyHippocrates.ViewModels
             { Owner = Application.Current.MainWindow, Title = "Редактировать сотрудника", Icon = new BitmapImage(new Uri("pack://application:,,,/edit.ico")) };
             if (dlg.ShowDialog() == true)
             {
+                e.FullName = copy.FullName;
+                e.Idnp = copy.Idnp;
+                e.Phone = copy.Phone;
+                e.Address = copy.Address;
+                e.Salary = copy.Salary;
+                e.Position = copy.Position;
+
                 var idx = _employees.IndexOf(e);
-                if (idx >= 0) _employees[idx] = copy;
+                if (idx >= 0)
+                {
+                    _employees.RemoveAt(idx);
+                    _employees.Insert(idx, e);
+                }
                 View.Refresh();
             }
         }
@@ -100,6 +112,7 @@ namespace MyHippocrates.ViewModels
 
         public void Reload()
         {
+            _ctx.ChangeTracker.Clear();
             _employees.Clear();
             foreach (var e in _ctx.Employees.OrderBy(x => x.Id).ToList())
                 _employees.Add(e);

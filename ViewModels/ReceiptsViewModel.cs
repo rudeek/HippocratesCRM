@@ -1,7 +1,4 @@
-﻿// ══════════════════════════════════════════════════════════════════
-// ReceiptsViewModel.cs
-// ══════════════════════════════════════════════════════════════════
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -60,8 +57,10 @@ namespace MyHippocrates.ViewModels
         }
 
         public void Reload() => Load();
+
         private void Load()
         {
+            _ctx.ChangeTracker.Clear();
             _receipts.Clear();
             foreach (var r in _ctx.Receipts
                 .Include(x => x.Pharmacy).Include(x => x.Employee)
@@ -80,7 +79,8 @@ namespace MyHippocrates.ViewModels
             {
                 entity.Pharmacy = _pharmacies.FirstOrDefault(p => p.Id == entity.PharmacyId);
                 entity.Employee = _employees.FirstOrDefault(e => e.Id == entity.EmployeeId);
-                _receipts.Add(entity); View.Refresh();
+                _receipts.Add(entity);
+                View.Refresh();
             }
         }
 
@@ -102,10 +102,21 @@ namespace MyHippocrates.ViewModels
             { Owner = Application.Current.MainWindow, Title = "Редактировать чек", Icon = new BitmapImage(new Uri("pack://application:,,,/edit.ico")) };
             if (dlg.ShowDialog() == true)
             {
-                copy.Pharmacy = _pharmacies.FirstOrDefault(p => p.Id == copy.PharmacyId);
-                copy.Employee = _employees.FirstOrDefault(e => e.Id == copy.EmployeeId);
+                r.ReceiptNumber = copy.ReceiptNumber;
+                r.PharmacyId = copy.PharmacyId;
+                r.EmployeeId = copy.EmployeeId;
+                r.TotalAmount = copy.TotalAmount;
+                r.Date = copy.Date;
+                r.Time = copy.Time;
+                r.Pharmacy = _pharmacies.FirstOrDefault(p => p.Id == copy.PharmacyId);
+                r.Employee = _employees.FirstOrDefault(e => e.Id == copy.EmployeeId);
+
                 var idx = _receipts.IndexOf(r);
-                if (idx >= 0) _receipts[idx] = copy;
+                if (idx >= 0)
+                {
+                    _receipts.RemoveAt(idx);
+                    _receipts.Insert(idx, r);
+                }
                 View.Refresh();
             }
         }
@@ -117,9 +128,16 @@ namespace MyHippocrates.ViewModels
                 $"Удалить чек №{r.ReceiptNumber}?\n\nВнимание: все позиции этого чека будут удалены.",
                 "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (res != MessageBoxResult.Yes) return;
-            try { DbProcedures.DeleteReceipt(_ctx, r.Id); _receipts.Remove(r); }
+            try
+            {
+                DbProcedures.DeleteReceipt(_ctx, r.Id);
+                _receipts.Remove(r);
+            }
             catch (Exception ex)
-            { MessageBox.Show(ex.InnerException?.Message ?? ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
+            {
+                MessageBox.Show(ex.InnerException?.Message ?? ex.Message,
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }
