@@ -3,7 +3,9 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media.Imaging;
 using MyHippocrates.Commands;
 using MyHippocrates.Data;
 using MyHippocrates.Models;
@@ -52,7 +54,7 @@ namespace MyHippocrates.ViewModels
         {
             var entity = new Manufacturer();
             var dlg = new EditDialog(entity, _ctx, isNew: true)
-            { Owner = Application.Current.MainWindow, Title = "Добавить производителя"};
+            { Owner = Application.Current.MainWindow, Title = "Добавить производителя", Icon = new BitmapImage(new Uri("pack://application:,,,/add.ico")) };
             dlg.TxtTitle.Text = "Добавление записи";
             if (dlg.ShowDialog() == true) { _manufacturers.Add(entity); View.Refresh(); }
         }
@@ -70,7 +72,7 @@ namespace MyHippocrates.ViewModels
                 Email = m.Email
             };
             var dlg = new EditDialog(copy, _ctx, isNew: false)
-            { Owner = Application.Current.MainWindow, Title = "Редактировать производителя" };
+            { Owner = Application.Current.MainWindow, Title = "Редактировать производителя", Icon = new BitmapImage(new Uri("pack://application:,,,/edit.ico")) };
             if (dlg.ShowDialog() == true)
             {
                 var idx = _manufacturers.IndexOf(m);

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Media.Imaging;
 using Microsoft.EntityFrameworkCore;
 using MyHippocrates.Commands;
 using MyHippocrates.Data;
@@ -66,7 +67,7 @@ namespace MyHippocrates.ViewModels
             var entity = new Product();
             var vm = new ProductEditorViewModel(entity, _manufacturers);
             var dlg = new EditDialog(vm, _ctx, isNew: true)
-            { Owner = Application.Current.MainWindow, Title = "Добавить товар" };
+            { Owner = Application.Current.MainWindow, Title = "Добавить товар", Icon = new BitmapImage(new Uri("pack://application:,,,/add.ico")) };
             dlg.TxtTitle.Text = "Добавление записи";
             if (dlg.ShowDialog() == true)
             {
@@ -94,7 +95,7 @@ namespace MyHippocrates.ViewModels
             };
             var vm = new ProductEditorViewModel(copy, _manufacturers);
             var dlg = new EditDialog(vm, _ctx, isNew: false)
-            { Owner = Application.Current.MainWindow, Title = "Редактировать товар" };
+            { Owner = Application.Current.MainWindow, Title = "Редактировать товар", Icon = new BitmapImage(new Uri("pack://application:,,,/edit.ico")) };
             if (dlg.ShowDialog() == true)
             {
                 copy.Manufacturer = _manufacturers.FirstOrDefault(m => m.Id == copy.ManufacturerId);

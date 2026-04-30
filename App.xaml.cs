@@ -16,7 +16,13 @@ namespace MyHippocrates
 
         private void PhoneNumber_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            e.Handled = !e.Text.All(c => char.IsDigit(c) || c == ' ' || c == '+');
+            var textBox = (TextBox)sender;
+            if(e.Text == "+" && textBox.Text.Contains("+"))
+            {
+                e.Handled = true;
+                return;
+            }
+            e.Handled = !e.Text.All(c => char.IsDigit(c) || c == '+');
         }
 
         private void OnlyDigits_PreviewTextInput(object sender, TextCompositionEventArgs e)

@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Media.Imaging;
 using Microsoft.EntityFrameworkCore;
 using MyHippocrates.Commands;
 using MyHippocrates.Data;
@@ -73,7 +74,7 @@ namespace MyHippocrates.ViewModels
             var entity = new Receipt { Date = DateTime.Today, Time = DateTime.UtcNow.TimeOfDay };
             var vm = new ReceiptEditorViewModel(entity, _pharmacies, _employees);
             var dlg = new Views.EditDialog(vm, _ctx, isNew: true)
-            { Owner = Application.Current.MainWindow, Title = "Добавить чек" };
+            { Owner = Application.Current.MainWindow, Title = "Добавить чек", Icon = new BitmapImage(new Uri("pack://application:,,,/add.ico")) };
             dlg.TxtTitle.Text = "Добавление записи";
             if (dlg.ShowDialog() == true)
             {
@@ -98,7 +99,7 @@ namespace MyHippocrates.ViewModels
             };
             var vm = new ReceiptEditorViewModel(copy, _pharmacies, _employees);
             var dlg = new Views.EditDialog(vm, _ctx, isNew: false)
-            { Owner = Application.Current.MainWindow, Title = "Редактировать чек" };
+            { Owner = Application.Current.MainWindow, Title = "Редактировать чек", Icon = new BitmapImage(new Uri("pack://application:,,,/edit.ico")) };
             if (dlg.ShowDialog() == true)
             {
                 copy.Pharmacy = _pharmacies.FirstOrDefault(p => p.Id == copy.PharmacyId);

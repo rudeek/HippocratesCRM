@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Media.Imaging;
 using MyHippocrates.Commands;
 using MyHippocrates.Data;
 using MyHippocrates.Models;
@@ -47,7 +48,7 @@ namespace MyHippocrates.ViewModels
         {
             var entity = new Pharmacy();
             var dlg = new Views.EditDialog(entity, _ctx, isNew: true)
-            { Owner = Application.Current.MainWindow, Title = "Добавить аптеку" };
+            { Owner = Application.Current.MainWindow, Title = "Добавить аптеку", Icon = new BitmapImage(new Uri("pack://application:,,,/add.ico")) };
             dlg.TxtTitle.Text = "Добавление записи";
             if (dlg.ShowDialog() == true) { _pharmacies.Add(entity); View.Refresh(); }
         }
@@ -58,7 +59,7 @@ namespace MyHippocrates.ViewModels
             var copy = new Pharmacy
             { Id = p.Id, Address = p.Address, Phone = p.Phone, WorkingHours = p.WorkingHours };
             var dlg = new Views.EditDialog(copy, _ctx, isNew: false)
-            { Owner = Application.Current.MainWindow, Title = "Редактировать аптеку" };
+            { Owner = Application.Current.MainWindow, Title = "Редактировать аптеку", Icon = new BitmapImage(new Uri("pack://application:,,,/edit.ico")) };
             if (dlg.ShowDialog() == true)
             {
                 var idx = _pharmacies.IndexOf(p);

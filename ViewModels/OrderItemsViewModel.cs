@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Media.Imaging;
 using Microsoft.EntityFrameworkCore;
 using MyHippocrates.Commands;
 using MyHippocrates.Data;
@@ -82,7 +83,7 @@ namespace MyHippocrates.ViewModels
             var entity = new OrderItem();
             var vm = new OrderItemEditorViewModel(entity, _receipts, _products, _stockBalances);
             var dlg = new Views.EditDialog(vm, _ctx, isNew: true)
-            { Owner = Application.Current.MainWindow, Title = "Добавить позицию" };
+            { Owner = Application.Current.MainWindow, Title = "Добавить позицию", Icon = new BitmapImage(new Uri("pack://application:,,,/add.ico")) };
             dlg.TxtTitle.Text = "Добавление записи";
             if (dlg.ShowDialog() == true)
             {
@@ -120,7 +121,7 @@ namespace MyHippocrates.ViewModels
 
             var vm = new OrderItemEditorViewModel(copy, _receipts, _products, _stockBalances);
             var dlg = new Views.EditDialog(vm, _ctx, isNew: false)
-            { Owner = Application.Current.MainWindow, Title = "Редактировать позицию" };
+            { Owner = Application.Current.MainWindow, Title = "Редактировать позицию", Icon = new BitmapImage(new Uri("pack://application:,,,/edit.ico")) };
 
             if (dlg.ShowDialog() == true)
             {
