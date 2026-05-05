@@ -10,22 +10,22 @@
     <Window.Resources>
 
         <!-- ══ Цвета ══════════════════════════════════════════════ -->
-        <SolidColorBrush x:Key="AccentGreen"    Color="#1B6B3A"/>
-        <SolidColorBrush x:Key="AccentGreenHov" Color="#145C30"/>
-        <SolidColorBrush x:Key="TableHeaderBg"  Color="#1B6B3A"/>
+        <SolidColorBrush x:Key="AccentGreen"    Color="#035b4b"/>
+        <SolidColorBrush x:Key="AccentGreenHov" Color="#024a3d"/>
+        <SolidColorBrush x:Key="TableHeaderBg"  Color="#035b4b"/>
         <SolidColorBrush x:Key="BgPage"         Color="#FFFFFF"/>
         <SolidColorBrush x:Key="BgRow"          Color="#FFFFFF"/>
-        <SolidColorBrush x:Key="BgRowAlt"       Color="#F8FBF8"/>
-        <SolidColorBrush x:Key="BorderLight"    Color="#E0EBE4"/>
-        <SolidColorBrush x:Key="TextDark"       Color="#1A2B1A"/>
-        <SolidColorBrush x:Key="TextMid"        Color="#4A6550"/>
-        <SolidColorBrush x:Key="TextLight"      Color="#8FAD95"/>
+        <SolidColorBrush x:Key="BgRowAlt"       Color="#f4fbf9"/>
+        <SolidColorBrush x:Key="BorderLight"    Color="#cce3de"/>
+        <SolidColorBrush x:Key="TextDark"       Color="#012920"/>
+        <SolidColorBrush x:Key="TextMid"        Color="#2d6b5a"/>
+        <SolidColorBrush x:Key="TextLight"      Color="#5a9b88"/>
 
         <!-- ══ Нумерация строк ════════════════════════════════════ -->
         <Style x:Key="RowNumStyle" TargetType="TextBlock">
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment"   Value="Center"/>
-            <Setter Property="Foreground"          Value="#8FAD95"/>
+            <Setter Property="Foreground"          Value="#5a9b88"/>
             <Setter Property="FontSize"            Value="12"/>
         </Style>
 
@@ -38,27 +38,27 @@
             <Setter Property="IsReadOnly"               Value="True"/>
             <Setter Property="Background"               Value="#FFFFFF"/>
             <Setter Property="RowBackground"            Value="#FFFFFF"/>
-            <Setter Property="AlternatingRowBackground" Value="#F8FBF8"/>
-            <Setter Property="Foreground"               Value="#1A2B1A"/>
-            <Setter Property="BorderBrush"              Value="#E0EBE4"/>
+            <Setter Property="AlternatingRowBackground" Value="#f4fbf9"/>
+            <Setter Property="Foreground"               Value="#012920"/>
+            <Setter Property="BorderBrush"              Value="#cce3de"/>
             <Setter Property="BorderThickness"          Value="1"/>
             <Setter Property="FontSize"                 Value="13"/>
             <Setter Property="FontFamily"               Value="Segoe UI"/>
             <Setter Property="GridLinesVisibility"      Value="Horizontal"/>
-            <Setter Property="HorizontalGridLinesBrush" Value="#EDF4EF"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#e0f0ec"/>
             <Setter Property="SelectionMode"            Value="Single"/>
             <Setter Property="SelectionUnit"            Value="FullRow"/>
             <Setter Property="RowHeight"                Value="46"/>
         </Style>
 
         <Style TargetType="DataGridColumnHeader">
-            <Setter Property="Background"      Value="#1B6B3A"/>
+            <Setter Property="Background"      Value="#035b4b"/>
             <Setter Property="Foreground"      Value="#FFFFFF"/>
             <Setter Property="FontWeight"      Value="SemiBold"/>
             <Setter Property="FontSize"        Value="12"/>
             <Setter Property="FontFamily"      Value="Segoe UI"/>
             <Setter Property="Padding"         Value="14 10"/>
-            <Setter Property="BorderBrush"     Value="#145C30"/>
+            <Setter Property="BorderBrush"     Value="#024a3d"/>
             <Setter Property="BorderThickness" Value="0 0 1 0"/>
         </Style>
 
@@ -66,10 +66,10 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#E8F4EC"/>
+                    <Setter Property="Background" Value="#d0ede7"/>
                 </Trigger>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#F2F8F4"/>
+                    <Setter Property="Background" Value="#e8f5f1"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -81,14 +81,14 @@
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="Transparent"/>
-                    <Setter Property="Foreground" Value="#1A2B1A"/>
+                    <Setter Property="Foreground" Value="#012920"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
         <!-- ══ Кнопка Добавить (зелёная заливка) ════════════════ -->
         <Style x:Key="BtnAdd" TargetType="Button">
-            <Setter Property="Background"      Value="#1B6B3A"/>
+            <Setter Property="Background"      Value="#035b4b"/>
             <Setter Property="Foreground"      Value="White"/>
             <Setter Property="FontWeight"      Value="SemiBold"/>
             <Setter Property="FontSize"        Value="13"/>
@@ -107,11 +107,11 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#145C30"/>
+                                <Setter Property="Background" Value="#024a3d"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Background" Value="#C8DDD0"/>
-                                <Setter Property="Foreground" Value="#8FAD95"/>
+                                <Setter Property="Background" Value="#9dccc0"/>
+                                <Setter Property="Foreground" Value="#5a9b88"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -122,11 +122,11 @@
         <!-- ══ Кнопка Изменить (контурная зелёная) ═════════════ -->
         <Style x:Key="BtnEdit" TargetType="Button">
             <Setter Property="Background"      Value="#FFFFFF"/>
-            <Setter Property="Foreground"      Value="#1B6B3A"/>
+            <Setter Property="Foreground"      Value="#035b4b"/>
             <Setter Property="FontWeight"      Value="SemiBold"/>
             <Setter Property="FontSize"        Value="13"/>
             <Setter Property="FontFamily"      Value="Segoe UI"/>
-            <Setter Property="BorderBrush"     Value="#1B6B3A"/>
+            <Setter Property="BorderBrush"     Value="#035b4b"/>
             <Setter Property="BorderThickness" Value="1.5"/>
             <Setter Property="Padding"         Value="20 9"/>
             <Setter Property="Cursor"          Value="Hand"/>
@@ -143,10 +143,10 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#F0F8F3"/>
+                                <Setter Property="Background" Value="#e5f4ef"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="BorderBrush" Value="#C8DDD0"/>
+                                <Setter Property="BorderBrush" Value="#9dccc0"/>
                                 <Setter Property="Foreground"  Value="#B0C8B8"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -193,15 +193,15 @@
 
         <!-- ══ Поле поиска ══════════════════════════════════════ -->
         <Style x:Key="SearchBox" TargetType="TextBox">
-            <Setter Property="Background"      Value="#F5F9F6"/>
-            <Setter Property="Foreground"      Value="#1A2B1A"/>
-            <Setter Property="BorderBrush"     Value="#D0E4D8"/>
+            <Setter Property="Background"      Value="#edf8f5"/>
+            <Setter Property="Foreground"      Value="#012920"/>
+            <Setter Property="BorderBrush"     Value="#a8d5cb"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding"         Value="34 9 12 9"/>
             <Setter Property="FontSize"        Value="13"/>
             <Setter Property="FontFamily"      Value="Segoe UI"/>
             <Setter Property="Width"           Value="280"/>
-            <Setter Property="CaretBrush"      Value="#1B6B3A"/>
+            <Setter Property="CaretBrush"      Value="#035b4b"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
@@ -212,7 +212,7 @@
                             <Grid>
                                 <!-- Иконка лупы -->
                                 <TextBlock Text="🔍" FontSize="12"
-                                           Foreground="#8FAD95"
+                                           Foreground="#5a9b88"
                                            HorizontalAlignment="Left"
                                            VerticalAlignment="Center"
                                            Margin="10 0 0 0"/>
@@ -223,7 +223,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter Property="BorderBrush" Value="#1B6B3A"/>
+                                <Setter Property="BorderBrush" Value="#035b4b"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -234,7 +234,7 @@
         <!-- ══ TabItem — вкладки в стиле скриншота ══════════════ -->
         <Style TargetType="TabItem">
             <Setter Property="Background"     Value="Transparent"/>
-            <Setter Property="Foreground"     Value="#4A6550"/>
+            <Setter Property="Foreground"     Value="#2d6b5a"/>
             <Setter Property="FontSize"       Value="14"/>
             <Setter Property="FontFamily"     Value="Segoe UI"/>
             <Setter Property="FontWeight"     Value="Normal"/>
@@ -246,7 +246,7 @@
                         <Border x:Name="Bd"
                                 Background="Transparent"
                                 Padding="{TemplateBinding Padding}"
-                                BorderBrush="#1B6B3A"
+                                BorderBrush="#035b4b"
                                 BorderThickness="0 0 0 0"
                                 Margin="0 0 4 0">
                             <ContentPresenter ContentSource="Header"
@@ -256,11 +256,11 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter TargetName="Bd" Property="BorderThickness" Value="0 0 0 3"/>
-                                <Setter Property="Foreground"  Value="#1B6B3A"/>
+                                <Setter Property="Foreground"  Value="#035b4b"/>
                                 <Setter Property="FontWeight"  Value="SemiBold"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#F0F8F3"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#e5f4ef"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -271,11 +271,11 @@
         <!-- ══ Кнопка шапки (Отчёты) — контурная ═══════════════ -->
         <Style x:Key="BtnHeader" TargetType="Button">
             <Setter Property="Background"      Value="#FFFFFF"/>
-            <Setter Property="Foreground"      Value="#1A2B1A"/>
+            <Setter Property="Foreground"      Value="#012920"/>
             <Setter Property="FontSize"        Value="13"/>
             <Setter Property="FontFamily"      Value="Segoe UI"/>
             <Setter Property="FontWeight"      Value="Normal"/>
-            <Setter Property="BorderBrush"     Value="#D0E4D8"/>
+            <Setter Property="BorderBrush"     Value="#a8d5cb"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding"         Value="20 10"/>
             <Setter Property="Cursor"          Value="Hand"/>
@@ -292,7 +292,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#F5F9F6"/>
+                                <Setter Property="Background" Value="#edf8f5"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -307,7 +307,7 @@
         <!-- ══ ШАПКА ════════════════════════════════════════════ -->
         <Border DockPanel.Dock="Top"
                 Background="#FFFFFF"
-                BorderBrush="#E0EBE4"
+                BorderBrush="#cce3de"
                 BorderThickness="0 0 0 1"
                 Padding="28 14">
             <Grid>
@@ -361,7 +361,7 @@
                         <!-- Полоса вкладок -->
                         <Border DockPanel.Dock="Top"
                                 Background="#FFFFFF"
-                                BorderBrush="#E0EBE4"
+                                BorderBrush="#cce3de"
                                 BorderThickness="0 0 0 1"
                                 Padding="20 0 0 0">
                             <TabPanel IsItemsHost="True"/>

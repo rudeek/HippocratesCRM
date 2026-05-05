@@ -6,71 +6,19 @@
              StartupUri="Views/ConnectionWindow.xaml">
     <Application.Resources>
 
-        <!-- ══ Глобальные стили ══════════════════════════════════════════ -->
-        <SolidColorBrush x:Key="BgMain"       Color="#0D1F0F"/>
-        <SolidColorBrush x:Key="BgPanel"      Color="#132B15"/>
-        <SolidColorBrush x:Key="BgCard"       Color="#1A3D1C"/>
-        <SolidColorBrush x:Key="AccentGreen"  Color="#2E7D32"/>
-        <SolidColorBrush x:Key="AccentLight"  Color="#43A047"/>
-        <SolidColorBrush x:Key="TextMain"     Color="#43A047"/>
-        <SolidColorBrush x:Key="TextMuted"    Color="#81C784"/>
-        <SolidColorBrush x:Key="BorderColor"  Color="#2E7D32"/>
-
-        <Style TargetType="Label">
-            <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
-            <Setter Property="FontSize"   Value="12"/>
-            <Setter Property="Padding"    Value="0 0 0 2"/>
-        </Style>
-
-        <Style TargetType="TextBox">
-            <Setter Property="Background"      Value="#0D1F0F"/>
-            <Setter Property="Foreground"      Value="{StaticResource TextMain}"/>
-            <Setter Property="BorderBrush"     Value="{StaticResource BorderColor}"/>
-            <Setter Property="BorderThickness" Value="0 0 0 1"/>
-            <Setter Property="Padding"         Value="6 5"/>
-            <Setter Property="FontSize"        Value="13"/>
-            <Setter Property="CaretBrush"      Value="{StaticResource TextMain}"/>
-        </Style>
-
-        <Style TargetType="PasswordBox">
-            <Setter Property="Background"      Value="#0D1F0F"/>
-            <Setter Property="Foreground"      Value="{StaticResource TextMain}"/>
-            <Setter Property="BorderBrush"     Value="{StaticResource BorderColor}"/>
-            <Setter Property="BorderThickness" Value="0 0 0 1"/>
-            <Setter Property="Padding"         Value="6 5"/>
-            <Setter Property="FontSize"        Value="13"/>
-        </Style>
-
-        <Style TargetType="ComboBox">
-            <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
-            <Setter Property="Padding"     Value="6 4"/>
-            <Setter Property="FontSize"    Value="13"/>
-        </Style>
-
-        <Style TargetType="DatePicker">
-            <Setter Property="Background" Value="#0D1F0F"/>
-            <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
-            <Setter Property="FontSize"   Value="13"/>
-        </Style>
-
-        <Style TargetType="CheckBox">
-            <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
-            <Setter Property="FontSize"   Value="13"/>
-        </Style>
-
         <!-- MANUFACTURER -->
         <DataTemplate DataType="{x:Type models:Manufacturer}">
             <StackPanel Width="440">
                 <Label Content="Название *"/>
                 <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
-                <Label Content="Страна *" Margin="0,10,0,0"/>
+                <Label Content="Страна *" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Country, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="OnlyLetters_PreviewTextInput"/>
-                <Label Content="Адрес *" Margin="0,10,0,0"/>
+                <Label Content="Адрес *" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"/>
-                <Label Content="Телефон * (начинается с +)" Margin="0,10,0,0"/>
+                <Label Content="Телефон * (начинается с +)" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"
                          PreviewTextInput="PhoneNumber_PreviewTextInput"/>
-                <Label Content="Email * (содержит @)" Margin="0,10,0,0"/>
+                <Label Content="Email * (содержит @)" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
             </StackPanel>
         </DataTemplate>
@@ -80,9 +28,9 @@
             <StackPanel Width="440">
                 <Label Content="Адрес *"/>
                 <TextBox Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"/>
-                <Label Content="Телефон * (начинается с +)" Margin="0,10,0,0"/>
+                <Label Content="Телефон * (начинается с +)" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="PhoneNumber_PreviewTextInput"/>
-                <Label Content="Часы работы *" Margin="0,10,0,0"/>
+                <Label Content="Часы работы *" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding WorkingHours, UpdateSourceTrigger=PropertyChanged}"/>
             </StackPanel>
         </DataTemplate>
@@ -91,108 +39,102 @@
         <DataTemplate DataType="{x:Type models:Employee}">
             <StackPanel Width="440">
                 <Label Content="ФИО *"/>
-                <TextBox Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}"  PreviewTextInput="OnlyLetters_PreviewTextInput"/>
-                <Label Content="IDNP * (13 цифр)" Margin="0,10,0,0"/>
+                <TextBox Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="OnlyLetters_PreviewTextInput"/>
+                <Label Content="IDNP * (13 цифр)" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Idnp, UpdateSourceTrigger=PropertyChanged}" MaxLength="13"/>
-                <Label Content="Телефон * (начинается с +)" Margin="0,10,0,0" PreviewTextInput="PhoneNumber_PreviewTextInput"/>
-                <TextBox Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}"/>
-                <Label Content="Адрес" Margin="0,10,0,0"/>
+                <Label Content="Телефон * (начинается с +)" Margin="0,12,0,0"/>
+                <TextBox Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="PhoneNumber_PreviewTextInput"/>
+                <Label Content="Адрес" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"/>
-                <Label Content="Зарплата * (> 0)" Margin="0,10,0,0"/>
+                <Label Content="Зарплата * (> 0)" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Salary, UpdateSourceTrigger=PropertyChanged}"/>
-                <Label Content="Должность *" Margin="0,10,0,0"/>
-                <TextBox Text="{Binding Position, UpdateSourceTrigger=PropertyChanged}"  PreviewTextInput="OnlyLetters_PreviewTextInput"/>
+                <Label Content="Должность *" Margin="0,12,0,0"/>
+                <TextBox Text="{Binding Position, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="OnlyLetters_PreviewTextInput"/>
             </StackPanel>
         </DataTemplate>
 
-        <!-- PRODUCT (через обёртку) -->
+        <!-- PRODUCT -->
         <DataTemplate DataType="{x:Type vm:ProductEditorViewModel}">
             <StackPanel Width="440">
                 <Label Content="Название *"/>
                 <TextBox Text="{Binding Entity.Name, UpdateSourceTrigger=PropertyChanged}"/>
-                <Label Content="Производитель *" Margin="0,10,0,0"/>
+                <Label Content="Производитель *" Margin="0,12,0,0"/>
                 <ComboBox ItemsSource="{Binding Manufacturers}"
                           DisplayMemberPath="Name"
                           SelectedValuePath="Id"
                           SelectedValue="{Binding Entity.ManufacturerId, Mode=TwoWay}"/>
-                <Label Content="Дата производства *" Margin="0,10,0,0"/>
+                <Label Content="Дата производства *" Margin="0,12,0,0"/>
                 <DatePicker SelectedDate="{Binding Entity.ProductionDate, Mode=TwoWay}"/>
-                <Label Content="Срок годности * (позже даты производства)" Margin="0,10,0,0"/>
+                <Label Content="Срок годности * (позже даты производства)" Margin="0,12,0,0"/>
                 <DatePicker SelectedDate="{Binding Entity.ExpirationDate, Mode=TwoWay}"/>
-                <Label Content="Единица измерения *" Margin="0,10,0,0"  PreviewTextInput="OnlyLetters_PreviewTextInput"/>
+                <Label Content="Единица измерения *" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Entity.Unit, UpdateSourceTrigger=PropertyChanged}"/>
-                <Label Content="Описание" Margin="0,10,0,0"/>
+                <Label Content="Описание" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Entity.Description, UpdateSourceTrigger=PropertyChanged}"
-                         Height="50" AcceptsReturn="True" TextWrapping="Wrap"/>
-                <Label Content="Закупочная цена * (> 0)" Margin="0,10,0,0"/>
+                         Height="60" AcceptsReturn="True" TextWrapping="Wrap"/>
+                <Label Content="Закупочная цена * (> 0)" Margin="0,12,0,0"/>
                 <TextBox PreviewTextInput="Price_PreviewTextInput">
                     <TextBox.Text>
-                        <Binding Path="Entity.PurchasePrice" 
-                 UpdateSourceTrigger="LostFocus"
-                 StringFormat="{}{0:0.##}"/>
+                        <Binding Path="Entity.PurchasePrice"
+                                 UpdateSourceTrigger="LostFocus"
+                                 StringFormat="{}{0:0.##}"/>
                     </TextBox.Text>
                 </TextBox>
-
-                <Label Content="Розничная цена * (≥ закупочной)" Margin="0,10,0,0"/>
+                <Label Content="Розничная цена * (≥ закупочной)" Margin="0,12,0,0"/>
                 <TextBox PreviewTextInput="Price_PreviewTextInput">
                     <TextBox.Text>
-                        <Binding Path="Entity.SalePrice" 
-                 UpdateSourceTrigger="LostFocus"
-                 StringFormat="{}{0:0.##}"/>
+                        <Binding Path="Entity.SalePrice"
+                                 UpdateSourceTrigger="LostFocus"
+                                 StringFormat="{}{0:0.##}"/>
                     </TextBox.Text>
                 </TextBox>
                 <CheckBox Content="Требует рецепта"
                           IsChecked="{Binding Entity.PrescriptionRequired, Mode=TwoWay}"
-                          Margin="0,12,0,0"/>
+                          Margin="0,14,0,0"/>
             </StackPanel>
         </DataTemplate>
 
-        <!-- RECEIPT (ORDER) -->
+        <!-- RECEIPT -->
         <DataTemplate DataType="{x:Type vm:ReceiptEditorViewModel}">
             <StackPanel Width="440">
                 <Label Content="Номер чека *"/>
                 <TextBox Text="{Binding Entity.ReceiptNumber, UpdateSourceTrigger=PropertyChanged}"/>
-
-                <Label Content="Аптека *" Margin="0,10,0,0"/>
+                <Label Content="Аптека *" Margin="0,12,0,0"/>
                 <ComboBox ItemsSource="{Binding Pharmacies}"
-                  DisplayMemberPath="Address"
-                  SelectedValuePath="Id"
-                  SelectedValue="{Binding Entity.PharmacyId, Mode=TwoWay}"/>
-
-                <Label Content="Сотрудник *" Margin="0,10,0,0"/>
+                          DisplayMemberPath="Address"
+                          SelectedValuePath="Id"
+                          SelectedValue="{Binding Entity.PharmacyId, Mode=TwoWay}"/>
+                <Label Content="Сотрудник *" Margin="0,12,0,0"/>
                 <ComboBox ItemsSource="{Binding Employees}"
-                  DisplayMemberPath="FullName"
-                  SelectedValuePath="Id"
-                  SelectedValue="{Binding Entity.EmployeeId, Mode=TwoWay}"/>
+                          DisplayMemberPath="FullName"
+                          SelectedValuePath="Id"
+                          SelectedValue="{Binding Entity.EmployeeId, Mode=TwoWay}"/>
             </StackPanel>
         </DataTemplate>
 
-        <!-- ORDER ITEM (через обёртку) — с фильтрацией по аптеке чека -->
+        <!-- ORDER ITEM -->
         <DataTemplate DataType="{x:Type vm:OrderItemEditorViewModel}">
             <StackPanel Width="440">
                 <Label Content="Чек *"/>
                 <ComboBox ItemsSource="{Binding Receipts}"
-                  DisplayMemberPath="ReceiptNumber"
-                  SelectedValuePath="Id"
-                  SelectedItem="{Binding SelectedReceipt, Mode=TwoWay}"/>
-
-                <Label Content="Товар * (только из склада выбранной аптеки)" Margin="0,10,0,0"/>
+                          DisplayMemberPath="ReceiptNumber"
+                          SelectedValuePath="Id"
+                          SelectedItem="{Binding SelectedReceipt, Mode=TwoWay}"/>
+                <Label Content="Товар * (только из склада выбранной аптеки)" Margin="0,12,0,0"/>
                 <ComboBox ItemsSource="{Binding AvailableProducts}"
-                  DisplayMemberPath="Name"
-                  SelectedValuePath="Id"
-                  SelectedItem="{Binding SelectedProduct, Mode=TwoWay}"/>
-
-                <Label Content="Количество * (> 0)" Margin="0,10,0,0"/>
+                          DisplayMemberPath="Name"
+                          SelectedValuePath="Id"
+                          SelectedItem="{Binding SelectedProduct, Mode=TwoWay}"/>
+                <Label Content="Количество * (> 0)" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Entity.Quantity, UpdateSourceTrigger=PropertyChanged}"
-                 PreviewTextInput="OnlyDigits_PreviewTextInput"/>
-
-                <Label Content="Скидка % (0–100)" Margin="0,10,0,0"/>
+                         PreviewTextInput="OnlyDigits_PreviewTextInput"/>
+                <Label Content="Скидка % (0–100)" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Entity.Discount, UpdateSourceTrigger=PropertyChanged}"
-                 PreviewTextInput="Price_PreviewTextInput"/>
+                         PreviewTextInput="Price_PreviewTextInput"/>
             </StackPanel>
         </DataTemplate>
 
-        <!-- STOCK BALANCE (через обёртку) -->
+        <!-- STOCK BALANCE -->
         <DataTemplate DataType="{x:Type vm:StockBalanceEditorViewModel}">
             <StackPanel Width="440">
                 <Label Content="Аптека *"/>
@@ -200,12 +142,12 @@
                           DisplayMemberPath="Address"
                           SelectedValuePath="Id"
                           SelectedValue="{Binding Entity.PharmacyId, Mode=TwoWay}"/>
-                <Label Content="Товар *" Margin="0,10,0,0"/>
+                <Label Content="Товар *" Margin="0,12,0,0"/>
                 <ComboBox ItemsSource="{Binding Products}"
                           DisplayMemberPath="Name"
                           SelectedValuePath="Id"
                           SelectedValue="{Binding Entity.ProductId, Mode=TwoWay}"/>
-                <Label Content="Остаток (≥ 0)" Margin="0,10,0,0"/>
+                <Label Content="Остаток (≥ 0)" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Entity.RemainingQty, UpdateSourceTrigger=PropertyChanged}"/>
             </StackPanel>
         </DataTemplate>
