@@ -202,11 +202,7 @@
 				</StackPanel>
 
 				<!-- Кнопка экспорт -->
-				<Button Grid.Column="2" Content="⬇  Экспорт CSV"
-                        Style="{StaticResource BtnExport}"
-                        Command="{Binding ExportCommand}"
-                        VerticalAlignment="Center"/>
-			</Grid>
+            </Grid>
 		</Border>
 
 		<!-- ══ ПАНЕЛЬ ФИЛЬТРОВ ══════════════════════════════════ -->

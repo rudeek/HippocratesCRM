@@ -22,6 +22,13 @@ namespace MyHippocrates
                 e.Handled = true;
                 return;
             }
+
+            if(e.Text.Length >= 15)
+            {
+                e.Handled = true;
+                return;
+            }
+
             e.Handled = !e.Text.All(c => char.IsDigit(c) || c == '+');
         }
 
@@ -46,11 +53,6 @@ namespace MyHippocrates
         private void Time_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !Regex.IsMatch(e.Text, "[0-9:]");
-        }
-
-        private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-
         }
     }
 

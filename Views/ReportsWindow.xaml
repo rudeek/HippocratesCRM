@@ -200,7 +200,6 @@
                 <!-- Кнопки экспорта -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button x:Name="BtnPrint" Content="🖨 Печать" Style="{StaticResource BlueBtn}" Margin="0 0 8 0" Click="BtnPrint_Click"/>
-                    <Button x:Name="BtnSavePdf" Content="💾 Сохранить XPS" Style="{StaticResource ActionBtn}" Click="BtnSavePdf_Click"/>
                 </StackPanel>
             </Grid>
         </Border>

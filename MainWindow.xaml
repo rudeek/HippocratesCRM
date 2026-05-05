@@ -4,90 +4,114 @@
         Title="Hippocrates — Аптечная сеть"
         Height="760" Width="1280"
         WindowState="Maximized"
-        Background="#0D1F0F"
+        Background="#FFFFFF"
         Icon="/icon.ico">
 
     <Window.Resources>
-        <!-- Нумерация строк в DataGrid -->
+
+        <!-- ══ Цвета ══════════════════════════════════════════════ -->
+        <SolidColorBrush x:Key="AccentGreen"    Color="#1B6B3A"/>
+        <SolidColorBrush x:Key="AccentGreenHov" Color="#145C30"/>
+        <SolidColorBrush x:Key="TableHeaderBg"  Color="#1B6B3A"/>
+        <SolidColorBrush x:Key="BgPage"         Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="BgRow"          Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="BgRowAlt"       Color="#F8FBF8"/>
+        <SolidColorBrush x:Key="BorderLight"    Color="#E0EBE4"/>
+        <SolidColorBrush x:Key="TextDark"       Color="#1A2B1A"/>
+        <SolidColorBrush x:Key="TextMid"        Color="#4A6550"/>
+        <SolidColorBrush x:Key="TextLight"      Color="#8FAD95"/>
+
+        <!-- ══ Нумерация строк ════════════════════════════════════ -->
         <Style x:Key="RowNumStyle" TargetType="TextBlock">
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment"   Value="Center"/>
-            <Setter Property="Foreground"          Value="#81C784"/>
+            <Setter Property="Foreground"          Value="#8FAD95"/>
             <Setter Property="FontSize"            Value="12"/>
         </Style>
 
-        <!-- DataGrid -->
+        <!-- ══ DataGrid ══════════════════════════════════════════ -->
         <Style TargetType="DataGrid">
-            <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="HeadersVisibility"        Value="Column"/>
             <Setter Property="AutoGenerateColumns"      Value="False"/>
             <Setter Property="CanUserAddRows"           Value="False"/>
             <Setter Property="CanUserDeleteRows"        Value="False"/>
             <Setter Property="IsReadOnly"               Value="True"/>
-            <Setter Property="Background"               Value="#132B15"/>
-            <Setter Property="RowBackground"            Value="#132B15"/>
-            <Setter Property="AlternatingRowBackground" Value="#0D1F0F"/>
-            <Setter Property="Foreground"               Value="#E8F5E9"/>
-            <Setter Property="BorderBrush"              Value="#2E7D32"/>
+            <Setter Property="Background"               Value="#FFFFFF"/>
+            <Setter Property="RowBackground"            Value="#FFFFFF"/>
+            <Setter Property="AlternatingRowBackground" Value="#F8FBF8"/>
+            <Setter Property="Foreground"               Value="#1A2B1A"/>
+            <Setter Property="BorderBrush"              Value="#E0EBE4"/>
             <Setter Property="BorderThickness"          Value="1"/>
             <Setter Property="FontSize"                 Value="13"/>
+            <Setter Property="FontFamily"               Value="Segoe UI"/>
             <Setter Property="GridLinesVisibility"      Value="Horizontal"/>
-            <Setter Property="HorizontalGridLinesBrush" Value="#1B5E20"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#EDF4EF"/>
             <Setter Property="SelectionMode"            Value="Single"/>
             <Setter Property="SelectionUnit"            Value="FullRow"/>
+            <Setter Property="RowHeight"                Value="46"/>
         </Style>
+
         <Style TargetType="DataGridColumnHeader">
-            <Setter Property="Background"      Value="#1B5E20"/>
-            <Setter Property="Foreground"      Value="white"/>
+            <Setter Property="Background"      Value="#1B6B3A"/>
+            <Setter Property="Foreground"      Value="#FFFFFF"/>
             <Setter Property="FontWeight"      Value="SemiBold"/>
             <Setter Property="FontSize"        Value="12"/>
-            <Setter Property="Padding"         Value="10 8"/>
-            <Setter Property="BorderBrush"     Value="#2E7D32"/>
+            <Setter Property="FontFamily"      Value="Segoe UI"/>
+            <Setter Property="Padding"         Value="14 10"/>
+            <Setter Property="BorderBrush"     Value="#145C30"/>
             <Setter Property="BorderThickness" Value="0 0 1 0"/>
         </Style>
+
         <Style TargetType="DataGridRow">
-            <Style.Triggers>
-                <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#2E7D32"/>
-                </Trigger>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#1A3D1C"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-        <Style TargetType="DataGridCell">
-            <Setter Property="Padding"         Value="8 5"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="Transparent"/>
-                    <Setter Property="Foreground"  Value="White"/>
+                    <Setter Property="Background" Value="#E8F4EC"/>
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F2F8F4"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
-        <!-- Кнопка ДОБАВИТЬ (зелёная) -->
+        <Style TargetType="DataGridCell">
+            <Setter Property="Padding"         Value="14 0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="#1A2B1A"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- ══ Кнопка Добавить (зелёная заливка) ════════════════ -->
         <Style x:Key="BtnAdd" TargetType="Button">
-            <Setter Property="Background"      Value="#2E7D32"/>
+            <Setter Property="Background"      Value="#1B6B3A"/>
             <Setter Property="Foreground"      Value="White"/>
             <Setter Property="FontWeight"      Value="SemiBold"/>
-            <Setter Property="FontSize"        Value="12"/>
+            <Setter Property="FontSize"        Value="13"/>
+            <Setter Property="FontFamily"      Value="Segoe UI"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding"         Value="14 7"/>
+            <Setter Property="Padding"         Value="20 9"/>
             <Setter Property="Cursor"          Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="6"
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="8"
                                 Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#43A047"/>
+                                <Setter Property="Background" Value="#145C30"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Background" Value="#444"/>
-                                <Setter Property="Foreground" Value="#888"/>
+                                <Setter Property="Background" Value="#C8DDD0"/>
+                                <Setter Property="Foreground" Value="#8FAD95"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -95,184 +119,375 @@
             </Setter>
         </Style>
 
-        <!-- Кнопка РЕДАКТИРОВАТЬ (синяя) -->
-        <Style x:Key="BtnEdit" TargetType="Button" BasedOn="{StaticResource BtnAdd}">
-            <Setter Property="Background" Value="#1565C0"/>
-            <Style.Resources/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#1976D2"/>
-                </Trigger>
-                <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Background" Value="#444"/>
-                    <Setter Property="Foreground"  Value="#888"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <!-- Кнопка УДАЛИТЬ (красная) -->
-        <Style x:Key="BtnDelete" TargetType="Button" BasedOn="{StaticResource BtnAdd}">
-            <Setter Property="Background" Value="#C62828"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#E53935"/>
-                </Trigger>
-                <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Background" Value="#444"/>
-                    <Setter Property="Foreground"  Value="#888"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <!-- TextBox поиска -->
-        <Style x:Key="SearchBox" TargetType="TextBox">
-            <Setter Property="Background"      Value="#132B15"/>
-            <Setter Property="Foreground"      Value="#E8F5E9"/>
-            <Setter Property="BorderBrush"     Value="#2E7D32"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding"         Value="8 6"/>
+        <!-- ══ Кнопка Изменить (контурная зелёная) ═════════════ -->
+        <Style x:Key="BtnEdit" TargetType="Button">
+            <Setter Property="Background"      Value="#FFFFFF"/>
+            <Setter Property="Foreground"      Value="#1B6B3A"/>
+            <Setter Property="FontWeight"      Value="SemiBold"/>
             <Setter Property="FontSize"        Value="13"/>
-            <Setter Property="Width"           Value="240"/>
-            <Setter Property="CaretBrush"      Value="#E8F5E9"/>
+            <Setter Property="FontFamily"      Value="Segoe UI"/>
+            <Setter Property="BorderBrush"     Value="#1B6B3A"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Padding"         Value="20 9"/>
+            <Setter Property="Cursor"          Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#F0F8F3"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="BorderBrush" Value="#C8DDD0"/>
+                                <Setter Property="Foreground"  Value="#B0C8B8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
-        <!-- TabItem -->
+        <!-- ══ Кнопка Удалить (контурная красная) ══════════════ -->
+        <Style x:Key="BtnDelete" TargetType="Button">
+            <Setter Property="Background"      Value="#FFFFFF"/>
+            <Setter Property="Foreground"      Value="#C0392B"/>
+            <Setter Property="FontWeight"      Value="SemiBold"/>
+            <Setter Property="FontSize"        Value="13"/>
+            <Setter Property="FontFamily"      Value="Segoe UI"/>
+            <Setter Property="BorderBrush"     Value="#C0392B"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Padding"         Value="20 9"/>
+            <Setter Property="Cursor"          Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FDF2F2"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="BorderBrush" Value="#E8C5C2"/>
+                                <Setter Property="Foreground"  Value="#E8C5C2"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ══ Поле поиска ══════════════════════════════════════ -->
+        <Style x:Key="SearchBox" TargetType="TextBox">
+            <Setter Property="Background"      Value="#F5F9F6"/>
+            <Setter Property="Foreground"      Value="#1A2B1A"/>
+            <Setter Property="BorderBrush"     Value="#D0E4D8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding"         Value="34 9 12 9"/>
+            <Setter Property="FontSize"        Value="13"/>
+            <Setter Property="FontFamily"      Value="Segoe UI"/>
+            <Setter Property="Width"           Value="280"/>
+            <Setter Property="CaretBrush"      Value="#1B6B3A"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <Grid>
+                                <!-- Иконка лупы -->
+                                <TextBlock Text="🔍" FontSize="12"
+                                           Foreground="#8FAD95"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Center"
+                                           Margin="10 0 0 0"/>
+                                <ScrollViewer x:Name="PART_ContentHost"
+                                              Margin="{TemplateBinding Padding}"
+                                              VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="#1B6B3A"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ══ TabItem — вкладки в стиле скриншота ══════════════ -->
         <Style TargetType="TabItem">
-            <Setter Property="Background" Value="#132B15"/>
-            <Setter Property="Foreground" Value="#81C784"/>
-            <Setter Property="FontSize"   Value="13"/>
-            <Setter Property="Padding"    Value="16 9"/>
+            <Setter Property="Background"     Value="Transparent"/>
+            <Setter Property="Foreground"     Value="#4A6550"/>
+            <Setter Property="FontSize"       Value="14"/>
+            <Setter Property="FontFamily"     Value="Segoe UI"/>
+            <Setter Property="FontWeight"     Value="Normal"/>
+            <Setter Property="Padding"        Value="20 12"/>
+            <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TabItem">
-                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
-                                Padding="{TemplateBinding Padding}" Margin="0 0 2 0">
-                            <ContentPresenter ContentSource="Header"/>
+                        <Border x:Name="Bd"
+                                Background="Transparent"
+                                Padding="{TemplateBinding Padding}"
+                                BorderBrush="#1B6B3A"
+                                BorderThickness="0 0 0 0"
+                                Margin="0 0 4 0">
+                            <ContentPresenter ContentSource="Header"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#2E7D32"/>
-                                <Setter Property="Foreground" Value="White"/>
+                                <Setter TargetName="Bd" Property="BorderThickness" Value="0 0 0 3"/>
+                                <Setter Property="Foreground"  Value="#1B6B3A"/>
+                                <Setter Property="FontWeight"  Value="SemiBold"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#1A3D1C"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#F0F8F3"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- ══ Кнопка шапки (Отчёты) — контурная ═══════════════ -->
+        <Style x:Key="BtnHeader" TargetType="Button">
+            <Setter Property="Background"      Value="#FFFFFF"/>
+            <Setter Property="Foreground"      Value="#1A2B1A"/>
+            <Setter Property="FontSize"        Value="13"/>
+            <Setter Property="FontFamily"      Value="Segoe UI"/>
+            <Setter Property="FontWeight"      Value="Normal"/>
+            <Setter Property="BorderBrush"     Value="#D0E4D8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding"         Value="20 10"/>
+            <Setter Property="Cursor"          Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#F5F9F6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </Window.Resources>
 
-    <DockPanel>
+    <DockPanel Background="#FFFFFF">
 
-        <!-- Шапка -->
-        <Border DockPanel.Dock="Top" Background="white" Padding="20 14">
+        <!-- ══ ШАПКА ════════════════════════════════════════════ -->
+        <Border DockPanel.Dock="Top"
+                Background="#FFFFFF"
+                BorderBrush="#E0EBE4"
+                BorderThickness="0 0 0 1"
+                Padding="28 14">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- ЛОГО -->
-                <Image Source="/logo.jpg" Width="308" Height="68"/>
+                <!-- Логотип -->
+                <Image Source="/logo.jpg"
+                       Height="60"
+                       RenderOptions.BitmapScalingMode="HighQuality"
+                       VerticalAlignment="Center"/>
 
-                
-                
-                <!-- ПУСТОЕ ПРОСТРАНСТВО -->
-                <StackPanel Grid.Column="1"/>
+                <!-- Кнопки справа -->
+                <StackPanel Grid.Column="2"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <Button Style="{StaticResource BtnHeader}"
+                            Margin="0 0 10 0"
+                            Click="OpenReports_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📄" FontSize="14" Margin="0 0 6 0"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Text="Отчёты" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
 
-
-                <Button Grid.Column="2" Content="📄 Отчёты"
-        Width="140"
-        Height="40"
-        Click="OpenReports_Click"/>
-                <!-- КНОПКА DASHBOARD -->
-                <Button Grid.Column="3"
-                        Style="{StaticResource BtnAdd}"
-            Content="Dashboard"
-            Padding="14 6"
-            Margin="10 0"
-            Background="#2E7D32"
-            Foreground="White"
-            BorderThickness="0"
-            Cursor="Hand"
-            Click="OpenDashboard"/>
+                    <Button Style="{StaticResource BtnAdd}"
+                            Click="OpenDashboard">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="⊞" FontSize="15" Margin="0 0 6 0"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Text="Dashboard" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
             </Grid>
         </Border>
 
-        <!-- Вкладки -->
-        <TabControl Background="#0D1F0F" BorderThickness="0" SelectionChanged="TabControl_SelectionChanged">
+        <!-- ══ ВКЛАДКИ + КОНТЕНТ ════════════════════════════════ -->
+        <TabControl Background="#FFFFFF"
+                    BorderThickness="0"
+                    SelectionChanged="TabControl_SelectionChanged"
+                    Padding="0">
 
-            <!-- ══ ПРОИЗВОДИТЕЛИ ═══════════════════════════════════════ -->
+            <TabControl.Template>
+                <ControlTemplate TargetType="TabControl">
+                    <DockPanel Background="White">
+                        <!-- Полоса вкладок -->
+                        <Border DockPanel.Dock="Top"
+                                Background="#FFFFFF"
+                                BorderBrush="#E0EBE4"
+                                BorderThickness="0 0 0 1"
+                                Padding="20 0 0 0">
+                            <TabPanel IsItemsHost="True"/>
+                        </Border>
+                        <!-- Контент -->
+                        <ContentPresenter ContentSource="SelectedContent"/>
+                    </DockPanel>
+                </ControlTemplate>
+            </TabControl.Template>
+
+            <!-- ══ ПРОИЗВОДИТЕЛИ ═════════════════════════════════ -->
             <TabItem Header="Производители">
-                <Grid Margin="10">
+                <Grid Margin="24 16 24 16">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" Margin="0 0 0 8">
+
+                    <!-- Тулбар -->
+                    <Grid Grid.Row="0" Margin="0 0 0 14">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Style="{StaticResource SearchBox}" HorizontalAlignment="Left"
-                                 Text="{Binding ManufacturersVM.SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBox Grid.Column="0"
+                                 Style="{StaticResource SearchBox}"
+                                 HorizontalAlignment="Left"
+                                 Text="{Binding ManufacturersVM.SearchText, UpdateSourceTrigger=PropertyChanged}">
+                            <TextBox.Resources>
+                                <Style TargetType="TextBox" BasedOn="{StaticResource SearchBox}"/>
+                            </TextBox.Resources>
+                        </TextBox>
+
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Button Content="Добавить"   Style="{StaticResource BtnAdd}"
-                                    Command="{Binding ManufacturersVM.AddCommand}"/>
-                            <Button Content="Изменить"  Style="{StaticResource BtnEdit}" Margin="6 0"
+                            <Button Style="{StaticResource BtnAdd}"
+                                    Command="{Binding ManufacturersVM.AddCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="⊕" FontSize="15" Margin="0 0 6 0"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Text="Добавить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnEdit}"
+                                    Margin="8 0"
                                     Command="{Binding ManufacturersVM.EditCommand}"
-                                    CommandParameter="{Binding SelectedItem, ElementName=ManufacturersGrid}"/>
-                            <Button Content="Удалить"   Style="{StaticResource BtnDelete}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=ManufacturersGrid}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="✎" FontSize="14" Margin="0 0 6 0"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Text="Изменить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnDelete}"
                                     Command="{Binding ManufacturersVM.DeleteCommand}"
-                                    CommandParameter="{Binding SelectedItem, ElementName=ManufacturersGrid}"/>
+                                    CommandParameter="{Binding SelectedItem, ElementName=ManufacturersGrid}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🗑" FontSize="13" Margin="0 0 6 0"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Text="Удалить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </Grid>
+
                     <DataGrid Grid.Row="1" x:Name="ManufacturersGrid"
                               ItemsSource="{Binding ManufacturersVM.View}"
                               LoadingRow="DataGrid_LoadingRow"
                               UnloadingRow="DataGrid_UnloadingRow">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="№" Width="50">
+                            <DataGridTemplateColumn Header="№" Width="56">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Style="{StaticResource RowNumStyle}"
-                                                   Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow},
-                                                          Path=Header}"/>
+                                                   Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Название"  Binding="{Binding Name}"    Width="160"/>
-                            <DataGridTextColumn Header="Страна"    Binding="{Binding Country}" Width="110"/>
+                            <DataGridTextColumn Header="Название"  Binding="{Binding Name}"    Width="180"/>
+                            <DataGridTextColumn Header="Страна"    Binding="{Binding Country}" Width="120"/>
                             <DataGridTextColumn Header="Адрес"     Binding="{Binding Address}" Width="*"/>
-                            <DataGridTextColumn Header="Телефон"   Binding="{Binding Phone}"   Width="140"/>
-                            <DataGridTextColumn Header="Email"     Binding="{Binding Email}"   Width="180"/>
+                            <DataGridTextColumn Header="Телефон"   Binding="{Binding Phone}"   Width="150"/>
+                            <DataGridTextColumn Header="Email"     Binding="{Binding Email}"   Width="200"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
             </TabItem>
 
-            <!-- ══ ТОВАРЫ ═══════════════════════════════════════════════ -->
+            <!-- ══ ТОВАРЫ ════════════════════════════════════════ -->
             <TabItem Header="Товары">
-                <Grid Margin="10">
+                <Grid Margin="24 16 24 16">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" Margin="0 0 0 8">
+                    <Grid Grid.Row="0" Margin="0 0 0 14">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Style="{StaticResource SearchBox}" HorizontalAlignment="Left"
+                        <TextBox Grid.Column="0" Style="{StaticResource SearchBox}"
+                                 HorizontalAlignment="Left"
                                  Text="{Binding ProductsVM.SearchText, UpdateSourceTrigger=PropertyChanged}"/>
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Button Content="Добавить"  Style="{StaticResource BtnAdd}"    Command="{Binding ProductsVM.AddCommand}"/>
-                            <Button Content="Изменить" Style="{StaticResource BtnEdit}"   Margin="6 0" Command="{Binding ProductsVM.EditCommand}"   CommandParameter="{Binding SelectedItem, ElementName=ProductsGrid}"/>
-                            <Button Content="Удалить"  Style="{StaticResource BtnDelete}" Command="{Binding ProductsVM.DeleteCommand}" CommandParameter="{Binding SelectedItem, ElementName=ProductsGrid}"/>
+                            <Button Style="{StaticResource BtnAdd}" Command="{Binding ProductsVM.AddCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="⊕" FontSize="15" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Добавить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnEdit}" Margin="8 0"
+                                    Command="{Binding ProductsVM.EditCommand}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=ProductsGrid}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="✎" FontSize="14" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Изменить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnDelete}"
+                                    Command="{Binding ProductsVM.DeleteCommand}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=ProductsGrid}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🗑" FontSize="13" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Удалить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </Grid>
                     <DataGrid Grid.Row="1" x:Name="ProductsGrid"
@@ -280,45 +495,66 @@
                               LoadingRow="DataGrid_LoadingRow"
                               UnloadingRow="DataGrid_UnloadingRow">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="№" Width="50">
+                            <DataGridTemplateColumn Header="№" Width="56">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Style="{StaticResource RowNumStyle}" Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
+                                        <TextBlock Style="{StaticResource RowNumStyle}"
+                                                   Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Название"       Binding="{Binding Name}"                                          Width="160"/>
-                            <DataGridTextColumn Header="Производитель"  Binding="{Binding Manufacturer.Name}"                             Width="140"/>
-                            <DataGridTextColumn Header="Дата пр-ва"     Binding="{Binding ProductionDate, StringFormat={}{0:dd.MM.yyyy}}"  Width="100"/>
-                            <DataGridTextColumn Header="Срок годн."     Binding="{Binding ExpirationDate, StringFormat={}{0:dd.MM.yyyy}}"  Width="100"/>
-                            <DataGridTextColumn Header="Ед."            Binding="{Binding Unit}"                                          Width="50"/>
-                            <DataGridTextColumn Header="Рецепт"         Binding="{Binding PrescriptionRequired}"                          Width="65"/>
-                            <DataGridTextColumn Header="Закупка"        Binding="{Binding PurchasePrice, StringFormat={}{0:F2}}"           Width="85"/>
-                            <DataGridTextColumn Header="Продажа"        Binding="{Binding SalePrice,     StringFormat={}{0:F2}}"           Width="85"/>
-                            <DataGridTextColumn Header="Описание"       Binding="{Binding Description}"                                   Width="*"/>
+                            <DataGridTextColumn Header="Название"      Binding="{Binding Name}"                                         Width="180"/>
+                            <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer.Name}"                            Width="150"/>
+                            <DataGridTextColumn Header="Дата пр-ва"    Binding="{Binding ProductionDate, StringFormat={}{0:dd.MM.yyyy}}" Width="110"/>
+                            <DataGridTextColumn Header="Срок годн."    Binding="{Binding ExpirationDate, StringFormat={}{0:dd.MM.yyyy}}" Width="110"/>
+                            <DataGridTextColumn Header="Ед."           Binding="{Binding Unit}"                                         Width="54"/>
+                            <DataGridTextColumn Header="Рецепт"        Binding="{Binding PrescriptionRequired}"                         Width="70"/>
+                            <DataGridTextColumn Header="Закупка"       Binding="{Binding PurchasePrice, StringFormat={}{0:F2}}"          Width="90"/>
+                            <DataGridTextColumn Header="Продажа"       Binding="{Binding SalePrice, StringFormat={}{0:F2}}"              Width="90"/>
+                            <DataGridTextColumn Header="Описание"      Binding="{Binding Description}"                                  Width="*"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
             </TabItem>
 
-            <!-- ══ АПТЕКИ ════════════════════════════════════════════════ -->
+            <!-- ══ АПТЕКИ ════════════════════════════════════════ -->
             <TabItem Header="Аптеки">
-                <Grid Margin="10">
+                <Grid Margin="24 16 24 16">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" Margin="0 0 0 8">
+                    <Grid Grid.Row="0" Margin="0 0 0 14">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Style="{StaticResource SearchBox}" HorizontalAlignment="Left"
+                        <TextBox Grid.Column="0" Style="{StaticResource SearchBox}"
+                                 HorizontalAlignment="Left"
                                  Text="{Binding PharmaciesVM.SearchText, UpdateSourceTrigger=PropertyChanged}"/>
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Button Content="Добавить"  Style="{StaticResource BtnAdd}"    Command="{Binding PharmaciesVM.AddCommand}"/>
-                            <Button Content="Изменить" Style="{StaticResource BtnEdit}"   Margin="6 0" Command="{Binding PharmaciesVM.EditCommand}"   CommandParameter="{Binding SelectedItem, ElementName=PharmaciesGrid}"/>
-                            <Button Content="Удалить"  Style="{StaticResource BtnDelete}" Command="{Binding PharmaciesVM.DeleteCommand}" CommandParameter="{Binding SelectedItem, ElementName=PharmaciesGrid}"/>
+                            <Button Style="{StaticResource BtnAdd}" Command="{Binding PharmaciesVM.AddCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="⊕" FontSize="15" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Добавить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnEdit}" Margin="8 0"
+                                    Command="{Binding PharmaciesVM.EditCommand}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=PharmaciesGrid}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="✎" FontSize="14" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Изменить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnDelete}"
+                                    Command="{Binding PharmaciesVM.DeleteCommand}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=PharmaciesGrid}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🗑" FontSize="13" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Удалить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </Grid>
                     <DataGrid Grid.Row="1" x:Name="PharmaciesGrid"
@@ -326,39 +562,60 @@
                               LoadingRow="DataGrid_LoadingRow"
                               UnloadingRow="DataGrid_UnloadingRow">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="№" Width="50">
+                            <DataGridTemplateColumn Header="№" Width="56">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Style="{StaticResource RowNumStyle}" Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
+                                        <TextBlock Style="{StaticResource RowNumStyle}"
+                                                   Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTextColumn Header="Адрес"       Binding="{Binding Address}"      Width="*"/>
-                            <DataGridTextColumn Header="Телефон"     Binding="{Binding Phone}"        Width="150"/>
-                            <DataGridTextColumn Header="Часы работы" Binding="{Binding WorkingHours}" Width="160"/>
+                            <DataGridTextColumn Header="Телефон"     Binding="{Binding Phone}"        Width="170"/>
+                            <DataGridTextColumn Header="Часы работы" Binding="{Binding WorkingHours}" Width="170"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
             </TabItem>
 
-            <!-- ══ СОТРУДНИКИ ════════════════════════════════════════════ -->
+            <!-- ══ СОТРУДНИКИ ════════════════════════════════════ -->
             <TabItem Header="Сотрудники">
-                <Grid Margin="10">
+                <Grid Margin="24 16 24 16">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" Margin="0 0 0 8">
+                    <Grid Grid.Row="0" Margin="0 0 0 14">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Style="{StaticResource SearchBox}" HorizontalAlignment="Left"
+                        <TextBox Grid.Column="0" Style="{StaticResource SearchBox}"
+                                 HorizontalAlignment="Left"
                                  Text="{Binding EmployeesVM.SearchText, UpdateSourceTrigger=PropertyChanged}"/>
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Button Content="Добавить"  Style="{StaticResource BtnAdd}"    Command="{Binding EmployeesVM.AddCommand}"/>
-                            <Button Content="Изменить" Style="{StaticResource BtnEdit}"   Margin="6 0" Command="{Binding EmployeesVM.EditCommand}"   CommandParameter="{Binding SelectedItem, ElementName=EmployeesGrid}"/>
-                            <Button Content="Удалить"  Style="{StaticResource BtnDelete}" Command="{Binding EmployeesVM.DeleteCommand}" CommandParameter="{Binding SelectedItem, ElementName=EmployeesGrid}"/>
+                            <Button Style="{StaticResource BtnAdd}" Command="{Binding EmployeesVM.AddCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="⊕" FontSize="15" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Добавить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnEdit}" Margin="8 0"
+                                    Command="{Binding EmployeesVM.EditCommand}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=EmployeesGrid}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="✎" FontSize="14" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Изменить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnDelete}"
+                                    Command="{Binding EmployeesVM.DeleteCommand}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=EmployeesGrid}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🗑" FontSize="13" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Удалить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </Grid>
                     <DataGrid Grid.Row="1" x:Name="EmployeesGrid"
@@ -366,41 +623,55 @@
                               LoadingRow="DataGrid_LoadingRow"
                               UnloadingRow="DataGrid_UnloadingRow">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="№" Width="50">
+                            <DataGridTemplateColumn Header="№" Width="56">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Style="{StaticResource RowNumStyle}" Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
+                                        <TextBlock Style="{StaticResource RowNumStyle}"
+                                                   Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="ФИО"       Binding="{Binding FullName}"  Width="*"/>
-                            <DataGridTextColumn Header="IDNP"      Binding="{Binding Idnp}"      Width="130"/>
-                            <DataGridTextColumn Header="Телефон"   Binding="{Binding Phone}"     Width="130"/>
-                            <DataGridTextColumn Header="Адрес"     Binding="{Binding Address}"   Width="200"/>
-                            <DataGridTextColumn Header="Зарплата"  Binding="{Binding Salary, StringFormat={}{0:F2}}" Width="100"/>
-                            <DataGridTextColumn Header="Должность" Binding="{Binding Position}"  Width="130"/>
+                            <DataGridTextColumn Header="ФИО"       Binding="{Binding FullName}"                           Width="*"/>
+                            <DataGridTextColumn Header="IDNP"      Binding="{Binding Idnp}"                               Width="140"/>
+                            <DataGridTextColumn Header="Телефон"   Binding="{Binding Phone}"                              Width="140"/>
+                            <DataGridTextColumn Header="Адрес"     Binding="{Binding Address}"                            Width="220"/>
+                            <DataGridTextColumn Header="Зарплата"  Binding="{Binding Salary, StringFormat={}{0:F2}}"      Width="110"/>
+                            <DataGridTextColumn Header="Должность" Binding="{Binding Position}"                           Width="130"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
             </TabItem>
 
-            <!-- ══ ЧЕКИ ══════════════════════════════════════════════════ -->
+            <!-- ══ ЧЕКИ ══════════════════════════════════════════ -->
             <TabItem Header="Чеки">
-                <Grid Margin="10">
+                <Grid Margin="24 16 24 16">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" Margin="0 0 0 8">
+                    <Grid Grid.Row="0" Margin="0 0 0 14">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Style="{StaticResource SearchBox}" HorizontalAlignment="Left"
+                        <TextBox Grid.Column="0" Style="{StaticResource SearchBox}"
+                                 HorizontalAlignment="Left"
                                  Text="{Binding ReceiptsVM.SearchText, UpdateSourceTrigger=PropertyChanged}"/>
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Button Content="Добавить"  Style="{StaticResource BtnAdd}"    Command="{Binding ReceiptsVM.AddCommand}"/>
-                            <Button Content="Удалить"  Style="{StaticResource BtnDelete}" Command="{Binding ReceiptsVM.DeleteCommand}" CommandParameter="{Binding SelectedItem, ElementName=ReceiptsGrid}"/>
+                            <Button Style="{StaticResource BtnAdd}" Command="{Binding ReceiptsVM.AddCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="⊕" FontSize="15" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Добавить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnDelete}" Margin="8 0 0 0"
+                                    Command="{Binding ReceiptsVM.DeleteCommand}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=ReceiptsGrid}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🗑" FontSize="13" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Удалить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </Grid>
                     <DataGrid Grid.Row="1" x:Name="ReceiptsGrid"
@@ -408,42 +679,63 @@
                               LoadingRow="DataGrid_LoadingRow"
                               UnloadingRow="DataGrid_UnloadingRow">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="№" Width="50">
+                            <DataGridTemplateColumn Header="№" Width="56">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Style="{StaticResource RowNumStyle}" Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
+                                        <TextBlock Style="{StaticResource RowNumStyle}"
+                                                   Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="№ чека"    Binding="{Binding ReceiptNumber}"                             Width="80"/>
-                            <DataGridTextColumn Header="Аптека"    Binding="{Binding Pharmacy.Address}"                          Width="*"/>
-                            <DataGridTextColumn Header="Сотрудник" Binding="{Binding Employee.FullName}"                         Width="180"/>
-                            <DataGridTextColumn Header="Сумма"     Binding="{Binding TotalAmount, StringFormat={}{0:F2}}"        Width="90"/>
-                            <DataGridTextColumn Header="Дата"      Binding="{Binding Date, StringFormat={}{0:dd.MM.yyyy}}"       Width="100"/>
-                            <DataGridTextColumn Header="Время"     Binding="{Binding Time, StringFormat={}{0:hh\\:mm\\:ss}}"    Width="90"/>
+                            <DataGridTextColumn Header="№ чека"    Binding="{Binding ReceiptNumber}"                           Width="90"/>
+                            <DataGridTextColumn Header="Аптека"    Binding="{Binding Pharmacy.Address}"                        Width="*"/>
+                            <DataGridTextColumn Header="Сотрудник" Binding="{Binding Employee.FullName}"                       Width="190"/>
+                            <DataGridTextColumn Header="Сумма"     Binding="{Binding TotalAmount, StringFormat={}{0:F2}}"      Width="100"/>
+                            <DataGridTextColumn Header="Дата"      Binding="{Binding Date, StringFormat={}{0:dd.MM.yyyy}}"     Width="110"/>
+                            <DataGridTextColumn Header="Время"     Binding="{Binding Time, StringFormat={}{0:hh\\:mm\\:ss}}"  Width="100"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
             </TabItem>
 
-            <!-- ══ ПОЗИЦИИ ЗАКАЗОВ ══════════════════════════════════════ -->
+            <!-- ══ ПОЗИЦИИ ЗАКАЗОВ ══════════════════════════════ -->
             <TabItem Header="Позиции заказов">
-                <Grid Margin="10">
+                <Grid Margin="24 16 24 16">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" Margin="0 0 0 8">
+                    <Grid Grid.Row="0" Margin="0 0 0 14">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Style="{StaticResource SearchBox}" HorizontalAlignment="Left"
+                        <TextBox Grid.Column="0" Style="{StaticResource SearchBox}"
+                                 HorizontalAlignment="Left"
                                  Text="{Binding OrderItemsVM.SearchText, UpdateSourceTrigger=PropertyChanged}"/>
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Button Content="Добавить"  Style="{StaticResource BtnAdd}"    Command="{Binding OrderItemsVM.AddCommand}"/>
-                            <Button Content="Изменить" Style="{StaticResource BtnEdit}"   Margin="6 0" Command="{Binding OrderItemsVM.EditCommand}"   CommandParameter="{Binding SelectedItem, ElementName=OrderItemsGrid}"/>
-                            <Button Content="Удалить"  Style="{StaticResource BtnDelete}" Command="{Binding OrderItemsVM.DeleteCommand}" CommandParameter="{Binding SelectedItem, ElementName=OrderItemsGrid}"/>
+                            <Button Style="{StaticResource BtnAdd}" Command="{Binding OrderItemsVM.AddCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="⊕" FontSize="15" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Добавить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnEdit}" Margin="8 0"
+                                    Command="{Binding OrderItemsVM.EditCommand}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=OrderItemsGrid}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="✎" FontSize="14" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Изменить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnDelete}"
+                                    Command="{Binding OrderItemsVM.DeleteCommand}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=OrderItemsGrid}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🗑" FontSize="13" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Удалить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </Grid>
                     <DataGrid Grid.Row="1" x:Name="OrderItemsGrid"
@@ -451,63 +743,82 @@
                               LoadingRow="DataGrid_LoadingRow"
                               UnloadingRow="DataGrid_UnloadingRow">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="№" Width="50">
+                            <DataGridTemplateColumn Header="№" Width="56">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Style="{StaticResource RowNumStyle}" Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
+                                        <TextBlock Style="{StaticResource RowNumStyle}"
+                                                   Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Чек №"      Binding="{Binding Receipt.ReceiptNumber}"                         Width="80"/>
-                            <DataGridTextColumn Header="Дата чека"  Binding="{Binding Receipt.Date, StringFormat={}{0:dd.MM.yyyy}}"   Width="100"/>
-                            <DataGridTextColumn Header="Товар"      Binding="{Binding Product.Name}"                                  Width="*"/>
-                            <DataGridTextColumn Header="Кол-во"     Binding="{Binding Quantity}"                                      Width="80"/>
-                            <DataGridTextColumn Header="Цена ед."   Binding="{Binding UnitPrice, StringFormat={}{0:F2}}"              Width="90"/>
-                            <DataGridTextColumn Header="Итого"      Binding="{Binding TotalPrice, StringFormat={}{0:F2}}"             Width="90"/>
-                            <DataGridTextColumn Header="Скидка"     Binding="{Binding Discount, StringFormat={}{0:0.##}%}"            Width="80"/>
+                            <DataGridTextColumn Header="Чек №"     Binding="{Binding Receipt.ReceiptNumber}"                       Width="90"/>
+                            <DataGridTextColumn Header="Дата чека" Binding="{Binding Receipt.Date, StringFormat={}{0:dd.MM.yyyy}}" Width="110"/>
+                            <DataGridTextColumn Header="Товар"     Binding="{Binding Product.Name}"                                Width="*"/>
+                            <DataGridTextColumn Header="Кол-во"    Binding="{Binding Quantity}"                                    Width="90"/>
+                            <DataGridTextColumn Header="Цена ед."  Binding="{Binding UnitPrice, StringFormat={}{0:F2}}"            Width="100"/>
+                            <DataGridTextColumn Header="Итого"     Binding="{Binding TotalPrice, StringFormat={}{0:F2}}"           Width="100"/>
+                            <DataGridTextColumn Header="Скидка"    Binding="{Binding Discount, StringFormat={}{0:0.##}%}"          Width="90"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
             </TabItem>
 
-            <!-- ══ ОСТАТКИ ══════════════════════════════════════════════ -->
+            <!-- ══ ОСТАТКИ ══════════════════════════════════════ -->
             <TabItem Header="Остатки на складе">
-                <Grid Margin="10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="75*"/>
-                        <ColumnDefinition Width="1181*"/>
-                    </Grid.ColumnDefinitions>
+                <Grid Margin="24 16 24 16">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Grid Grid.Row="0" Margin="0 0 0 8" Grid.ColumnSpan="2">
+                    <Grid Grid.Row="0" Margin="0 0 0 14">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Style="{StaticResource SearchBox}" HorizontalAlignment="Left"
+                        <TextBox Grid.Column="0" Style="{StaticResource SearchBox}"
+                                 HorizontalAlignment="Left"
                                  Text="{Binding StockBalanceVM.SearchText, UpdateSourceTrigger=PropertyChanged}"/>
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Button Content="Добавить"  Style="{StaticResource BtnAdd}"    Command="{Binding StockBalanceVM.AddCommand}"/>
-                            <Button Content="Изменить" Style="{StaticResource BtnEdit}"   Margin="6 0" Command="{Binding StockBalanceVM.EditCommand}"   CommandParameter="{Binding SelectedItem, ElementName=StockGrid}"/>
-                            <Button Content="Удалить"  Style="{StaticResource BtnDelete}" Command="{Binding StockBalanceVM.DeleteCommand}" CommandParameter="{Binding SelectedItem, ElementName=StockGrid}"/>
+                            <Button Style="{StaticResource BtnAdd}" Command="{Binding StockBalanceVM.AddCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="⊕" FontSize="15" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Добавить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnEdit}" Margin="8 0"
+                                    Command="{Binding StockBalanceVM.EditCommand}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=StockGrid}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="✎" FontSize="14" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Изменить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnDelete}"
+                                    Command="{Binding StockBalanceVM.DeleteCommand}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=StockGrid}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🗑" FontSize="13" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Удалить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </Grid>
                     <DataGrid x:Name="StockGrid"
                               ItemsSource="{Binding StockBalanceVM.View}"
-                              LoadingRow="DataGrid_LoadingRow" UnloadingRow="DataGrid_UnloadingRow" Grid.ColumnSpan="2" Margin="0,39,0,0" Grid.RowSpan="2">
+                              LoadingRow="DataGrid_LoadingRow"
+                              UnloadingRow="DataGrid_UnloadingRow">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="№" Width="50">
+                            <DataGridTemplateColumn Header="№" Width="56">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Style="{StaticResource RowNumStyle}" Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
+                                        <TextBlock Style="{StaticResource RowNumStyle}"
+                                                   Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                             <DataGridTextColumn Header="Аптека"  Binding="{Binding Pharmacy.Address}" Width="*"/>
                             <DataGridTextColumn Header="Товар"   Binding="{Binding Product.Name}"     Width="*"/>
-                            <DataGridTextColumn Header="Остаток" Binding="{Binding RemainingQty}"     Width="100"/>
+                            <DataGridTextColumn Header="Остаток" Binding="{Binding RemainingQty}"     Width="110"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
