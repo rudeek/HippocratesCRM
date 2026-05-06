@@ -23,7 +23,7 @@ namespace MyHippocrates
                 return;
             }
 
-            if(e.Text.Length >= 15)
+            if(textBox.Text.Length >= 15)
             {
                 e.Handled = true;
                 return;
@@ -40,9 +40,27 @@ namespace MyHippocrates
         private void Price_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             var tb = (TextBox)sender;
-            // Запрещаем всё кроме цифр и точки
-            // И не даём ввести вторую точку
-            if (e.Text == "." && tb.Text.Contains("."))
+            var input = e.Text;
+
+            // If user types dot or comma, normalize to current-culture separator
+            if (input == ".")
+            {
+                // block if separator already present
+                if (tb.Text.Contains("."))
+                {
+                    e.Handled = true;
+                    return;
+                }
+
+                // consume original input and insert culture separator at caret
+                e.Handled = true;
+                var selStart = tb.SelectionStart;
+                tb.Text = tb.Text.Insert(selStart, ".");
+                tb.SelectionStart = selStart + 1;
+                return;
+            }
+
+            if (!input.All(c => char.IsDigit(c) || c.ToString() == "."))
             {
                 e.Handled = true;
                 return;

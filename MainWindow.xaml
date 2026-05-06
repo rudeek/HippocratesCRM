@@ -44,7 +44,7 @@
             <Setter Property="BorderThickness"          Value="1"/>
             <Setter Property="FontSize"                 Value="13"/>
             <Setter Property="FontFamily"               Value="Segoe UI"/>
-            <Setter Property="GridLinesVisibility"      Value="Horizontal"/>
+            <Setter Property="GridLinesVisibility"      Value="None"/>
             <Setter Property="HorizontalGridLinesBrush" Value="#e0f0ec"/>
             <Setter Property="SelectionMode"            Value="Single"/>
             <Setter Property="SelectionUnit"            Value="FullRow"/>
@@ -63,7 +63,8 @@
         </Style>
 
         <Style TargetType="DataGridRow">
-            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="BorderThickness" Value="0 0 0 1"/>
+            <Setter Property="BorderBrush"     Value="#e0f0ec"/>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="#d0ede7"/>
@@ -762,8 +763,6 @@
                     </DataGrid>
                 </Grid>
             </TabItem>
-
-            <!-- ══ ОСТАТКИ ══════════════════════════════════════ -->
             <TabItem Header="Остатки на складе">
                 <Grid Margin="24 16 24 16">
                     <Grid.RowDefinitions>
@@ -776,26 +775,31 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBox Grid.Column="0" Style="{StaticResource SearchBox}"
-                                 HorizontalAlignment="Left"
-                                 Text="{Binding StockBalanceVM.SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                     HorizontalAlignment="Left"
+                     Text="{Binding StockBalanceVM.SearchText, UpdateSourceTrigger=PropertyChanged}"/>
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <!-- Add button bound to StockBalanceVM.AddCommand -->
                             <Button Style="{StaticResource BtnAdd}" Command="{Binding StockBalanceVM.AddCommand}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="⊕" FontSize="15" Margin="0 0 6 0" VerticalAlignment="Center"/>
                                     <TextBlock Text="Добавить" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
+
+                            <!-- Edit button bound to StockBalanceVM.EditCommand with selected item parameter -->
                             <Button Style="{StaticResource BtnEdit}" Margin="8 0"
-                                    Command="{Binding StockBalanceVM.EditCommand}"
-                                    CommandParameter="{Binding SelectedItem, ElementName=StockGrid}">
+                        Command="{Binding StockBalanceVM.EditCommand}"
+                        CommandParameter="{Binding SelectedItem, ElementName=StockGrid}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="✎" FontSize="14" Margin="0 0 6 0" VerticalAlignment="Center"/>
                                     <TextBlock Text="Изменить" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
+
+                            <!-- Delete button bound to StockBalanceVM.DeleteCommand with selected item parameter -->
                             <Button Style="{StaticResource BtnDelete}"
-                                    Command="{Binding StockBalanceVM.DeleteCommand}"
-                                    CommandParameter="{Binding SelectedItem, ElementName=StockGrid}">
+                        Command="{Binding StockBalanceVM.DeleteCommand}"
+                        CommandParameter="{Binding SelectedItem, ElementName=StockGrid}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="🗑" FontSize="13" Margin="0 0 6 0" VerticalAlignment="Center"/>
                                     <TextBlock Text="Удалить" VerticalAlignment="Center"/>
@@ -803,16 +807,17 @@
                             </Button>
                         </StackPanel>
                     </Grid>
+
                     <DataGrid x:Name="StockGrid"
-                              ItemsSource="{Binding StockBalanceVM.View}"
-                              LoadingRow="DataGrid_LoadingRow"
-                              UnloadingRow="DataGrid_UnloadingRow">
+                  ItemsSource="{Binding StockBalanceVM.View}"
+                  LoadingRow="DataGrid_LoadingRow"
+                  UnloadingRow="DataGrid_UnloadingRow">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="№" Width="56">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Style="{StaticResource RowNumStyle}"
-                                                   Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
+                                       Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>

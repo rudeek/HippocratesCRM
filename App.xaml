@@ -47,7 +47,8 @@
                 <Label Content="Адрес" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"/>
                 <Label Content="Зарплата * (> 0)" Margin="0,12,0,0"/>
-                <TextBox Text="{Binding Salary, UpdateSourceTrigger=PropertyChanged}"/>
+                <!-- attached Price_PreviewTextInput so decimal separator is handled correctly -->
+                <TextBox Text="{Binding Salary, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="Price_PreviewTextInput"/>
                 <Label Content="Должность *" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Position, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="OnlyLetters_PreviewTextInput"/>
             </StackPanel>
@@ -60,9 +61,15 @@
                 <TextBox Text="{Binding Entity.Name, UpdateSourceTrigger=PropertyChanged}"/>
                 <Label Content="Производитель *" Margin="0,12,0,0"/>
                 <ComboBox ItemsSource="{Binding Manufacturers}"
-                          DisplayMemberPath="Name"
                           SelectedValuePath="Id"
-                          SelectedValue="{Binding Entity.ManufacturerId, Mode=TwoWay}"/>
+                          DisplayMemberPath="Name"
+                          SelectedValue="{Binding Entity.ManufacturerId, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" Padding="2 4"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
                 <Label Content="Дата производства *" Margin="0,12,0,0"/>
                 <DatePicker SelectedDate="{Binding Entity.ProductionDate, Mode=TwoWay}"/>
                 <Label Content="Срок годности * (позже даты производства)" Margin="0,12,0,0"/>
@@ -103,12 +110,24 @@
                 <ComboBox ItemsSource="{Binding Pharmacies}"
                           DisplayMemberPath="Address"
                           SelectedValuePath="Id"
-                          SelectedValue="{Binding Entity.PharmacyId, Mode=TwoWay}"/>
+                          SelectedValue="{Binding Entity.PharmacyId, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Address}" Padding="2 4"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
                 <Label Content="Сотрудник *" Margin="0,12,0,0"/>
                 <ComboBox ItemsSource="{Binding Employees}"
                           DisplayMemberPath="FullName"
                           SelectedValuePath="Id"
-                          SelectedValue="{Binding Entity.EmployeeId, Mode=TwoWay}"/>
+                          SelectedValue="{Binding Entity.EmployeeId, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding FullName}" Padding="2 4"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </StackPanel>
         </DataTemplate>
 
@@ -121,6 +140,7 @@
                           SelectedValuePath="Id"
                           SelectedItem="{Binding SelectedReceipt, Mode=TwoWay}"/>
                 <Label Content="Товар * (только из склада выбранной аптеки)" Margin="0,12,0,0"/>
+                
                 <ComboBox ItemsSource="{Binding AvailableProducts}"
                           DisplayMemberPath="Name"
                           SelectedValuePath="Id"

@@ -27,6 +27,7 @@
     <Resource Include="edit.ico" />
     <Resource Include="icon.ico" />
     <Resource Include="logo.jpg" />
+    <Resource Include="logoWhite.png" />
   </ItemGroup>
 
 </Project>
