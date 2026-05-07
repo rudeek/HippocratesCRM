@@ -289,12 +289,12 @@ namespace MyHippocrates.Data
             {
                 using var cmd = cn.CreateCommand();
                 cmd.Transaction = tx;
-                cmd.CommandText = "CALL sp_add_receipt(@p_receipt_number, @p_pharmacy_id, @p_employee_id, @p_date, @p_time, @p_id)";
-                cmd.Parameters.AddWithValue("p_receipt_number", r.ReceiptNumber);
+                // Номер чека теперь генерируется автоматически в процедуре
+                cmd.CommandText = "CALL sp_add_receipt(@p_pharmacy_id, @p_employee_id, @p_date, @p_id)";
                 cmd.Parameters.AddWithValue("p_pharmacy_id", r.PharmacyId);
                 cmd.Parameters.AddWithValue("p_employee_id", r.EmployeeId);
-                cmd.Parameters.Add(new NpgsqlParameter("p_date", NpgsqlDbType.Date) { Value = r.Date.Date });
-                cmd.Parameters.AddWithValue("p_time", r.Time);
+                cmd.Parameters.Add(new NpgsqlParameter("p_date", NpgsqlDbType.Date)
+                { Value = r.Date.Date });
                 var pOut = new NpgsqlParameter("p_id", NpgsqlDbType.Integer)
                 { Direction = ParameterDirection.InputOutput, Value = 0 };
                 cmd.Parameters.Add(pOut);
@@ -314,13 +314,12 @@ namespace MyHippocrates.Data
             {
                 using var cmd = cn.CreateCommand();
                 cmd.Transaction = tx;
-                cmd.CommandText = "CALL sp_update_receipt(@p_id, @p_receipt_number, @p_pharmacy_id, @p_employee_id, @p_date, @p_time)";
+                cmd.CommandText = "CALL sp_update_receipt(@p_id, @p_pharmacy_id, @p_employee_id, @p_date)";
                 cmd.Parameters.AddWithValue("p_id", r.Id);
-                cmd.Parameters.AddWithValue("p_receipt_number", r.ReceiptNumber);
                 cmd.Parameters.AddWithValue("p_pharmacy_id", r.PharmacyId);
                 cmd.Parameters.AddWithValue("p_employee_id", r.EmployeeId);
-                cmd.Parameters.Add(new NpgsqlParameter("p_date", NpgsqlDbType.Date) { Value = r.Date.Date });
-                cmd.Parameters.AddWithValue("p_time", r.Time);
+                cmd.Parameters.Add(new NpgsqlParameter("p_date", NpgsqlDbType.Date)
+                { Value = r.Date.Date });
                 cmd.ExecuteNonQuery();
                 tx.Commit();
             }

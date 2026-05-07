@@ -198,7 +198,7 @@
             <Setter Property="Foreground"      Value="#012920"/>
             <Setter Property="BorderBrush"     Value="#a8d5cb"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding"         Value="34 9 12 9"/>
+            <Setter Property="Padding"         Value="17 9 12 9"/>
             <Setter Property="FontSize"        Value="13"/>
             <Setter Property="FontFamily"      Value="Segoe UI"/>
             <Setter Property="Width"           Value="280"/>
@@ -763,30 +763,33 @@
                     </DataGrid>
                 </Grid>
             </TabItem>
+            <!-- ══ ОСТАТКИ ══════════════════════════════════════════ -->
             <TabItem Header="Остатки на складе">
                 <Grid Margin="24 16 24 16">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
+
                     <Grid Grid.Row="0" Margin="0 0 0 14">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox Grid.Column="0" Style="{StaticResource SearchBox}"
+
+                        <TextBox Grid.Column="0"
+                     Style="{StaticResource SearchBox}"
                      HorizontalAlignment="Left"
                      Text="{Binding StockBalanceVM.SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <!-- Add button bound to StockBalanceVM.AddCommand -->
-                            <Button Style="{StaticResource BtnAdd}" Command="{Binding StockBalanceVM.AddCommand}">
+                            <Button Style="{StaticResource BtnAdd}"
+                        Command="{Binding StockBalanceVM.AddCommand}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="⊕" FontSize="15" Margin="0 0 6 0" VerticalAlignment="Center"/>
                                     <TextBlock Text="Добавить" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
-
-                            <!-- Edit button bound to StockBalanceVM.EditCommand with selected item parameter -->
                             <Button Style="{StaticResource BtnEdit}" Margin="8 0"
                         Command="{Binding StockBalanceVM.EditCommand}"
                         CommandParameter="{Binding SelectedItem, ElementName=StockGrid}">
@@ -795,8 +798,6 @@
                                     <TextBlock Text="Изменить" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
-
-                            <!-- Delete button bound to StockBalanceVM.DeleteCommand with selected item parameter -->
                             <Button Style="{StaticResource BtnDelete}"
                         Command="{Binding StockBalanceVM.DeleteCommand}"
                         CommandParameter="{Binding SelectedItem, ElementName=StockGrid}">
@@ -808,7 +809,7 @@
                         </StackPanel>
                     </Grid>
 
-                    <DataGrid x:Name="StockGrid"
+                    <DataGrid Grid.Row="1" x:Name="StockGrid"
                   ItemsSource="{Binding StockBalanceVM.View}"
                   LoadingRow="DataGrid_LoadingRow"
                   UnloadingRow="DataGrid_UnloadingRow">

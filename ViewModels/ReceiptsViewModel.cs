@@ -70,17 +70,19 @@ namespace MyHippocrates.ViewModels
 
         private void Add()
         {
-            var entity = new Receipt { Date = DateTime.Today, Time = DateTime.UtcNow.TimeOfDay };
+            var entity = new Receipt { Date = DateTime.Today };
             var vm = new ReceiptEditorViewModel(entity, _pharmacies, _employees);
             var dlg = new Views.EditDialog(vm, _ctx, isNew: true)
-            { Owner = Application.Current.MainWindow, Title = "Добавить чек", Icon = new BitmapImage(new Uri("pack://application:,,,/add.ico")) };
+            {
+                Owner = Application.Current.MainWindow,
+                Title = "Добавить чек",
+                Icon = new BitmapImage(new Uri("pack://application:,,,/add.ico"))
+            };
             dlg.TxtTitle.Text = "Добавление записи";
             if (dlg.ShowDialog() == true)
             {
-                entity.Pharmacy = _pharmacies.FirstOrDefault(p => p.Id == entity.PharmacyId);
-                entity.Employee = _employees.FirstOrDefault(e => e.Id == entity.EmployeeId);
-                _receipts.Add(entity);
-                View.Refresh();
+                // Перезагружаем чтобы получить сгенерированный номер
+                Reload();
             }
         }
 
@@ -99,25 +101,14 @@ namespace MyHippocrates.ViewModels
             };
             var vm = new ReceiptEditorViewModel(copy, _pharmacies, _employees);
             var dlg = new Views.EditDialog(vm, _ctx, isNew: false)
-            { Owner = Application.Current.MainWindow, Title = "Редактировать чек", Icon = new BitmapImage(new Uri("pack://application:,,,/edit.ico")) };
+            {
+                Owner = Application.Current.MainWindow,
+                Title = "Редактировать чек",
+                Icon = new BitmapImage(new Uri("pack://application:,,,/edit.ico"))
+            };
             if (dlg.ShowDialog() == true)
             {
-                r.ReceiptNumber = copy.ReceiptNumber;
-                r.PharmacyId = copy.PharmacyId;
-                r.EmployeeId = copy.EmployeeId;
-                r.TotalAmount = copy.TotalAmount;
-                r.Date = copy.Date;
-                r.Time = copy.Time;
-                r.Pharmacy = _pharmacies.FirstOrDefault(p => p.Id == copy.PharmacyId);
-                r.Employee = _employees.FirstOrDefault(e => e.Id == copy.EmployeeId);
-
-                var idx = _receipts.IndexOf(r);
-                if (idx >= 0)
-                {
-                    _receipts.RemoveAt(idx);
-                    _receipts.Insert(idx, r);
-                }
-                View.Refresh();
+                Reload();
             }
         }
 

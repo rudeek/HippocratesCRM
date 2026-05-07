@@ -39,6 +39,8 @@ namespace MyHippocrates.ViewModels
             Entity = entity;
             Pharmacies = pharmacies;
             Employees = employees;
+            if (Entity.Date == default)
+                Entity.Date = DateTime.Today;
         }
     }
 

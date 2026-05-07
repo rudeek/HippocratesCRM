@@ -104,13 +104,11 @@
         <!-- RECEIPT -->
         <DataTemplate DataType="{x:Type vm:ReceiptEditorViewModel}">
             <StackPanel Width="440">
-                <Label Content="Номер чека *"/>
-                <TextBox Text="{Binding Entity.ReceiptNumber, UpdateSourceTrigger=PropertyChanged}"/>
                 <Label Content="Аптека *" Margin="0,12,0,0"/>
                 <ComboBox ItemsSource="{Binding Pharmacies}"
-                          DisplayMemberPath="Address"
-                          SelectedValuePath="Id"
-                          SelectedValue="{Binding Entity.PharmacyId, Mode=TwoWay}">
+                  DisplayMemberPath="Address"
+                  SelectedValuePath="Id"
+                  SelectedValue="{Binding Entity.PharmacyId, Mode=TwoWay}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Address}" Padding="2 4"/>
@@ -119,9 +117,9 @@
                 </ComboBox>
                 <Label Content="Сотрудник *" Margin="0,12,0,0"/>
                 <ComboBox ItemsSource="{Binding Employees}"
-                          DisplayMemberPath="FullName"
-                          SelectedValuePath="Id"
-                          SelectedValue="{Binding Entity.EmployeeId, Mode=TwoWay}">
+                  DisplayMemberPath="FullName"
+                  SelectedValuePath="Id"
+                  SelectedValue="{Binding Entity.EmployeeId, Mode=TwoWay}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding FullName}" Padding="2 4"/>
@@ -155,18 +153,29 @@
         </DataTemplate>
 
         <!-- STOCK BALANCE -->
+        <!-- STOCK BALANCE -->
         <DataTemplate DataType="{x:Type vm:StockBalanceEditorViewModel}">
             <StackPanel Width="440">
                 <Label Content="Аптека *"/>
                 <ComboBox ItemsSource="{Binding Pharmacies}"
-                          DisplayMemberPath="Address"
-                          SelectedValuePath="Id"
-                          SelectedValue="{Binding Entity.PharmacyId, Mode=TwoWay}"/>
+                  SelectedValuePath="Id"
+                  SelectedValue="{Binding Entity.PharmacyId, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Address}" Padding="2 4"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
                 <Label Content="Товар *" Margin="0,12,0,0"/>
                 <ComboBox ItemsSource="{Binding Products}"
-                          DisplayMemberPath="Name"
-                          SelectedValuePath="Id"
-                          SelectedValue="{Binding Entity.ProductId, Mode=TwoWay}"/>
+                  SelectedValuePath="Id"
+                  SelectedValue="{Binding Entity.ProductId, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" Padding="2 4"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
                 <Label Content="Остаток (≥ 0)" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Entity.RemainingQty, UpdateSourceTrigger=PropertyChanged}"/>
             </StackPanel>

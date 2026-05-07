@@ -1508,3 +1508,68 @@ WHERE sb.remaining_qty < 20
 ORDER BY sb.remaining_qty;
 
 
+
+
+-- Пересоздаём таблицу receipt
+ALTER TABLE receipt DROP CONSTRAINT receipt_receipt_number_key;
+ALTER TABLE receipt ADD CONSTRAINT receipt_number_date_unique 
+    UNIQUE (receipt_number, date);
+
+-- Обновляем процедуру добавления чека
+CREATE OR REPLACE PROCEDURE sp_add_receipt(
+    p_pharmacy_id INT, p_employee_id INT,
+    p_date DATE,
+    OUT p_id INT
+)
+LANGUAGE plpgsql AS $$
+DECLARE
+    v_number INT;
+BEGIN
+    -- Автоматически генерируем номер чека для данной даты
+    SELECT COALESCE(MAX(receipt_number), 0) + 1
+    INTO v_number
+    FROM receipt
+    WHERE date = p_date;
+
+    INSERT INTO receipt(receipt_number, pharmacy_id, employee_id, total_amount, date, time)
+    VALUES (v_number, p_pharmacy_id, p_employee_id, 0, p_date, CURRENT_TIME)
+    RETURNING receipt_id INTO p_id;
+END;
+$$;
+
+-- Обновляем процедуру изменения чека
+CREATE OR REPLACE PROCEDURE sp_update_receipt(
+    p_id INT, p_pharmacy_id INT,
+    p_employee_id INT, p_date DATE
+)
+LANGUAGE plpgsql AS $$
+DECLARE
+    v_number INT;
+    v_old_date DATE;
+BEGIN
+    SELECT date INTO v_old_date FROM receipt WHERE receipt_id = p_id;
+
+    -- Если дата изменилась — пересчитываем номер
+    IF v_old_date != p_date THEN
+        SELECT COALESCE(MAX(receipt_number), 0) + 1
+        INTO v_number
+        FROM receipt
+        WHERE date = p_date;
+    ELSE
+        SELECT receipt_number INTO v_number
+        FROM receipt WHERE receipt_id = p_id;
+    END IF;
+
+    UPDATE receipt
+    SET pharmacy_id = p_pharmacy_id,
+        employee_id = p_employee_id,
+        date        = p_date,
+        receipt_number = v_number
+    WHERE receipt_id = p_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Чек с id=% не найден', p_id;
+    END IF;
+END;
+$$;
+

@@ -79,6 +79,9 @@ namespace MyHippocrates.Models
         [Column("date")] public DateTime Date { get; set; } = DateTime.UtcNow;
         [Column("time")] public TimeSpan Time { get; set; } = DateTime.UtcNow.TimeOfDay;
 
+        // Вычисляемое свойство для отображения
+        public string DisplayId => $"{Date:dd.MM.yyyy}-{ReceiptNumber:D3}";
+
         public Pharmacy? Pharmacy { get; set; }
         public Employee? Employee { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();

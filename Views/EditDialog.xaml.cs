@@ -179,7 +179,6 @@ namespace MyHippocrates.Views
 
         private static string? ValidateReceipt(Receipt r)
         {
-            if (r.ReceiptNumber <= 0) return "Номер чека должен быть больше нуля.";
             if (r.PharmacyId == 0) return "Выберите аптеку.";
             if (r.EmployeeId == 0) return "Выберите сотрудника.";
             return null;

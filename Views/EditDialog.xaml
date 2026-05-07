@@ -23,10 +23,11 @@
             <Setter Property="Foreground"      Value="#0d2e28"/>
             <Setter Property="BorderBrush"     Value="#a8d5cb"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding"         Value="10 8"/>
+            <Setter Property="Padding"         Value="5 2"/>
             <Setter Property="FontSize"        Value="13"/>
             <Setter Property="FontFamily"      Value="Segoe UI"/>
             <Setter Property="CaretBrush"      Value="#035b4b"/>
+            <Setter Property="Height"          Value="38"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
@@ -64,8 +65,9 @@
             <Setter Property="Foreground"      Value="#0d2e28"/>
             <Setter Property="BorderBrush"     Value="#a8d5cb"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding"         Value="10 7"/>
+            <Setter Property="Padding"         Value="2 2"/>
             <Setter Property="FontSize"        Value="13"/>
+            <Setter Property="Height"          Value="38"/>
             <Setter Property="FontFamily"      Value="Segoe UI"/>
             <Setter Property="Template">
                 <Setter.Value>
