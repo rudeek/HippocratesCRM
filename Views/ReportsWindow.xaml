@@ -5,14 +5,27 @@
         Width="1280" Height="860" 
         WindowState="Maximized" 
         WindowStartupLocation="CenterOwner" 
-        Background="#FAFAFA" 
+        Background="#FFFFFF" 
         Icon="/icon.ico">
 
     <Window.Resources>
-        <!-- ── Кнопка-вкладка отчёта (светлая тема) ─────────────────────────── -->
+        <!-- ══ Цвета (синхронизированы с MainWindow) ═════════════════════ -->
+        <SolidColorBrush x:Key="AccentGreen"     Color="#035b4b"/>
+        <SolidColorBrush x:Key="AccentGreenHov"  Color="#024a3d"/>
+        <SolidColorBrush x:Key="TextDark"        Color="#012920"/>
+        <SolidColorBrush x:Key="TextMid"         Color="#2d6b5a"/>
+        <SolidColorBrush x:Key="TextLight"       Color="#5a9b88"/>
+        <SolidColorBrush x:Key="BorderLight"     Color="#cce3de"/>
+        <SolidColorBrush x:Key="BorderSubtle"    Color="#e0f0ec"/>
+        <SolidColorBrush x:Key="BgRowAlt"        Color="#f4fbf9"/>
+        <SolidColorBrush x:Key="BgSelected"      Color="#e5f4ef"/>
+        <SolidColorBrush x:Key="BgHover"         Color="#e8f5f1"/>
+        <SolidColorBrush x:Key="BgFilter"        Color="#edf8f5"/>
+
+        <!-- ── Кнопка-вкладка отчёта ───────────────────────────────────── -->
         <Style x:Key="TabBtn" TargetType="RadioButton">
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="#424242"/>
+            <Setter Property="Foreground" Value="{StaticResource TextMid}"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="Normal"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -23,18 +36,18 @@
                     <ControlTemplate TargetType="RadioButton">
                         <Border x:Name="Bd" Background="{TemplateBinding Background}" 
                                 Padding="{TemplateBinding Padding}" 
-                                BorderBrush="#2E7D32" BorderThickness="0 0 0 3">
+                                BorderBrush="{StaticResource AccentGreen}" BorderThickness="0 0 0 3">
                             <ContentPresenter/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#E8F5E9"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource BgSelected}"/>
                                 <Setter TargetName="Bd" Property="BorderThickness" Value="0 0 0 3"/>
-                                <Setter Property="Foreground" Value="#1B5E20"/>
+                                <Setter Property="Foreground" Value="{StaticResource AccentGreen}"/>
                                 <Setter Property="FontWeight" Value="SemiBold"/>
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#C8E6C9"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource BgHover}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -42,9 +55,9 @@
             </Setter>
         </Style>
 
-        <!-- ── Кнопка действия (зелёная) ──────────────────────────────── -->
+        <!-- ── Кнопка действия (зелёная заливка) ───────────────────────── -->
         <Style x:Key="ActionBtn" TargetType="Button">
-            <Setter Property="Background" Value="#2E7D32"/>
+            <Setter Property="Background" Value="{StaticResource AccentGreen}"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="12"/>
@@ -54,16 +67,16 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#388E3C"/>
+                                <Setter Property="Background" Value="{StaticResource AccentGreenHov}"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Background" Value="#A5D6A7"/>
-                                <Setter Property="Foreground" Value="#757575"/>
+                                <Setter Property="Background" Value="#9dccc0"/>
+                                <Setter Property="Foreground" Value="{StaticResource TextLight}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -71,7 +84,7 @@
             </Setter>
         </Style>
 
-        <!-- ── Синяя кнопка ─────────────────────────────────── -->
+        <!-- ── Синяя кнопка (вторичный акцент) ────────────────────────── -->
         <Style x:Key="BlueBtn" TargetType="Button" BasedOn="{StaticResource ActionBtn}">
             <Setter Property="Background" Value="#1565C0"/>
             <Style.Triggers>
@@ -81,43 +94,50 @@
             </Style.Triggers>
         </Style>
 
-        <!-- ── Label фильтра (тёмный текст для контраста) ─────────────────────────────────── -->
+        <!-- ── Label фильтра ──────────────────────────────────────────── -->
         <Style x:Key="FilterLabel" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#424242"/>
+            <Setter Property="Foreground" Value="{StaticResource TextMid}"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Margin" Value="0 0 0 4"/>
         </Style>
 
-        <!-- ── ComboBox фильтра (белый фон, тёмный текст) ──────────────────────────────── -->
+        <!-- ══ ComboBox фильтра — ЕДИНАЯ ВЫСОТА ═════════════════════ -->
         <Style x:Key="FilterCombo" TargetType="ComboBox">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="#212121"/>
-            <Setter Property="BorderBrush" Value="#2E7D32"/>
+            <Setter Property="Background" Value="{StaticResource BgFilter}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextDark}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderLight}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="8 6"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="MinWidth" Value="180"/>
+
+            <!-- ГЛАВНОЕ ИСПРАВЛЕНИЕ: Фиксируем высоту и центрируем текст -->
+            <Setter Property="MinHeight" Value="32"/>
+            <Setter Property="Padding" Value="8 0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
                         <Grid>
                             <ToggleButton x:Name="ToggleButton" 
-                                        Background="{TemplateBinding Background}"
-                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                        IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                                        ClickMode="Press">
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                ClickMode="Press">
                                 <ToggleButton.Style>
                                     <Style TargetType="ToggleButton">
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="ToggleButton">
                                                     <Border Background="{TemplateBinding Background}" 
-                                                            BorderBrush="{TemplateBinding BorderBrush}" 
-                                                            BorderThickness="{TemplateBinding BorderThickness}">
+                                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="4">
                                                         <Path x:Name="Arrow" HorizontalAlignment="Right" VerticalAlignment="Center" 
-                                                              Margin="0,0,8,0" Data="M 0 0 L 4 4 L 8 0 Z" Fill="#424242"/>
+                                                      Margin="0,0,8,0" Data="M 0 0 L 4 4 L 8 0 Z" Fill="{StaticResource TextLight}"/>
                                                     </Border>
                                                 </ControlTemplate>
                                             </Setter.Value>
@@ -125,61 +145,160 @@
                                     </Style>
                                 </ToggleButton.Style>
                             </ToggleButton>
+
+                            <!-- Важно: VerticalAlignment привязан к VerticalContentAlignment контрола -->
                             <ContentPresenter x:Name="ContentSite" 
-                                            Content="{TemplateBinding SelectionBoxItem}"
-                                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
-                                            Margin="8,2,28,2"
-                                            VerticalAlignment="Center"
-                                            TextElement.Foreground="{TemplateBinding Foreground}"/>
+                                    Content="{TemplateBinding SelectionBoxItem}"
+                                    ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                    Margin="8,0,28,0"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                    HorizontalAlignment="Left"
+                                    TextElement.Foreground="{TemplateBinding Foreground}"/>
+
                             <Popup x:Name="Popup" 
-                                   Placement="Bottom" 
-                                   IsOpen="{TemplateBinding IsDropDownOpen}" 
-                                   AllowsTransparency="True" 
-                                   Focusable="False" 
-                                   PopupAnimation="Slide">
+                           Placement="Bottom" 
+                           IsOpen="{TemplateBinding IsDropDownOpen}" 
+                           AllowsTransparency="True" 
+                           Focusable="False" 
+                           PopupAnimation="Slide">
                                 <Border x:Name="DropDownBorder" 
-                                        Background="White" 
-                                        BorderBrush="#2E7D32" 
-                                        BorderThickness="1" 
-                                        CornerRadius="4">
+                                Background="White" 
+                                BorderBrush="{StaticResource BorderLight}" 
+                                BorderThickness="1" 
+                                CornerRadius="4">
                                     <ScrollViewer MaxHeight="200">
                                         <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
                                     </ScrollViewer>
                                 </Border>
                             </Popup>
                         </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="{StaticResource AccentGreen}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
 
-        <!-- ── DatePicker фильтра (белый фон, тёмный текст) ────────────────────────────── -->
+        <!-- ══ DatePicker фильтра — ЕДИНАЯ ВЫСОТА ═══════════════════ -->
         <Style x:Key="FilterDate" TargetType="DatePicker">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="#212121"/>
-            <Setter Property="BorderBrush" Value="#2E7D32"/>
+            <Setter Property="Background" Value="{StaticResource BgFilter}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextDark}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderLight}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="MinWidth" Value="130"/>
-            <Setter Property="Padding" Value="4"/>
+
+            <!-- ГЛАВНОЕ ИСПРАВЛЕНИЕ -->
+            <Setter Property="MinHeight" Value="32"/>
+            <Setter Property="Padding" Value="8 0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DatePicker">
+                        <Border x:Name="Border"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="4"
+                        Padding="1">
+                            <Grid>
+                                <DatePickerTextBox x:Name="PART_TextBox"
+                                           Background="Transparent"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           Padding="8,0,28,0"
+                                           VerticalAlignment="Center"
+                                           HorizontalAlignment="Stretch"
+                                           Focusable="True"/>
+
+                                <ToggleButton x:Name="PART_Button"
+                                      Content="📅"
+                                      FontSize="10"
+                                      Foreground="{StaticResource TextLight}"
+                                      Background="Transparent"
+                                      BorderThickness="0"
+                                      HorizontalAlignment="Right"
+                                      Width="24"
+                                      IsTabStop="False"
+                                      Cursor="Hand"
+                                      VerticalAlignment="Center"/>
+
+                                <Popup x:Name="PART_Popup"
+                               AllowsTransparency="True"
+                               Placement="Bottom"
+                               PlacementTarget="{Binding ElementName=PART_TextBox}"
+                               StaysOpen="False"
+                               IsOpen="{Binding IsChecked, ElementName=PART_Button}">
+                                    <Border Background="White"
+                                    BorderBrush="{StaticResource BorderLight}"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    Margin="0,2,0,0">
+                                        <Calendar x:Name="PART_Calendar"
+                                          Background="White"
+                                          Foreground="{StaticResource TextDark}"
+                                          FontSize="12"
+                                          Margin="4"/>
+                                    </Border>
+                                </Popup>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource AccentGreen}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource AccentGreen}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
-        <!-- ── TextBox фильтра (белый фон, тёмный текст) ───────────────────────────────── -->
+        <!-- ══ TextBox фильтра — ЕДИНАЯ ВЫСОТА ══════════════════════ -->
         <Style x:Key="FilterBox" TargetType="TextBox">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="#212121"/>
-            <Setter Property="BorderBrush" Value="#2E7D32"/>
+            <Setter Property="Background" Value="{StaticResource BgFilter}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextDark}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BorderLight}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="8 6"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="MinWidth" Value="80"/>
-            <Setter Property="CaretBrush" Value="#212121"/>
+            <Setter Property="CaretBrush" Value="{StaticResource AccentGreen}"/>
+
+            <!-- ГЛАВНОЕ ИСПРАВЛЕНИЕ -->
+            <Setter Property="MinHeight" Value="32"/>
+            <Setter Property="Padding" Value="8 0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="4">
+                            <ScrollViewer x:Name="PART_ContentHost" 
+                                  Margin="{TemplateBinding Padding}"
+                                  VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="{StaticResource AccentGreen}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
 
     <DockPanel>
         <!-- ══ ШАПКА ══════════════════════════════════════════════ -->
-        <Border DockPanel.Dock="Top" Background="White" BorderBrush="#2E7D32" BorderThickness="0 0 0 1" Padding="22 14">
+        <Border DockPanel.Dock="Top" Background="White" BorderBrush="{StaticResource BorderLight}" BorderThickness="0 0 0 1" Padding="22 14">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -188,12 +307,11 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Background="#E8F5E9" CornerRadius="8" Padding="10 6" Margin="0 0 14 0" BorderBrush="#2E7D32" BorderThickness="1">
-                        <TextBlock Text="📄" FontSize="22"/>
-                    </Border>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="HIPPOCRATES" FontSize="20" FontWeight="Bold" Foreground="#1B5E20"/>
-                        <TextBlock Text="Модуль отчётов" FontSize="11" Foreground="#616161"/>
+                        <Image Source="/logo.jpg"
+       Height="60"
+       RenderOptions.BitmapScalingMode="HighQuality"
+       VerticalAlignment="Center"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -205,7 +323,7 @@
         </Border>
 
         <!-- ══ ВКЛАДКИ ВЫБОРА ОТЧЁТА ══════════════════════════════ -->
-        <Border DockPanel.Dock="Top" Background="#F5F5F5" BorderBrush="#C8E6C9" BorderThickness="0 0 0 1">
+        <Border DockPanel.Dock="Top" Background="White" BorderBrush="{StaticResource BorderLight}" BorderThickness="0 0 0 1">
             <StackPanel Orientation="Horizontal">
                 <RadioButton x:Name="RbSales" Content="📊 Продажи за период" Style="{StaticResource TabBtn}" IsChecked="True" Checked="ReportType_Changed"/>
                 <RadioButton x:Name="RbProducts" Content="💊 Анализ товаров" Style="{StaticResource TabBtn}" Checked="ReportType_Changed"/>
@@ -214,7 +332,7 @@
         </Border>
 
         <!-- ══ ПАНЕЛЬ ФИЛЬТРОВ ═════════════════════════════════════ -->
-        <Border DockPanel.Dock="Top" Background="White" BorderBrush="#C8E6C9" BorderThickness="0 0 0 1" Padding="16 12">
+        <Border DockPanel.Dock="Top" Background="White" BorderBrush="{StaticResource BorderLight}" BorderThickness="0 0 0 1" Padding="16 12">
             <StackPanel>
                 <!-- ── Фильтры: Продажи ───────────────────────── -->
                 <StackPanel x:Name="PanelSalesFilters" Orientation="Horizontal">
@@ -286,16 +404,16 @@
         </Border>
 
         <!-- ══ ОБЛАСТЬ ПРОСМОТРА ОТЧЁТА ═══════════════════════════ -->
-        <Border Background="White" Padding="0" BorderBrush="#E0E0E0" BorderThickness="0 1 0 0">
+        <Border Background="White" Padding="0" BorderBrush="{StaticResource BorderSubtle}" BorderThickness="0 1 0 0">
             <Grid>
                 <!-- Placeholder пока отчёт не сформирован -->
                 <StackPanel x:Name="PlaceholderPanel" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock Text="📄" FontSize="64" HorizontalAlignment="Center" Foreground="#BDBDBD"/>
-                    <TextBlock Text="Выберите параметры и нажмите «Сформировать»" Foreground="#757575" FontSize="16" HorizontalAlignment="Center" Margin="0 12 0 0"/>
+                    <TextBlock Text="📄" FontSize="64" HorizontalAlignment="Center" Foreground="{StaticResource BorderLight}"/>
+                    <TextBlock Text="Выберите параметры и нажмите «Сформировать»" Foreground="{StaticResource TextMid}" FontSize="16" HorizontalAlignment="Center" Margin="0 12 0 0"/>
                 </StackPanel>
 
                 <!-- FlowDocumentReader -->
-                <FlowDocumentReader x:Name="DocReader" Visibility="Collapsed" Background="White" ViewingMode="Scroll" Foreground="#212121"/>
+                <FlowDocumentReader x:Name="DocReader" Visibility="Collapsed" Background="White" ViewingMode="Scroll" Foreground="{StaticResource TextDark}"/>
             </Grid>
         </Border>
     </DockPanel>

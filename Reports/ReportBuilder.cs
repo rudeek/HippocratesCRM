@@ -13,20 +13,24 @@ namespace MyHippocrates.Reports
     /// <summary>
     /// Строит FlowDocument-отчёты для трёх типов аналитики.
     /// Все стили задаются программно — никаких внешних словарей не нужно.
+    /// Цвета синхронизированы с MainWindow.xaml (#035b4b тема)
     /// </summary>
     public static class ReportBuilder
     {
-        // ── Цветовая палитра ─────────────────────────────────────
-        private static readonly SolidColorBrush HeaderBg = new(Color.FromRgb(27, 94, 32));
-        private static readonly SolidColorBrush SubHeaderBg = new(Color.FromRgb(46, 125, 50));
-        private static readonly SolidColorBrush TableHead = new(Color.FromRgb(232, 245, 233));
-        private static readonly SolidColorBrush AltRow = new(Color.FromRgb(247, 251, 247));
-        private static readonly SolidColorBrush WarnBg = new(Color.FromRgb(255, 243, 224));
-        private static readonly SolidColorBrush DangerBg = new(Color.FromRgb(255, 205, 210));
-        private static readonly SolidColorBrush TextDark = new(Color.FromRgb(28, 43, 28));
-        private static readonly SolidColorBrush TextGray = new(Color.FromRgb(96, 125, 139));
+        // ── Цветовая палитра (единая с MainWindow) ─────────────────
+        private static readonly SolidColorBrush HeaderBg = new(Color.FromRgb(3, 91, 75));      // #035b4b
+        private static readonly SolidColorBrush SubHeaderBg = new(Color.FromRgb(2, 74, 61));    // #024a3d
+        private static readonly SolidColorBrush TableHead = new(Color.FromRgb(3, 91, 75));      // #035b4b (белый текст)
+        private static readonly SolidColorBrush AltRow = new(Color.FromRgb(244, 251, 249));     // #f4fbf9
+        private static readonly SolidColorBrush WarnBg = new(Color.FromRgb(255, 243, 224));     // #FFF3E0 (оранжевый — оставляем для видимости)
+        private static readonly SolidColorBrush DangerBg = new(Color.FromRgb(255, 205, 210));   // #FFCDD2 (красный — оставляем для видимости)
+        private static readonly SolidColorBrush TextDark = new(Color.FromRgb(1, 41, 32));       // #012920
+        private static readonly SolidColorBrush TextMid = new(Color.FromRgb(45, 107, 90));      // #2d6b5a
+        private static readonly SolidColorBrush TextLight = new(Color.FromRgb(90, 155, 136));   // #5a9b88
+        private static readonly SolidColorBrush TextOnDark = new(Color.FromRgb(204, 227, 222)); // #cce3de (текст на тёмном фоне)
         private static readonly SolidColorBrush White = Brushes.White;
-        private static readonly SolidColorBrush BorderBrush = new(Color.FromRgb(200, 222, 200));
+        private static readonly SolidColorBrush BorderBrush = new(Color.FromRgb(204, 227, 222)); // #cce3de
+        private static readonly SolidColorBrush BorderSubtle = new(Color.FromRgb(224, 240, 236)); // #e0f0ec
 
         // ══════════════════════════════════════════════════════════
         // ОТЧЁТ 1 — Сводка продаж за период
@@ -101,7 +105,7 @@ namespace MyHippocrates.Reports
             foreach (var ph in byPharmacy)
             {
                 AddTableRow(phTable, false,
-                    ph.Address, $"{ph.Revenue:F2}", $"{ph.Count}", $"{ph.Avg:F2}","","",
+                    ph.Address, $"{ph.Revenue:F2}", $"{ph.Count}", $"{ph.Avg:F2}", "", "",
                     alt ? AltRow : White);
                 alt = !alt;
             }
@@ -242,7 +246,7 @@ namespace MyHippocrates.Reports
             {
                 AddTableRow(mTable, false,
                     m.Manuf, $"{m.Revenue:F2}", $"{m.Qty}",
-                    "","","",
+                    "", "", "",
                     alt ? AltRow : White);
                 alt = !alt;
             }
@@ -302,7 +306,7 @@ namespace MyHippocrates.Reports
                         s.Product?.Name ?? "?",
                         s.Product?.Manufacturer?.Name ?? "—",
                         s.Pharmacy?.Address ?? "?",
-                        "0", "","",
+                        "0", "", "",
                         DangerBg);
             }
 
@@ -320,7 +324,7 @@ namespace MyHippocrates.Reports
                         s.Product?.Name ?? "?",
                         s.Product?.Manufacturer?.Name ?? "—",
                         s.Pharmacy?.Address ?? "?",
-                        $"{s.RemainingQty}","","",
+                        $"{s.RemainingQty}", "", "",
                         WarnBg);
             }
 
@@ -354,7 +358,7 @@ namespace MyHippocrates.Reports
                         s.Product?.Name ?? "?",
                         s.Product?.Manufacturer?.Name ?? "—",
                         s.Product?.Unit ?? "шт",
-                        $"{s.RemainingQty}","","",
+                        $"{s.RemainingQty}", "", "",
                         rowBg);
                     alt = !alt;
                 }
@@ -411,7 +415,7 @@ namespace MyHippocrates.Reports
                         new System.Windows.Controls.TextBlock
                         {
                             Text       = "HIPPOCRATES — Аптечная сеть",
-                            Foreground = new SolidColorBrush(Color.FromRgb(165, 214, 167)),
+                            Foreground = TextOnDark,  // #cce3de вместо #A5D6A7
                             FontSize   = 10,
                             FontFamily = new FontFamily("Segoe UI")
                         },
@@ -427,7 +431,7 @@ namespace MyHippocrates.Reports
                         new System.Windows.Controls.TextBlock
                         {
                             Text       = subtitle,
-                            Foreground = new SolidColorBrush(Color.FromRgb(165, 214, 167)),
+                            Foreground = TextOnDark,  // #cce3de вместо #A5D6A7
                             FontSize   = 10,
                             FontFamily = new FontFamily("Segoe UI"),
                             Margin     = new Thickness(0, 6, 0, 0),
@@ -436,7 +440,7 @@ namespace MyHippocrates.Reports
                         new System.Windows.Controls.TextBlock
                         {
                             Text       = $"Сформировано: {DateTime.Now:dd.MM.yyyy HH:mm:ss}",
-                            Foreground = new SolidColorBrush(Color.FromRgb(165, 214, 167)),
+                            Foreground = TextOnDark,  // #cce3de вместо #A5D6A7
                             FontSize   = 9,
                             FontFamily = new FontFamily("Segoe UI"),
                             Margin     = new Thickness(0, 4, 0, 0)
@@ -454,9 +458,9 @@ namespace MyHippocrates.Reports
             {
                 FontSize = 13,
                 FontWeight = FontWeights.SemiBold,
-                Foreground = new SolidColorBrush(Color.FromRgb(27, 94, 32)),
+                Foreground = HeaderBg,  // #035b4b вместо #1B5E20
                 Margin = new Thickness(0, 14, 0, 4),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(46, 125, 50)),
+                BorderBrush = SubHeaderBg,  // #024a3d вместо #2E7D32
                 BorderThickness = new Thickness(0, 0, 0, 1),
                 Padding = new Thickness(0, 0, 0, 3)
             });
@@ -467,7 +471,7 @@ namespace MyHippocrates.Reports
             var table = new Table
             {
                 CellSpacing = 0,
-                BorderBrush = BorderBrush,
+                BorderBrush = BorderBrush,  // #cce3de
                 BorderThickness = new Thickness(1),
                 Margin = new Thickness(0, 0, 0, 4)
             };
@@ -499,7 +503,7 @@ namespace MyHippocrates.Reports
             var row = new TableRow
             {
                 Background = isHeader
-                    ? TableHead
+                    ? TableHead  // #035b4b
                     : (bg ?? White)
             };
 
@@ -509,14 +513,13 @@ namespace MyHippocrates.Reports
                 {
                     Margin = new Thickness(6, 3, 6, 3),
                     FontWeight = isHeader ? FontWeights.SemiBold : FontWeights.Normal,
-                    FontSize = isHeader ? 11 : 11
+                    FontSize = isHeader ? 11 : 11,
+                    Foreground = isHeader ? White : TextDark  // Белый текст на тёмной шапке
                 };
-                if (isHeader)
-                    para.Foreground = new SolidColorBrush(Color.FromRgb(27, 94, 32));
 
                 var tc = new TableCell(para)
                 {
-                    BorderBrush = BorderBrush,
+                    BorderBrush = BorderSubtle,  // #e0f0ec для внутренних границ
                     BorderThickness = new Thickness(0, 0, 1, 1)
                 };
                 row.Cells.Add(tc);
@@ -542,7 +545,7 @@ namespace MyHippocrates.Reports
         {
             var row = new TableRow
             {
-                Background = new SolidColorBrush(Color.FromRgb(200, 230, 201))
+                Background = new SolidColorBrush(Color.FromRgb(229, 244, 239))  // #e5f4ef
             };
 
             for (int i = 0; i < table.Columns.Count; i++)
@@ -552,11 +555,12 @@ namespace MyHippocrates.Reports
                 {
                     Margin = new Thickness(6, 3, 6, 3),
                     FontWeight = FontWeights.Bold,
-                    FontSize = 11
+                    FontSize = 11,
+                    Foreground = TextDark
                 };
                 row.Cells.Add(new TableCell(para)
                 {
-                    BorderBrush = BorderBrush,
+                    BorderBrush = BorderSubtle,
                     BorderThickness = new Thickness(0, 1, 1, 1)
                 });
             }
@@ -571,10 +575,10 @@ namespace MyHippocrates.Reports
                 new Run($"© {DateTime.Now.Year} Hippocrates — Система управления аптечной сетью   |   " +
                         $"Документ сформирован: {DateTime.Now:dd.MM.yyyy HH:mm}"))
             {
-                Foreground = TextGray,
+                Foreground = TextLight,  // #5a9b88 вместо #607D8B
                 FontSize = 9,
                 TextAlignment = TextAlignment.Center,
-                BorderBrush = BorderBrush,
+                BorderBrush = BorderBrush,  // #cce3de
                 BorderThickness = new Thickness(0, 1, 0, 0),
                 Padding = new Thickness(0, 6, 0, 0)
             });

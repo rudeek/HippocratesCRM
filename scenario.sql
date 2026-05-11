@@ -39,12 +39,13 @@ CREATE TABLE employee (
 
 CREATE TABLE receipt (
     receipt_id     SERIAL PRIMARY KEY,
-    receipt_number INT           NOT NULL UNIQUE,
+    receipt_number INT           NOT NULL,
     pharmacy_id    INT           NOT NULL REFERENCES pharmacy(pharmacy_id) ON DELETE CASCADE,
     employee_id    INT           NOT NULL REFERENCES employee(employee_id) ON DELETE CASCADE,
     total_amount   NUMERIC(10,2) NOT NULL DEFAULT 0,
     date           DATE          NOT NULL DEFAULT CURRENT_DATE,
-    time           TIME          NOT NULL DEFAULT CURRENT_TIME
+    time           TIME          NOT NULL DEFAULT CURRENT_TIME,
+    CONSTRAINT receipt_pharmacy_number_date_unique UNIQUE (pharmacy_id, receipt_number, date)
 );
 
 CREATE TABLE order_item (
@@ -64,6 +65,10 @@ CREATE TABLE stock_balance (
     PRIMARY KEY (pharmacy_id, product_id)
 );
 
+-- ══════════════════════════════════════════════════════════════════
+-- ТРИГГЕР: автозаполнение unit_price из таблицы product
+-- ══════════════════════════════════════════════════════════════════
+
 CREATE OR REPLACE FUNCTION set_unit_price()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -77,6 +82,9 @@ BEFORE INSERT ON order_item
 FOR EACH ROW
 EXECUTE FUNCTION set_unit_price();
 
+-- ══════════════════════════════════════════════════════════════════
+-- ДАННЫЕ
+-- ══════════════════════════════════════════════════════════════════
 
 TRUNCATE stock_balance, order_item, receipt, employee, pharmacy, product, manufacturer RESTART IDENTITY CASCADE;
 
@@ -368,292 +376,114 @@ INSERT INTO employee (full_name, idnp, phone, address, salary, position) VALUES
 ('Oleg Damaschin','2872398288617','+37379609272','Chisinau, str. Danu 3',8409.62,'Cashier'),
 ('Ala Taranu','2727689342568','+37379806071','Chisinau, str. Grosu 5',9282.78,'Manager');
 
+-- ══════════════════════════════════════════════════════════════════
+-- Чеки: receipt_number генерируется по pharmacy_id + date
+-- Каждая аптека нумерует чеки заново каждый день начиная с 1
+-- ══════════════════════════════════════════════════════════════════
+
 INSERT INTO receipt (receipt_number, pharmacy_id, employee_id, total_amount, date, time) VALUES
-(2001,1,1,0,'2025-06-24','08:54:00'),
-(2002,2,2,0,'2025-08-04','15:06:00'),
-(2003,3,3,0,'2025-08-10','13:40:00'),
-(2004,4,4,0,'2025-08-24','10:27:00'),
-(2005,5,5,0,'2025-04-01','16:41:00'),
-(2006,6,6,0,'2025-05-19','17:51:00'),
-(2007,7,7,0,'2025-10-03','15:29:00'),
-(2008,8,8,0,'2025-08-12','17:17:00'),
-(2009,9,9,0,'2025-06-15','11:53:00'),
-(2010,10,10,0,'2025-02-14','12:56:00'),
-(2011,11,11,0,'2025-08-19','11:48:00'),
-(2012,12,12,0,'2025-08-26','17:39:00'),
-(2013,13,13,0,'2025-12-09','14:21:00'),
-(2014,14,14,0,'2025-01-15','15:54:00'),
-(2015,15,15,0,'2025-06-16','10:31:00'),
-(2016,16,16,0,'2025-04-19','13:51:00'),
-(2017,17,17,0,'2025-05-13','13:17:00'),
-(2018,18,18,0,'2025-11-02','12:35:00'),
-(2019,19,19,0,'2025-01-06','16:12:00'),
-(2020,20,20,0,'2025-02-13','11:46:00'),
-(2021,21,21,0,'2025-07-28','15:35:00'),
-(2022,22,22,0,'2025-05-04','15:41:00'),
-(2023,23,23,0,'2025-12-31','15:28:00'),
-(2024,24,24,0,'2025-01-09','09:18:00'),
-(2025,25,25,0,'2025-04-24','14:44:00'),
-(2026,26,26,0,'2025-05-05','12:42:00'),
-(2027,27,27,0,'2025-10-25','13:30:00'),
-(2028,28,28,0,'2025-10-11','16:22:00'),
-(2029,29,29,0,'2025-08-06','16:21:00'),
-(2030,30,30,0,'2025-06-30','15:17:00'),
-(2031,31,31,0,'2025-06-06','12:14:00'),
-(2032,32,32,0,'2025-03-03','11:20:00'),
-(2033,33,33,0,'2025-03-03','16:48:00'),
-(2034,34,34,0,'2025-12-20','10:12:00'),
-(2035,35,35,0,'2025-04-21','15:17:00'),
-(2036,36,36,0,'2025-10-29','16:38:00'),
-(2037,37,37,0,'2025-05-25','09:53:00'),
-(2038,38,38,0,'2025-04-10','12:14:00'),
-(2039,39,39,0,'2025-07-04','10:19:00'),
-(2040,40,40,0,'2025-01-08','16:08:00'),
-(2041,41,41,0,'2025-05-21','08:03:00'),
-(2042,42,42,0,'2025-10-11','12:44:00'),
-(2043,43,43,0,'2025-03-06','18:55:00'),
-(2044,44,44,0,'2025-09-09','09:55:00'),
-(2045,45,45,0,'2025-01-07','17:18:00'),
-(2046,46,46,0,'2025-08-29','15:28:00'),
-(2047,47,47,0,'2025-06-24','10:03:00'),
-(2048,48,48,0,'2025-05-10','15:07:00'),
-(2049,49,49,0,'2025-02-03','14:31:00'),
-(2050,50,50,0,'2025-02-07','17:40:00');
+(1,1,1,0,'2025-06-24','08:54:00'),
+(1,2,2,0,'2025-08-04','15:06:00'),
+(1,3,3,0,'2025-08-10','13:40:00'),
+(1,4,4,0,'2025-08-24','10:27:00'),
+(1,5,5,0,'2025-04-01','16:41:00'),
+(1,6,6,0,'2025-05-19','17:51:00'),
+(1,7,7,0,'2025-10-03','15:29:00'),
+(1,8,8,0,'2025-08-12','17:17:00'),
+(1,9,9,0,'2025-06-15','11:53:00'),
+(1,10,10,0,'2025-02-14','12:56:00'),
+(1,11,11,0,'2025-08-19','11:48:00'),
+(1,12,12,0,'2025-08-26','17:39:00'),
+(1,13,13,0,'2025-12-09','14:21:00'),
+(1,14,14,0,'2025-01-15','15:54:00'),
+(1,15,15,0,'2025-06-16','10:31:00'),
+(1,16,16,0,'2025-04-19','13:51:00'),
+(1,17,17,0,'2025-05-13','13:17:00'),
+(1,18,18,0,'2025-11-02','12:35:00'),
+(1,19,19,0,'2025-01-06','16:12:00'),
+(1,20,20,0,'2025-02-13','11:46:00'),
+(1,21,21,0,'2025-07-28','15:35:00'),
+(1,22,22,0,'2025-05-04','15:41:00'),
+(1,23,23,0,'2025-12-31','15:28:00'),
+(1,24,24,0,'2025-01-09','09:18:00'),
+(1,25,25,0,'2025-04-24','14:44:00'),
+(1,26,26,0,'2025-05-05','12:42:00'),
+(1,27,27,0,'2025-10-25','13:30:00'),
+(1,28,28,0,'2025-10-11','16:22:00'),
+(1,29,29,0,'2025-08-06','16:21:00'),
+(1,30,30,0,'2025-06-30','15:17:00'),
+(1,31,31,0,'2025-06-06','12:14:00'),
+(1,32,32,0,'2025-03-03','11:20:00'),
+(1,33,33,0,'2025-03-03','16:48:00'),
+(1,34,34,0,'2025-12-20','10:12:00'),
+(1,35,35,0,'2025-04-21','15:17:00'),
+(1,36,36,0,'2025-10-29','16:38:00'),
+(1,37,37,0,'2025-05-25','09:53:00'),
+(1,38,38,0,'2025-04-10','12:14:00'),
+(1,39,39,0,'2025-07-04','10:19:00'),
+(1,40,40,0,'2025-01-08','16:08:00'),
+(1,41,41,0,'2025-05-21','08:03:00'),
+(1,42,42,0,'2025-10-11','12:44:00'),
+(1,43,43,0,'2025-03-06','18:55:00'),
+(1,44,44,0,'2025-09-09','09:55:00'),
+(1,45,45,0,'2025-01-07','17:18:00'),
+(1,46,46,0,'2025-08-29','15:28:00'),
+(1,47,47,0,'2025-06-24','10:03:00'),
+(1,48,48,0,'2025-05-10','15:07:00'),
+(1,49,49,0,'2025-02-03','14:31:00'),
+(1,50,50,0,'2025-02-07','17:40:00');
 
 INSERT INTO stock_balance (pharmacy_id, product_id, remaining_qty) VALUES
-(1,11,274),
-(1,20,138),
-(1,39,222),
-(1,73,109),
-(2,29,193),
-(2,77,176),
-(2,78,211),
-(2,80,190),
-(2,100,156),
-(3,8,133),
-(3,40,267),
-(3,73,100),
-(3,79,240),
-(3,80,272),
-(4,11,218),
-(4,21,97),
-(4,34,139),
-(4,85,123),
-(5,1,232),
-(5,53,195),
-(5,58,153),
-(5,89,84),
-(6,37,93),
-(6,59,146),
-(6,90,135),
-(6,91,251),
-(7,15,113),
-(7,29,288),
-(7,55,244),
-(7,70,147),
-(8,8,267),
-(8,10,230),
-(8,22,286),
-(8,40,224),
-(9,16,179),
-(9,39,214),
-(9,57,259),
-(9,60,146),
-(9,89,207),
-(10,6,143),
-(10,11,162),
-(10,56,83),
-(10,57,264),
-(10,77,234),
-(11,30,81),
-(11,74,248),
-(11,76,287),
-(11,87,272),
-(12,6,211),
-(12,23,147),
-(12,74,195),
-(12,97,193),
-(12,98,246),
-(13,56,200),
-(13,63,179),
-(13,75,98),
-(13,82,165),
-(14,14,203),
-(14,21,151),
-(14,42,184),
-(14,43,247),
-(14,86,253),
-(15,5,162),
-(15,12,273),
-(15,59,106),
-(15,71,141),
-(15,98,160),
-(16,1,89),
-(16,60,168),
-(16,66,184),
-(16,70,208),
-(16,85,123),
-(17,7,153),
-(17,27,187),
-(17,57,219),
-(17,81,143),
-(17,98,112),
-(18,4,120),
-(18,16,259),
-(18,31,80),
-(18,78,218),
-(18,81,158),
-(19,12,242),
-(19,15,119),
-(19,16,259),
-(19,29,288),
-(19,60,202),
-(20,35,196),
-(20,54,216),
-(20,62,113),
-(20,66,195),
-(20,91,141),
-(21,18,297),
-(21,25,97),
-(21,66,273),
-(21,77,149),
-(21,96,282),
-(22,1,227),
-(22,35,291),
-(22,37,224),
-(22,44,264),
-(22,65,156),
-(23,20,163),
-(23,45,175),
-(23,58,219),
-(23,62,217),
-(23,69,270),
-(24,25,136),
-(24,31,275),
-(24,42,173),
-(24,74,181),
-(24,90,295),
-(25,41,286),
-(25,61,177),
-(25,91,244),
-(25,96,174),
-(26,5,161),
-(26,17,103),
-(26,64,227),
-(26,65,291),
-(27,2,115),
-(27,13,111),
-(27,59,246),
-(27,68,184),
-(27,93,94),
-(28,34,241),
-(28,44,96),
-(28,51,295),
-(28,80,293),
-(28,89,161),
-(29,41,213),
-(29,63,140),
-(29,81,86),
-(29,92,233),
-(29,98,93),
-(30,12,255),
-(30,13,191),
-(30,30,274),
-(30,56,104),
-(30,96,241),
-(31,4,93),
-(31,6,154),
-(31,39,281),
-(31,89,161),
-(32,19,252),
-(32,32,281),
-(32,48,183),
-(32,56,222),
-(32,68,121),
-(33,11,252),
-(33,23,235),
-(33,49,205),
-(33,79,137),
-(34,30,193),
-(34,33,80),
-(34,60,140),
-(34,82,247),
-(35,10,238),
-(35,21,154),
-(35,37,190),
-(35,70,227),
-(35,87,164),
-(36,26,140),
-(36,33,295),
-(36,39,106),
-(36,59,201),
-(36,89,176),
-(37,3,81),
-(37,38,177),
-(37,46,244),
-(37,74,287),
-(37,90,147),
-(38,37,233),
-(38,64,138),
-(38,78,277),
-(38,96,282),
-(39,25,262),
-(39,29,248),
-(39,33,243),
-(39,80,275),
-(39,82,269),
-(40,6,83),
-(40,13,276),
-(40,81,156),
-(40,83,191),
-(41,12,119),
-(41,17,185),
-(41,38,130),
-(41,42,111),
-(41,94,268),
-(42,22,153),
-(42,33,271),
-(42,35,282),
-(42,65,203),
-(42,68,288),
-(43,10,253),
-(43,15,135),
-(43,19,263),
-(43,60,297),
-(43,97,252),
-(44,2,173),
-(44,12,107),
-(44,47,214),
-(44,51,193),
-(44,72,144),
-(45,14,234),
-(45,48,82),
-(45,49,136),
-(45,75,252),
-(45,82,197),
-(46,9,156),
-(46,29,195),
-(46,79,290),
-(46,82,245),
-(46,83,256),
-(47,5,136),
-(47,6,100),
-(47,15,202),
-(47,18,106),
-(47,39,216),
-(48,48,215),
-(48,50,269),
-(48,59,257),
-(48,86,183),
-(49,13,147),
-(49,54,237),
-(49,63,83),
-(49,84,181),
-(50,13,166),
-(50,28,252),
-(50,31,218),
-(50,47,243),
-(50,57,169);
+(1,11,274),(1,20,138),(1,39,222),(1,73,109),
+(2,29,193),(2,77,176),(2,78,211),(2,80,190),(2,100,156),
+(3,8,133),(3,40,267),(3,73,100),(3,79,240),(3,80,272),
+(4,11,218),(4,21,97),(4,34,139),(4,85,123),
+(5,1,232),(5,53,195),(5,58,153),(5,89,84),
+(6,37,93),(6,59,146),(6,90,135),(6,91,251),
+(7,15,113),(7,29,288),(7,55,244),(7,70,147),
+(8,8,267),(8,10,230),(8,22,286),(8,40,224),
+(9,16,179),(9,39,214),(9,57,259),(9,60,146),(9,89,207),
+(10,6,143),(10,11,162),(10,56,83),(10,57,264),(10,77,234),
+(11,30,81),(11,74,248),(11,76,287),(11,87,272),
+(12,6,211),(12,23,147),(12,74,195),(12,97,193),(12,98,246),
+(13,56,200),(13,63,179),(13,75,98),(13,82,165),
+(14,14,203),(14,21,151),(14,42,184),(14,43,247),(14,86,253),
+(15,5,162),(15,12,273),(15,59,106),(15,71,141),(15,98,160),
+(16,1,89),(16,60,168),(16,66,184),(16,70,208),(16,85,123),
+(17,7,153),(17,27,187),(17,57,219),(17,81,143),(17,98,112),
+(18,4,120),(18,16,259),(18,31,80),(18,78,218),(18,81,158),
+(19,12,242),(19,15,119),(19,16,259),(19,29,288),(19,60,202),
+(20,35,196),(20,54,216),(20,62,113),(20,66,195),(20,91,141),
+(21,18,297),(21,25,97),(21,66,273),(21,77,149),(21,96,282),
+(22,1,227),(22,35,291),(22,37,224),(22,44,264),(22,65,156),
+(23,20,163),(23,45,175),(23,58,219),(23,62,217),(23,69,270),
+(24,25,136),(24,31,275),(24,42,173),(24,74,181),(24,90,295),
+(25,41,286),(25,61,177),(25,91,244),(25,96,174),
+(26,5,161),(26,17,103),(26,64,227),(26,65,291),
+(27,2,115),(27,13,111),(27,59,246),(27,68,184),(27,93,94),
+(28,34,241),(28,44,96),(28,51,295),(28,80,293),(28,89,161),
+(29,41,213),(29,63,140),(29,81,86),(29,92,233),(29,98,93),
+(30,12,255),(30,13,191),(30,30,274),(30,56,104),(30,96,241),
+(31,4,93),(31,6,154),(31,39,281),(31,89,161),
+(32,19,252),(32,32,281),(32,48,183),(32,56,222),(32,68,121),
+(33,11,252),(33,23,235),(33,49,205),(33,79,137),
+(34,30,193),(34,33,80),(34,60,140),(34,82,247),
+(35,10,238),(35,21,154),(35,37,190),(35,70,227),(35,87,164),
+(36,26,140),(36,33,295),(36,39,106),(36,59,201),(36,89,176),
+(37,3,81),(37,38,177),(37,46,244),(37,74,287),(37,90,147),
+(38,37,233),(38,64,138),(38,78,277),(38,96,282),
+(39,25,262),(39,29,248),(39,33,243),(39,80,275),(39,82,269),
+(40,6,83),(40,13,276),(40,81,156),(40,83,191),
+(41,12,119),(41,17,185),(41,38,130),(41,42,111),(41,94,268),
+(42,22,153),(42,33,271),(42,35,282),(42,65,203),(42,68,288),
+(43,10,253),(43,15,135),(43,19,263),(43,60,297),(43,97,252),
+(44,2,173),(44,12,107),(44,47,214),(44,51,193),(44,72,144),
+(45,14,234),(45,48,82),(45,49,136),(45,75,252),(45,82,197),
+(46,9,156),(46,29,195),(46,79,290),(46,82,245),(46,83,256),
+(47,5,136),(47,6,100),(47,15,202),(47,18,106),(47,39,216),
+(48,48,215),(48,50,269),(48,59,257),(48,86,183),
+(49,13,147),(49,54,237),(49,63,83),(49,84,181),
+(50,13,166),(50,28,252),(50,31,218),(50,47,243),(50,57,169);
 
 INSERT INTO order_item (receipt_id, product_id, quantity, unit_price, discount) VALUES
 (1,11,1,(SELECT sale_price FROM product WHERE product_id=11),5),
@@ -838,6 +668,7 @@ INSERT INTO order_item (receipt_id, product_id, quantity, unit_price, discount) 
 (46,82,1,(SELECT sale_price FROM product WHERE product_id=82),0),
 (46,83,3,(SELECT sale_price FROM product WHERE product_id=83),0),
 (46,29,3,(SELECT sale_price FROM product WHERE product_id=29),5),
+(46,9,1,(SELECT sale_price FROM product WHERE product_id=9),5),
 (47,5,4,(SELECT sale_price FROM product WHERE product_id=5),0),
 (47,18,3,(SELECT sale_price FROM product WHERE product_id=18),10),
 (47,6,4,(SELECT sale_price FROM product WHERE product_id=6),0),
@@ -854,19 +685,24 @@ INSERT INTO order_item (receipt_id, product_id, quantity, unit_price, discount) 
 (50,47,2,(SELECT sale_price FROM product WHERE product_id=47),5),
 (50,57,5,(SELECT sale_price FROM product WHERE product_id=57),5),
 (50,13,5,(SELECT sale_price FROM product WHERE product_id=13),0),
-(50,28,3,(SELECT sale_price FROM product WHERE product_id=28),0),
-(46,9,1,(SELECT sale_price FROM product WHERE product_id=9),5);
+(50,28,3,(SELECT sale_price FROM product WHERE product_id=28),0);
 
+-- Пересчитываем total_amount по всем чекам
 UPDATE receipt r
 SET total_amount = (
-    SELECT COALESCE(SUM(total_price),0)
+    SELECT COALESCE(SUM(total_price), 0)
     FROM order_item WHERE receipt_id = r.receipt_id
 );
 
+-- ══════════════════════════════════════════════════════════════════
+-- ХРАНИМЫЕ ПРОЦЕДУРЫ
+-- ══════════════════════════════════════════════════════════════════
+
+-- ── MANUFACTURER ─────────────────────────────────────────────────
 
 CREATE OR REPLACE PROCEDURE sp_add_manufacturer(
-    p_name    VARCHAR, p_country VARCHAR,
-    p_address VARCHAR, p_phone   VARCHAR, p_email VARCHAR,
+    p_name VARCHAR, p_country VARCHAR,
+    p_address VARCHAR, p_phone VARCHAR, p_email VARCHAR,
     OUT p_id INT
 )
 LANGUAGE plpgsql AS $$
@@ -876,7 +712,7 @@ BEGIN
     RETURNING manufacturer_id INTO p_id;
 END;
 $$;
- 
+
 CREATE OR REPLACE PROCEDURE sp_update_manufacturer(
     p_id INT, p_name VARCHAR, p_country VARCHAR,
     p_address VARCHAR, p_phone VARCHAR, p_email VARCHAR
@@ -892,24 +728,19 @@ BEGIN
     END IF;
 END;
 $$;
- 
--- Каскадное удаление: manufacturer → product → order_item, stock_balance
+
 CREATE OR REPLACE PROCEDURE sp_delete_manufacturer(p_id INT)
 LANGUAGE plpgsql AS $$
 BEGIN
-    DELETE FROM manufacturer
-    WHERE manufacturer_id = p_id;
-
+    DELETE FROM manufacturer WHERE manufacturer_id = p_id;
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Производитель с id=% не найден', p_id;
     END IF;
 END;
 $$;
- 
--- ──────────────────────────────────────────────────────────────────
--- PRODUCT
--- ──────────────────────────────────────────────────────────────────
- 
+
+-- ── PRODUCT ──────────────────────────────────────────────────────
+
 CREATE OR REPLACE PROCEDURE sp_add_product(
     p_name VARCHAR, p_manufacturer_id INT,
     p_production_date DATE, p_expiration_date DATE,
@@ -927,7 +758,7 @@ BEGIN
     RETURNING product_id INTO p_id;
 END;
 $$;
- 
+
 CREATE OR REPLACE PROCEDURE sp_update_product(
     p_id INT, p_name VARCHAR, p_manufacturer_id INT,
     p_production_date DATE, p_expiration_date DATE,
@@ -949,22 +780,19 @@ BEGIN
     END IF;
 END;
 $$;
- 
--- Каскадное удаление: product → order_item, stock_balance
+
 CREATE OR REPLACE PROCEDURE sp_delete_product(p_id INT)
 LANGUAGE plpgsql AS $$
 BEGIN
-    DELETE FROM product       WHERE product_id = p_id;
+    DELETE FROM product WHERE product_id = p_id;
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Товар с id=% не найден', p_id;
     END IF;
 END;
 $$;
- 
--- ──────────────────────────────────────────────────────────────────
--- PHARMACY
--- ──────────────────────────────────────────────────────────────────
- 
+
+-- ── PHARMACY ─────────────────────────────────────────────────────
+
 CREATE OR REPLACE PROCEDURE sp_add_pharmacy(
     p_address VARCHAR, p_phone VARCHAR, p_working_hours VARCHAR,
     OUT p_id INT
@@ -976,7 +804,7 @@ BEGIN
     RETURNING pharmacy_id INTO p_id;
 END;
 $$;
- 
+
 CREATE OR REPLACE PROCEDURE sp_update_pharmacy(
     p_id INT, p_address VARCHAR, p_phone VARCHAR, p_working_hours VARCHAR
 )
@@ -990,24 +818,19 @@ BEGIN
     END IF;
 END;
 $$;
- 
--- Каскадное удаление: pharmacy → receipt → order_item; pharmacy → stock_balance
+
 CREATE OR REPLACE PROCEDURE sp_delete_pharmacy(p_id INT)
 LANGUAGE plpgsql AS $$
 BEGIN
-    DELETE FROM pharmacy
-    WHERE pharmacy_id = p_id;
-
+    DELETE FROM pharmacy WHERE pharmacy_id = p_id;
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Аптека с id=% не найдена', p_id;
     END IF;
 END;
 $$;
- 
--- ──────────────────────────────────────────────────────────────────
--- EMPLOYEE
--- ──────────────────────────────────────────────────────────────────
- 
+
+-- ── EMPLOYEE ─────────────────────────────────────────────────────
+
 CREATE OR REPLACE PROCEDURE sp_add_employee(
     p_full_name VARCHAR, p_idnp VARCHAR, p_phone VARCHAR,
     p_address VARCHAR, p_salary NUMERIC, p_position VARCHAR,
@@ -1020,7 +843,7 @@ BEGIN
     RETURNING employee_id INTO p_id;
 END;
 $$;
- 
+
 CREATE OR REPLACE PROCEDURE sp_update_employee(
     p_id INT, p_full_name VARCHAR, p_idnp VARCHAR, p_phone VARCHAR,
     p_address VARCHAR, p_salary NUMERIC, p_position VARCHAR
@@ -1036,206 +859,91 @@ BEGIN
     END IF;
 END;
 $$;
- 
--- Каскадное удаление: employee → receipt → order_item
+
 CREATE OR REPLACE PROCEDURE sp_delete_employee(p_id INT)
 LANGUAGE plpgsql AS $$
 BEGIN
-    DELETE FROM employee
-    WHERE employee_id = p_id;
-
+    DELETE FROM employee WHERE employee_id = p_id;
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Сотрудник с id=% не найден', p_id;
     END IF;
 END;
 $$;
- 
--- ──────────────────────────────────────────────────────────────────
--- RECEIPT
--- ──────────────────────────────────────────────────────────────────
- 
+
+-- ── RECEIPT ──────────────────────────────────────────────────────
+-- Номер чека уникален в рамках pharmacy_id + date, начинается с 1
+
 CREATE OR REPLACE PROCEDURE sp_add_receipt(
-    p_receipt_number INT, p_pharmacy_id INT, p_employee_id INT,
-    p_date DATE, p_time TIME,
+    p_pharmacy_id INT, p_employee_id INT,
+    p_date DATE,
     OUT p_id INT
 )
 LANGUAGE plpgsql AS $$
+DECLARE
+    v_number INT;
 BEGIN
+    SELECT COALESCE(MAX(receipt_number), 0) + 1
+    INTO v_number
+    FROM receipt
+    WHERE pharmacy_id = p_pharmacy_id
+      AND date = p_date;
+
     INSERT INTO receipt(receipt_number, pharmacy_id, employee_id, total_amount, date, time)
-    VALUES (p_receipt_number, p_pharmacy_id, p_employee_id, 0, p_date, p_time)
+    VALUES (v_number, p_pharmacy_id, p_employee_id, 0, p_date, CURRENT_TIME)
     RETURNING receipt_id INTO p_id;
 END;
 $$;
- 
+
 CREATE OR REPLACE PROCEDURE sp_update_receipt(
-    p_id INT, p_receipt_number INT, p_pharmacy_id INT,
-    p_employee_id INT, p_date DATE, p_time TIME
+    p_id INT, p_pharmacy_id INT,
+    p_employee_id INT, p_date DATE
 )
 LANGUAGE plpgsql AS $$
+DECLARE
+    v_number          INT;
+    v_old_pharmacy_id INT;
+    v_old_date        DATE;
 BEGIN
+    SELECT pharmacy_id, date
+    INTO v_old_pharmacy_id, v_old_date
+    FROM receipt WHERE receipt_id = p_id;
+
+    IF v_old_pharmacy_id != p_pharmacy_id OR v_old_date != p_date THEN
+        SELECT COALESCE(MAX(receipt_number), 0) + 1
+        INTO v_number
+        FROM receipt
+        WHERE pharmacy_id = p_pharmacy_id
+          AND date = p_date
+          AND receipt_id != p_id;
+    ELSE
+        SELECT receipt_number INTO v_number
+        FROM receipt WHERE receipt_id = p_id;
+    END IF;
+
     UPDATE receipt
-    SET receipt_number=p_receipt_number, pharmacy_id=p_pharmacy_id,
-        employee_id=p_employee_id, date=p_date, time=p_time
+    SET pharmacy_id    = p_pharmacy_id,
+        employee_id    = p_employee_id,
+        date           = p_date,
+        receipt_number = v_number
     WHERE receipt_id = p_id;
+
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Чек с id=% не найден', p_id;
     END IF;
 END;
 $$;
- 
--- Каскадное удаление: receipt → order_item
+
 CREATE OR REPLACE PROCEDURE sp_delete_receipt(p_id INT)
 LANGUAGE plpgsql AS $$
 BEGIN
-    DELETE FROM receipt
-    WHERE receipt_id = p_id;
-
+    DELETE FROM receipt WHERE receipt_id = p_id;
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Чек с id=% не найден', p_id;
     END IF;
 END;
 $$;
--- ──────────────────────────────────────────────────────────────────
--- ORDER ITEM
--- ──────────────────────────────────────────────────────────────────
- 
-CREATE OR REPLACE PROCEDURE sp_add_order_item(
-    p_receipt_id INT, p_product_id INT,
-    p_quantity INT, p_discount NUMERIC
-)
-LANGUAGE plpgsql AS $$
-BEGIN
-    -- unit_price заполнится триггером trg_set_unit_price
-    INSERT INTO order_item(receipt_id, product_id, quantity, discount)
-    VALUES (p_receipt_id, p_product_id, p_quantity, p_discount);
- 
-    -- Обновляем total_amount чека
-    UPDATE receipt
-    SET total_amount = (
-        SELECT COALESCE(SUM(total_price), 0)
-        FROM order_item WHERE receipt_id = p_receipt_id
-    )
-    WHERE receipt_id = p_receipt_id;
-END;
-$$;
- 
-CREATE OR REPLACE PROCEDURE sp_update_order_item(
-    p_receipt_id INT, p_product_id INT,
-    p_new_receipt_id INT, p_new_product_id INT,
-    p_quantity INT, p_discount NUMERIC
-)
-LANGUAGE plpgsql AS $$
-DECLARE
-    v_price NUMERIC;
-BEGIN
-    -- Если меняется ключ — удаляем старую запись и вставляем новую
-    IF p_receipt_id != p_new_receipt_id OR p_product_id != p_new_product_id THEN
-        DELETE FROM order_item WHERE receipt_id = p_receipt_id AND product_id = p_product_id;
-        SELECT sale_price INTO v_price FROM product WHERE product_id = p_new_product_id;
-        INSERT INTO order_item(receipt_id, product_id, quantity, unit_price, discount)
-        VALUES (p_new_receipt_id, p_new_product_id, p_quantity, v_price, p_discount);
-    ELSE
-        UPDATE order_item
-        SET quantity=p_quantity, discount=p_discount
-        WHERE receipt_id = p_receipt_id AND product_id = p_product_id;
-    END IF;
- 
-    -- Пересчитываем total_amount для обоих чеков
-    UPDATE receipt
-    SET total_amount = (
-        SELECT COALESCE(SUM(total_price), 0)
-        FROM order_item WHERE receipt_id = receipt.receipt_id
-    )
-    WHERE receipt_id IN (p_receipt_id, p_new_receipt_id);
-END;
-$$;
- 
-CREATE OR REPLACE PROCEDURE sp_delete_order_item(
-    p_receipt_id INT,
-    p_product_id INT
-)
-LANGUAGE plpgsql AS $$
-BEGIN
-    DELETE FROM order_item
-    WHERE receipt_id = p_receipt_id
-      AND product_id = p_product_id;
 
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Позиция не найдена (receipt_id=%, product_id=%)',
-        p_receipt_id, p_product_id;
-    END IF;
-
-    -- обновляем сумму чека
-    UPDATE receipt
-    SET total_amount = (
-        SELECT COALESCE(SUM(total_price), 0)
-        FROM order_item
-        WHERE receipt_id = p_receipt_id
-    )
-    WHERE receipt_id = p_receipt_id;
-END;
-$$;
- 
--- ──────────────────────────────────────────────────────────────────
--- STOCK BALANCE
--- ──────────────────────────────────────────────────────────────────
- 
-CREATE OR REPLACE PROCEDURE sp_add_stock_balance(
-    p_pharmacy_id INT, p_product_id INT, p_remaining_qty INT
-)
-LANGUAGE plpgsql AS $$
-BEGIN
-    INSERT INTO stock_balance(pharmacy_id, product_id, remaining_qty)
-    VALUES (p_pharmacy_id, p_product_id, p_remaining_qty);
-END;
-$$;
- 
-CREATE OR REPLACE PROCEDURE sp_update_stock_balance(
-    p_pharmacy_id INT, p_product_id INT,
-    p_new_pharmacy_id INT, p_new_product_id INT,
-    p_remaining_qty INT
-)
-LANGUAGE plpgsql AS $$
-BEGIN
-    IF p_pharmacy_id != p_new_pharmacy_id OR p_product_id != p_new_product_id THEN
-        DELETE FROM stock_balance WHERE pharmacy_id = p_pharmacy_id AND product_id = p_product_id;
-        INSERT INTO stock_balance(pharmacy_id, product_id, remaining_qty)
-        VALUES (p_new_pharmacy_id, p_new_product_id, p_remaining_qty);
-    ELSE
-        UPDATE stock_balance
-        SET remaining_qty = p_remaining_qty
-        WHERE pharmacy_id = p_pharmacy_id AND product_id = p_product_id;
-    END IF;
-END;
-$$;
- 
-CREATE OR REPLACE PROCEDURE sp_delete_stock_balance(
-    p_pharmacy_id INT,
-    p_product_id INT
-)
-LANGUAGE plpgsql AS $$
-BEGIN
-    DELETE FROM stock_balance
-    WHERE pharmacy_id = p_pharmacy_id
-      AND product_id = p_product_id;
-
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Остаток не найден (pharmacy_id=%, product_id=%)',
-        p_pharmacy_id, p_product_id;
-    END IF;
-END;
-$$;
-
-
-
-
--- ══════════════════════════════════════════════════════════════════
--- PATCH: stock deduction on order_item insert/update/delete
---        + dashboard analytics views
--- ══════════════════════════════════════════════════════════════════
-
--- ── Обновлённая процедура добавления позиции заказа ──────────────
--- Проверяет наличие товара на складе аптеки и списывает его.
+-- ── ORDER ITEM ───────────────────────────────────────────────────
 
 CREATE OR REPLACE PROCEDURE sp_add_order_item(
     p_receipt_id INT, p_product_id INT,
@@ -1243,10 +951,9 @@ CREATE OR REPLACE PROCEDURE sp_add_order_item(
 )
 LANGUAGE plpgsql AS $$
 DECLARE
-    v_pharmacy_id  INT;
-    v_stock        INT;
+    v_pharmacy_id INT;
+    v_stock       INT;
 BEGIN
-    -- Определяем аптеку по чеку
     SELECT pharmacy_id INTO v_pharmacy_id
     FROM receipt WHERE receipt_id = p_receipt_id;
 
@@ -1254,7 +961,6 @@ BEGIN
         RAISE EXCEPTION 'Чек с id=% не найден', p_receipt_id;
     END IF;
 
-    -- Проверяем остаток на складе
     SELECT remaining_qty INTO v_stock
     FROM stock_balance
     WHERE pharmacy_id = v_pharmacy_id AND product_id = p_product_id;
@@ -1267,22 +973,17 @@ BEGIN
         RAISE EXCEPTION 'Недостаточно товара на складе. Доступно: %', v_stock;
     END IF;
 
-	
-
-    -- unit_price заполнится триггером trg_set_unit_price
     INSERT INTO order_item(receipt_id, product_id, quantity, discount)
-	VALUES (p_receipt_id, p_product_id, p_quantity, p_discount)
-	ON CONFLICT (receipt_id, product_id)
-	DO UPDATE SET
-	    quantity = order_item.quantity + EXCLUDED.quantity,
-	    discount = EXCLUDED.discount;
+    VALUES (p_receipt_id, p_product_id, p_quantity, p_discount)
+    ON CONFLICT (receipt_id, product_id)
+    DO UPDATE SET
+        quantity = order_item.quantity + EXCLUDED.quantity,
+        discount = EXCLUDED.discount;
 
-    -- Списываем со склада
     UPDATE stock_balance
     SET remaining_qty = remaining_qty - p_quantity
     WHERE pharmacy_id = v_pharmacy_id AND product_id = p_product_id;
 
-    -- Обновляем total_amount чека
     UPDATE receipt
     SET total_amount = (
         SELECT COALESCE(SUM(total_price), 0)
@@ -1292,10 +993,6 @@ BEGIN
 END;
 $$;
 
-
--- ── Обновлённая процедура изменения позиции заказа ───────────────
--- При изменении количества корректирует склад.
-
 CREATE OR REPLACE PROCEDURE sp_update_order_item(
     p_receipt_id     INT, p_product_id     INT,
     p_new_receipt_id INT, p_new_product_id INT,
@@ -1303,40 +1000,34 @@ CREATE OR REPLACE PROCEDURE sp_update_order_item(
 )
 LANGUAGE plpgsql AS $$
 DECLARE
-    v_old_pharmacy_id  INT;
-    v_new_pharmacy_id  INT;
-    v_old_qty          INT;
-    v_stock            INT;
-    v_price            NUMERIC;
+    v_old_pharmacy_id INT;
+    v_new_pharmacy_id INT;
+    v_old_qty         INT;
+    v_stock           INT;
+    v_price           NUMERIC;
+    v_delta           INT;
 BEGIN
-    -- Старая аптека
     SELECT pharmacy_id INTO v_old_pharmacy_id
     FROM receipt WHERE receipt_id = p_receipt_id;
 
-    -- Новая аптека
     SELECT pharmacy_id INTO v_new_pharmacy_id
     FROM receipt WHERE receipt_id = p_new_receipt_id;
 
-    -- Старое количество
     SELECT quantity INTO v_old_qty
     FROM order_item
     WHERE receipt_id = p_receipt_id AND product_id = p_product_id;
 
-    -- Если меняется ключ (чек или товар) — удаляем старую запись, вставляем новую
     IF p_receipt_id != p_new_receipt_id OR p_product_id != p_new_product_id THEN
 
-        -- Возвращаем старый товар на старый склад
         UPDATE stock_balance
         SET remaining_qty = remaining_qty + v_old_qty
         WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
 
-        -- Проверяем наличие нового товара на новом складе
         SELECT remaining_qty INTO v_stock
         FROM stock_balance
         WHERE pharmacy_id = v_new_pharmacy_id AND product_id = p_new_product_id;
 
         IF v_stock IS NULL THEN
-            -- Откатываем возврат (чтобы не оставлять БД в некорректном состоянии)
             UPDATE stock_balance
             SET remaining_qty = remaining_qty - v_old_qty
             WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
@@ -1357,43 +1048,37 @@ BEGIN
         INSERT INTO order_item(receipt_id, product_id, quantity, unit_price, discount)
         VALUES (p_new_receipt_id, p_new_product_id, p_quantity, v_price, p_discount);
 
-        -- Списываем новый товар с нового склада
         UPDATE stock_balance
         SET remaining_qty = remaining_qty - p_quantity
         WHERE pharmacy_id = v_new_pharmacy_id AND product_id = p_new_product_id;
 
     ELSE
-        -- Ключ не меняется — только количество/скидка
-        DECLARE
-            v_delta INT := p_quantity - v_old_qty;
-        BEGIN
-            IF v_delta > 0 THEN
-                -- Нужно больше товара — проверяем склад
-                SELECT remaining_qty INTO v_stock
-                FROM stock_balance
-                WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
+        v_delta := p_quantity - v_old_qty;
 
-                IF v_stock IS NULL OR v_stock < v_delta THEN
-                    RAISE EXCEPTION 'Недостаточно товара на складе. Доступно: %', COALESCE(v_stock, 0);
-                END IF;
+        IF v_delta > 0 THEN
+            SELECT remaining_qty INTO v_stock
+            FROM stock_balance
+            WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
 
-                UPDATE stock_balance
-                SET remaining_qty = remaining_qty - v_delta
-                WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
-            ELSIF v_delta < 0 THEN
-                -- Возвращаем разницу на склад
-                UPDATE stock_balance
-                SET remaining_qty = remaining_qty + ABS(v_delta)
-                WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
+            IF v_stock IS NULL OR v_stock < v_delta THEN
+                RAISE EXCEPTION 'Недостаточно товара на складе. Доступно: %', COALESCE(v_stock, 0);
             END IF;
-        END;
+
+            UPDATE stock_balance
+            SET remaining_qty = remaining_qty - v_delta
+            WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
+
+        ELSIF v_delta < 0 THEN
+            UPDATE stock_balance
+            SET remaining_qty = remaining_qty + ABS(v_delta)
+            WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
+        END IF;
 
         UPDATE order_item
         SET quantity = p_quantity, discount = p_discount
         WHERE receipt_id = p_receipt_id AND product_id = p_product_id;
     END IF;
 
-    -- Пересчитываем total_amount для обоих чеков
     UPDATE receipt
     SET total_amount = (
         SELECT COALESCE(SUM(total_price), 0)
@@ -1402,10 +1087,6 @@ BEGIN
     WHERE receipt_id IN (p_receipt_id, p_new_receipt_id);
 END;
 $$;
-
-
--- ── Обновлённая процедура удаления позиции заказа ────────────────
--- Возвращает товар на склад при удалении.
 
 CREATE OR REPLACE PROCEDURE sp_delete_order_item(
     p_receipt_id INT,
@@ -1431,12 +1112,10 @@ BEGIN
     DELETE FROM order_item
     WHERE receipt_id = p_receipt_id AND product_id = p_product_id;
 
-    -- Возвращаем товар на склад
     UPDATE stock_balance
     SET remaining_qty = remaining_qty + v_qty
     WHERE pharmacy_id = v_pharmacy_id AND product_id = p_product_id;
 
-    -- Обновляем сумму чека
     UPDATE receipt
     SET total_amount = (
         SELECT COALESCE(SUM(total_price), 0)
@@ -1446,12 +1125,58 @@ BEGIN
 END;
 $$;
 
+-- ── STOCK BALANCE ────────────────────────────────────────────────
+
+CREATE OR REPLACE PROCEDURE sp_add_stock_balance(
+    p_pharmacy_id INT, p_product_id INT, p_remaining_qty INT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO stock_balance(pharmacy_id, product_id, remaining_qty)
+    VALUES (p_pharmacy_id, p_product_id, p_remaining_qty);
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE sp_update_stock_balance(
+    p_pharmacy_id INT, p_product_id INT,
+    p_new_pharmacy_id INT, p_new_product_id INT,
+    p_remaining_qty INT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    IF p_pharmacy_id != p_new_pharmacy_id OR p_product_id != p_new_product_id THEN
+        DELETE FROM stock_balance
+        WHERE pharmacy_id = p_pharmacy_id AND product_id = p_product_id;
+        INSERT INTO stock_balance(pharmacy_id, product_id, remaining_qty)
+        VALUES (p_new_pharmacy_id, p_new_product_id, p_remaining_qty);
+    ELSE
+        UPDATE stock_balance
+        SET remaining_qty = p_remaining_qty
+        WHERE pharmacy_id = p_pharmacy_id AND product_id = p_product_id;
+    END IF;
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE sp_delete_stock_balance(
+    p_pharmacy_id INT,
+    p_product_id INT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    DELETE FROM stock_balance
+    WHERE pharmacy_id = p_pharmacy_id AND product_id = p_product_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Остаток не найден (pharmacy_id=%, product_id=%)',
+            p_pharmacy_id, p_product_id;
+    END IF;
+END;
+$$;
 
 -- ══════════════════════════════════════════════════════════════════
--- DASHBOARD VIEWS & QUERIES (используются из C# через raw SQL)
+-- АНАЛИТИЧЕСКИЕ ПРЕДСТАВЛЕНИЯ (для Dashboard)
 -- ══════════════════════════════════════════════════════════════════
 
--- Выручка по месяцам
 CREATE OR REPLACE VIEW vw_revenue_by_month AS
 SELECT
     TO_CHAR(date, 'YYYY-MM') AS month,
@@ -1461,7 +1186,6 @@ FROM receipt
 GROUP BY TO_CHAR(date, 'YYYY-MM')
 ORDER BY month;
 
--- Выручка по аптекам
 CREATE OR REPLACE VIEW vw_revenue_by_pharmacy AS
 SELECT
     ph.address,
@@ -1473,7 +1197,6 @@ JOIN pharmacy ph ON ph.pharmacy_id = r.pharmacy_id
 GROUP BY ph.pharmacy_id, ph.address
 ORDER BY total_revenue DESC;
 
--- Топ продаж по товарам
 CREATE OR REPLACE VIEW vw_top_products AS
 SELECT
     p.name,
@@ -1485,7 +1208,6 @@ JOIN product p ON p.product_id = oi.product_id
 GROUP BY p.product_id, p.name
 ORDER BY total_revenue DESC;
 
--- Продажи по категории "рецепт / без рецепта"
 CREATE OR REPLACE VIEW vw_sales_by_prescription AS
 SELECT
     CASE WHEN p.prescription_required THEN 'По рецепту' ELSE 'Без рецепта' END AS category,
@@ -1495,7 +1217,6 @@ FROM order_item oi
 JOIN product p ON p.product_id = oi.product_id
 GROUP BY p.prescription_required;
 
--- Остатки ниже порога (для алертов)
 CREATE OR REPLACE VIEW vw_low_stock AS
 SELECT
     ph.address AS pharmacy,
@@ -1506,70 +1227,3 @@ JOIN pharmacy ph ON ph.pharmacy_id = sb.pharmacy_id
 JOIN product  p  ON p.product_id  = sb.product_id
 WHERE sb.remaining_qty < 20
 ORDER BY sb.remaining_qty;
-
-
-
-
--- Пересоздаём таблицу receipt
-ALTER TABLE receipt DROP CONSTRAINT receipt_receipt_number_key;
-ALTER TABLE receipt ADD CONSTRAINT receipt_number_date_unique 
-    UNIQUE (receipt_number, date);
-
--- Обновляем процедуру добавления чека
-CREATE OR REPLACE PROCEDURE sp_add_receipt(
-    p_pharmacy_id INT, p_employee_id INT,
-    p_date DATE,
-    OUT p_id INT
-)
-LANGUAGE plpgsql AS $$
-DECLARE
-    v_number INT;
-BEGIN
-    -- Автоматически генерируем номер чека для данной даты
-    SELECT COALESCE(MAX(receipt_number), 0) + 1
-    INTO v_number
-    FROM receipt
-    WHERE date = p_date;
-
-    INSERT INTO receipt(receipt_number, pharmacy_id, employee_id, total_amount, date, time)
-    VALUES (v_number, p_pharmacy_id, p_employee_id, 0, p_date, CURRENT_TIME)
-    RETURNING receipt_id INTO p_id;
-END;
-$$;
-
--- Обновляем процедуру изменения чека
-CREATE OR REPLACE PROCEDURE sp_update_receipt(
-    p_id INT, p_pharmacy_id INT,
-    p_employee_id INT, p_date DATE
-)
-LANGUAGE plpgsql AS $$
-DECLARE
-    v_number INT;
-    v_old_date DATE;
-BEGIN
-    SELECT date INTO v_old_date FROM receipt WHERE receipt_id = p_id;
-
-    -- Если дата изменилась — пересчитываем номер
-    IF v_old_date != p_date THEN
-        SELECT COALESCE(MAX(receipt_number), 0) + 1
-        INTO v_number
-        FROM receipt
-        WHERE date = p_date;
-    ELSE
-        SELECT receipt_number INTO v_number
-        FROM receipt WHERE receipt_id = p_id;
-    END IF;
-
-    UPDATE receipt
-    SET pharmacy_id = p_pharmacy_id,
-        employee_id = p_employee_id,
-        date        = p_date,
-        receipt_number = v_number
-    WHERE receipt_id = p_id;
-
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Чек с id=% не найден', p_id;
-    END IF;
-END;
-$$;
-

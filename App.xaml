@@ -41,14 +41,20 @@
                 <Label Content="ФИО *"/>
                 <TextBox Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="OnlyLetters_PreviewTextInput"/>
                 <Label Content="IDNP * (13 цифр)" Margin="0,12,0,0"/>
-                <TextBox Text="{Binding Idnp, UpdateSourceTrigger=PropertyChanged}" MaxLength="13"/>
+                <TextBox Text="{Binding Idnp, UpdateSourceTrigger=PropertyChanged}" MaxLength="13" PreviewTextInput="OnlyDigits_PreviewTextInput"/>
                 <Label Content="Телефон * (начинается с +)" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="PhoneNumber_PreviewTextInput"/>
                 <Label Content="Адрес" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"/>
                 <Label Content="Зарплата * (> 0)" Margin="0,12,0,0"/>
                 <!-- attached Price_PreviewTextInput so decimal separator is handled correctly -->
-                <TextBox Text="{Binding Salary, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="Price_PreviewTextInput"/>
+                <TextBox PreviewTextInput="Price_PreviewTextInput">
+                    <TextBox.Text>
+                        <Binding Path="Entity.Salary"
+                        UpdateSourceTrigger="LostFocus"
+                        StringFormat="{}{0:0.##}"/>
+                    </TextBox.Text>
+                </TextBox>
                 <Label Content="Должность *" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Position, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="OnlyLetters_PreviewTextInput"/>
             </StackPanel>
