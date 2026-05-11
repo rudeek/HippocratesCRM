@@ -37,7 +37,9 @@ namespace MyHippocrates.ViewModels
             {
                 if (string.IsNullOrWhiteSpace(_search)) return true;
                 if (obj is not Pharmacy p) return false;
-                return p.Address?.ToLower().Contains(_search.ToLower()) ?? false;
+                return p.Address.ToLower().Contains(_search.ToLower())
+                || p.Phone.ToLower().Contains(_search.ToLower())
+                || p.WorkingHours.ToLower().Contains(_search.ToLower());
             };
             AddCommand = new RelayCommand(_ => Add());
             EditCommand = new RelayCommand(p => Edit(p as Pharmacy), p => p is Pharmacy);

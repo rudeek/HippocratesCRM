@@ -37,6 +37,9 @@ namespace MyHippocrates.ViewModels
                 if (string.IsNullOrWhiteSpace(_search)) return true;
                 if (obj is not Employee e) return false;
                 return e.FullName.ToLower().Contains(_search.ToLower())
+                    || e.Phone.ToLower().Contains(_search.ToLower())
+                    || e.Idnp.ToLower().Contains(_search.ToLower())
+                    || e.Address.ToLower().Contains(_search.ToLower())
                     || (e.Position?.ToLower().Contains(_search.ToLower()) ?? false);
             };
             AddCommand = new RelayCommand(_ => Add());
