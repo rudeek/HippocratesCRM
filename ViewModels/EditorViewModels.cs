@@ -13,15 +13,29 @@ namespace MyHippocrates.ViewModels
     {
         public Product Entity { get; }
         public ObservableCollection<Manufacturer> Manufacturers { get; }
+        public ObservableCollection<Category> Categories { get; }
 
-        public ProductEditorViewModel(Product entity, ObservableCollection<Manufacturer> manufacturers)
+        public ProductEditorViewModel(Product entity, ObservableCollection<Manufacturer> manufacturers, ObservableCollection<Category> categories)
         {
             Entity = entity;
             Manufacturers = manufacturers;
+            Categories = categories;
             if (Entity.ProductionDate == default)
                 Entity.ProductionDate = DateTime.UtcNow;
             if (Entity.ExpirationDate == default)
                 Entity.ExpirationDate = DateTime.UtcNow.AddYears(2);
+        }
+    }
+
+    public class EmployeeEditorViewModel
+    {
+        public Employee Entity { get; }
+        public ObservableCollection<Role> Roles { get; }
+
+        public EmployeeEditorViewModel(Employee entity, ObservableCollection<Role> roles)
+        {
+            Entity = entity;
+            Roles = roles;
         }
     }
 
@@ -153,6 +167,69 @@ namespace MyHippocrates.ViewModels
             Entity = entity;
             Pharmacies = pharmacies;
             Products = products;
+        }
+    }
+
+
+    // ══ Добавить в ViewModels/EditorViewModels.cs ══
+
+    // ── CategoryEditorViewModel ───────────────────────────────────
+    // Category — простая сущность, DataTemplate в App.xaml
+    // использует Category напрямую (как Manufacturer/Pharmacy),
+    // поэтому отдельный editor VM не нужен.
+    // Но для единообразия с паттерном добавляем пустую обёртку:
+    // (можно не добавлять — EditDialog умеет работать с Category напрямую)
+
+    // ── RoleEditorViewModel ───────────────────────────────────────
+    // Аналогично — Role простая, DataTemplate работает с Role напрямую.
+
+    // ── SystemUserEditorViewModel ─────────────────────────────────
+    // SystemUser требует обёртки: нужен список сотрудников для ComboBox
+    // и отдельное поле plain-text пароля (не хранится в модели).
+    public class SystemUserEditorViewModel : INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler? PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string name = "") =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+        public SystemUser Entity { get; }
+
+        /// <summary>
+        /// Только для записей, у которых ещё нет аккаунта (фильтрованный список).
+        /// При редактировании — все сотрудники (текущий сотрудник всегда доступен).
+        /// </summary>
+        public ObservableCollection<Employee> AvailableEmployees { get; }
+
+        /// <summary>
+        /// Plain-text пароль. При добавлении — обязателен.
+        /// При редактировании — оставить пустым, чтобы не менять пароль.
+        /// </summary>
+        private string _plainPassword = "";
+        public string PlainPassword
+        {
+            get => _plainPassword;
+            set { _plainPassword = value; OnPropertyChanged(); }
+        }
+
+        private Employee? _selectedEmployee;
+        public Employee? SelectedEmployee
+        {
+            get => _selectedEmployee;
+            set
+            {
+                _selectedEmployee = value;
+                Entity.EmployeeId = value?.Id ?? 0;
+                OnPropertyChanged();
+            }
+        }
+
+        public SystemUserEditorViewModel(
+            SystemUser entity,
+            ObservableCollection<Employee> availableEmployees)
+        {
+            Entity = entity;
+            AvailableEmployees = availableEmployees;
+            _selectedEmployee = availableEmployees.FirstOrDefault(e => e.Id == entity.EmployeeId);
         }
     }
 }

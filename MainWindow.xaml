@@ -637,7 +637,7 @@
                             <DataGridTextColumn Header="Телефон"   Binding="{Binding Phone}"                              Width="140"/>
                             <DataGridTextColumn Header="Адрес"     Binding="{Binding Address}"                            Width="220"/>
                             <DataGridTextColumn Header="Зарплата"  Binding="{Binding Salary, StringFormat={}{0:F2}}"      Width="110"/>
-                            <DataGridTextColumn Header="Должность" Binding="{Binding Position}"                           Width="130"/>
+                            <DataGridTextColumn Header="Должность" Binding="{Binding Role.Name}"                           Width="130"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
@@ -825,6 +825,191 @@
                             <DataGridTextColumn Header="Аптека"  Binding="{Binding Pharmacy.Address}" Width="*"/>
                             <DataGridTextColumn Header="Товар"   Binding="{Binding Product.Name}"     Width="*"/>
                             <DataGridTextColumn Header="Остаток" Binding="{Binding RemainingQty}"     Width="110"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- ══ Добавить три TabItem в TabControl в MainWindow.xaml ══ -->
+
+            <!-- ══ КАТЕГОРИИ ═════════════════════════════════════ -->
+            <TabItem Header="Категории">
+                <Grid Margin="24 16 24 16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" Margin="0 0 0 14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Style="{StaticResource SearchBox}"
+                                 HorizontalAlignment="Left"
+                                 Text="{Binding CategoryVM.SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button Style="{StaticResource BtnAdd}" Command="{Binding CategoryVM.AddCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="⊕" FontSize="15" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Добавить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnEdit}" Margin="8 0"
+                                    Command="{Binding CategoryVM.EditCommand}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=CategoryGrid}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="✎" FontSize="14" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Изменить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnDelete}"
+                                    Command="{Binding CategoryVM.DeleteCommand}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=CategoryGrid}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🗑" FontSize="13" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Удалить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                    <DataGrid Grid.Row="1" x:Name="CategoryGrid"
+                              ItemsSource="{Binding CategoryVM.View}"
+                              LoadingRow="DataGrid_LoadingRow"
+                              UnloadingRow="DataGrid_UnloadingRow">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="№" Width="56">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Style="{StaticResource RowNumStyle}"
+                                                   Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Название"  Binding="{Binding Name}"        Width="220"/>
+                            <DataGridTextColumn Header="Описание"  Binding="{Binding Description}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- ══ ДОЛЖНОСТИ ═════════════════════════════════════ -->
+            <TabItem Header="Должности">
+                <Grid Margin="24 16 24 16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" Margin="0 0 0 14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Style="{StaticResource SearchBox}"
+                                 HorizontalAlignment="Left"
+                                 Text="{Binding RoleVM.SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button Style="{StaticResource BtnAdd}" Command="{Binding RoleVM.AddCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="⊕" FontSize="15" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Добавить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnEdit}" Margin="8 0"
+                                    Command="{Binding RoleVM.EditCommand}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=RoleGrid}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="✎" FontSize="14" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Изменить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnDelete}"
+                                    Command="{Binding RoleVM.DeleteCommand}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=RoleGrid}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🗑" FontSize="13" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Удалить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                    <DataGrid Grid.Row="1" x:Name="RoleGrid"
+                              ItemsSource="{Binding RoleVM.View}"
+                              LoadingRow="DataGrid_LoadingRow"
+                              UnloadingRow="DataGrid_UnloadingRow">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="№" Width="56">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Style="{StaticResource RowNumStyle}"
+                                                   Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Название"  Binding="{Binding Name}"                                Width="200"/>
+                            <DataGridTextColumn Header="Зарплата"  Binding="{Binding FixedSalary, StringFormat={}{0:F2}}" Width="130"/>
+                            <DataGridTextColumn Header="Описание"  Binding="{Binding Description}"                        Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- ══ ПОЛЬЗОВАТЕЛИ СИСТЕМЫ ══════════════════════════ -->
+            <TabItem Header="Пользователи">
+                <Grid Margin="24 16 24 16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0" Margin="0 0 0 14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Style="{StaticResource SearchBox}"
+                                 HorizontalAlignment="Left"
+                                 Text="{Binding SystemUserVM.SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button Style="{StaticResource BtnAdd}" Command="{Binding SystemUserVM.AddCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="⊕" FontSize="15" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Добавить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnEdit}" Margin="8 0"
+                                    Command="{Binding SystemUserVM.EditCommand}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=SystemUserGrid}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="✎" FontSize="14" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Изменить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnDelete}"
+                                    Command="{Binding SystemUserVM.DeleteCommand}"
+                                    CommandParameter="{Binding SelectedItem, ElementName=SystemUserGrid}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="🗑" FontSize="13" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Удалить" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                    <DataGrid Grid.Row="1" x:Name="SystemUserGrid"
+                              ItemsSource="{Binding SystemUserVM.View}"
+                              LoadingRow="DataGrid_LoadingRow"
+                              UnloadingRow="DataGrid_UnloadingRow">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="№" Width="56">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Style="{StaticResource RowNumStyle}"
+                                                   Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Сотрудник"    Binding="{Binding Employee.FullName}" Width="*"/>
+                            <DataGridTextColumn Header="Логин"        Binding="{Binding Login}"            Width="160"/>
+                            <DataGridTextColumn Header="Роль системы" Binding="{Binding SystemRole}"       Width="120"/>
+                            <DataGridCheckBoxColumn Header="Активен"  Binding="{Binding IsActive}"         Width="90"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>

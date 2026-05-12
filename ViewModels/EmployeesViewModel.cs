@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
+using Microsoft.EntityFrameworkCore;
 using MyHippocrates.Commands;
 using MyHippocrates.Data;
 using MyHippocrates.Models;
@@ -14,6 +16,7 @@ namespace MyHippocrates.ViewModels
     {
         private readonly AppDbContext _ctx;
         private readonly ObservableCollection<Employee> _employees;
+        private readonly ObservableCollection<Role> _roles;
         public ICollectionView View { get; }
 
         private string _search = "";
@@ -27,10 +30,14 @@ namespace MyHippocrates.ViewModels
         public RelayCommand EditCommand { get; }
         public RelayCommand DeleteCommand { get; }
 
-        public EmployeesViewModel(AppDbContext ctx, ObservableCollection<Employee> employees)
+        public EmployeesViewModel(AppDbContext ctx,
+            ObservableCollection<Employee> employees,
+            ObservableCollection<Role> roles)
         {
             _ctx = ctx;
             _employees = employees;
+            _roles = roles;
+
             View = CollectionViewSource.GetDefaultView(_employees);
             View.Filter = obj =>
             {
@@ -40,8 +47,9 @@ namespace MyHippocrates.ViewModels
                     || e.Phone.ToLower().Contains(_search.ToLower())
                     || e.Idnp.ToLower().Contains(_search.ToLower())
                     || e.Address.ToLower().Contains(_search.ToLower())
-                    || (e.Position?.ToLower().Contains(_search.ToLower()) ?? false);
+                    || (e.Role?.Name?.ToLower().Contains(_search.ToLower()) ?? false);
             };
+
             AddCommand = new RelayCommand(_ => Add());
             EditCommand = new RelayCommand(e => Edit(e as Employee), e => e is Employee);
             DeleteCommand = new RelayCommand(e => Delete(e as Employee), e => e is Employee);
@@ -50,11 +58,17 @@ namespace MyHippocrates.ViewModels
         private void Add()
         {
             var entity = new Employee();
-            var dlg = new Views.EditDialog(entity, _ctx, isNew: true)
-            { Owner = Application.Current.MainWindow, Title = "Добавить сотрудника", Icon = new BitmapImage(new Uri("pack://application:,,,/add.ico")) };
+            var vm = new EmployeeEditorViewModel(entity, _roles);
+            var dlg = new Views.EditDialog(vm, _ctx, isNew: true)
+            {
+                Owner = Application.Current.MainWindow,
+                Title = "Добавить сотрудника",
+                Icon = new BitmapImage(new Uri("pack://application:,,,/add.ico"))
+            };
             dlg.TxtTitle.Text = "Добавление записи";
             if (dlg.ShowDialog() == true)
             {
+                entity.Role = _roles.FirstOrDefault(r => r.Id == entity.RoleId);
                 _employees.Add(entity);
                 View.Refresh();
             }
@@ -71,10 +85,15 @@ namespace MyHippocrates.ViewModels
                 Phone = e.Phone,
                 Address = e.Address,
                 Salary = e.Salary,
-                Position = e.Position
+                RoleId = e.RoleId
             };
-            var dlg = new Views.EditDialog(copy, _ctx, isNew: false)
-            { Owner = Application.Current.MainWindow, Title = "Редактировать сотрудника", Icon = new BitmapImage(new Uri("pack://application:,,,/edit.ico")) };
+            var vm = new EmployeeEditorViewModel(copy, _roles);
+            var dlg = new Views.EditDialog(vm, _ctx, isNew: false)
+            {
+                Owner = Application.Current.MainWindow,
+                Title = "Редактировать сотрудника",
+                Icon = new BitmapImage(new Uri("pack://application:,,,/edit.ico"))
+            };
             if (dlg.ShowDialog() == true)
             {
                 e.FullName = copy.FullName;
@@ -82,7 +101,8 @@ namespace MyHippocrates.ViewModels
                 e.Phone = copy.Phone;
                 e.Address = copy.Address;
                 e.Salary = copy.Salary;
-                e.Position = copy.Position;
+                e.RoleId = copy.RoleId;
+                e.Role = _roles.FirstOrDefault(r => r.Id == copy.RoleId);
 
                 var idx = _employees.IndexOf(e);
                 if (idx >= 0)
@@ -117,7 +137,9 @@ namespace MyHippocrates.ViewModels
         {
             _ctx.ChangeTracker.Clear();
             _employees.Clear();
-            foreach (var e in _ctx.Employees.OrderBy(x => x.Id).ToList())
+            foreach (var e in _ctx.Employees
+                .Include(x => x.Role)
+                .OrderBy(x => x.Id).ToList())
                 _employees.Add(e);
             View.Refresh();
         }

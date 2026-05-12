@@ -35,28 +35,47 @@
             </StackPanel>
         </DataTemplate>
 
-        <!-- EMPLOYEE -->
-        <DataTemplate DataType="{x:Type models:Employee}">
+        <!-- EMPLOYEE (обновлённый — через EmployeeEditorViewModel) -->
+        <DataTemplate DataType="{x:Type vm:EmployeeEditorViewModel}">
             <StackPanel Width="440">
                 <Label Content="ФИО *"/>
-                <TextBox Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="OnlyLetters_PreviewTextInput"/>
+                <TextBox Text="{Binding Entity.FullName, UpdateSourceTrigger=PropertyChanged}"
+                         PreviewTextInput="OnlyLetters_PreviewTextInput"/>
                 <Label Content="IDNP * (13 цифр)" Margin="0,12,0,0"/>
-                <TextBox Text="{Binding Idnp, UpdateSourceTrigger=PropertyChanged}" MaxLength="13" PreviewTextInput="OnlyDigits_PreviewTextInput"/>
+                <TextBox Text="{Binding Entity.Idnp, UpdateSourceTrigger=PropertyChanged}"
+                         MaxLength="13"
+                         PreviewTextInput="OnlyDigits_PreviewTextInput"/>
                 <Label Content="Телефон * (начинается с +)" Margin="0,12,0,0"/>
-                <TextBox Text="{Binding Phone, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="PhoneNumber_PreviewTextInput"/>
+                <TextBox Text="{Binding Entity.Phone, UpdateSourceTrigger=PropertyChanged}"
+                         PreviewTextInput="PhoneNumber_PreviewTextInput"/>
                 <Label Content="Адрес" Margin="0,12,0,0"/>
-                <TextBox Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox Text="{Binding Entity.Address, UpdateSourceTrigger=PropertyChanged}"/>
                 <Label Content="Зарплата * (> 0)" Margin="0,12,0,0"/>
-                <!-- attached Price_PreviewTextInput so decimal separator is handled correctly -->
                 <TextBox PreviewTextInput="Price_PreviewTextInput">
                     <TextBox.Text>
                         <Binding Path="Entity.Salary"
-                        UpdateSourceTrigger="LostFocus"
-                        StringFormat="{}{0:0.##}"/>
+                                 UpdateSourceTrigger="LostFocus"
+                                 StringFormat="{}{0:0.##}"/>
                     </TextBox.Text>
                 </TextBox>
                 <Label Content="Должность *" Margin="0,12,0,0"/>
-                <TextBox Text="{Binding Position, UpdateSourceTrigger=PropertyChanged}" PreviewTextInput="OnlyLetters_PreviewTextInput"/>
+                <ComboBox ItemsSource="{Binding Roles}"
+                          SelectedValue="{Binding Entity.RoleId, Mode=TwoWay}"
+                          SelectedValuePath="Id"
+                          DisplayMemberPath="Name">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Padding="2 4">
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="{}{0} — {1:F0} MDL">
+                                        <Binding Path="Name"/>
+                                        <Binding Path="FixedSalary"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </StackPanel>
         </DataTemplate>
 
@@ -70,6 +89,17 @@
                           SelectedValuePath="Id"
                           DisplayMemberPath="Name"
                           SelectedValue="{Binding Entity.ManufacturerId, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" Padding="2 4"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <Label Content="Категория *" Margin="0,12,0,0"/>
+                <ComboBox ItemsSource="{Binding Categories}"
+                          SelectedValuePath="Id"
+                          DisplayMemberPath="Name"
+                          SelectedValue="{Binding Entity.CategoryId, Mode=TwoWay}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Name}" Padding="2 4"/>
@@ -184,6 +214,67 @@
                 </ComboBox>
                 <Label Content="Остаток (≥ 0)" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Entity.RemainingQty, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- ══ Добавить в Application.Resources в App.xaml ══ -->
+
+        <!-- CATEGORY -->
+        <DataTemplate DataType="{x:Type models:Category}">
+            <StackPanel Width="440">
+                <Label Content="Название *"/>
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+                <Label Content="Описание" Margin="0,12,0,0"/>
+                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                         Height="80" AcceptsReturn="True" TextWrapping="Wrap"/>
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- ROLE -->
+        <DataTemplate DataType="{x:Type models:Role}">
+            <StackPanel Width="440">
+                <Label Content="Название *"/>
+                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+                <Label Content="Фиксированная зарплата * (> 0)" Margin="0,12,0,0"/>
+                <TextBox PreviewTextInput="Price_PreviewTextInput">
+                    <TextBox.Text>
+                        <Binding Path="FixedSalary"
+                                 UpdateSourceTrigger="LostFocus"
+                                 StringFormat="{}{0:0.##}"/>
+                    </TextBox.Text>
+                </TextBox>
+                <Label Content="Описание" Margin="0,12,0,0"/>
+                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                         Height="80" AcceptsReturn="True" TextWrapping="Wrap"/>
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- SYSTEM USER -->
+        <DataTemplate DataType="{x:Type vm:SystemUserEditorViewModel}">
+            <StackPanel Width="440">
+                <Label Content="Сотрудник *"/>
+                <ComboBox ItemsSource="{Binding AvailableEmployees}"
+                          SelectedItem="{Binding SelectedEmployee, Mode=TwoWay}"
+                          DisplayMemberPath="FullName"
+                          SelectedValuePath="Id">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding FullName}" Padding="2 4"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <Label Content="Логин *" Margin="0,12,0,0"/>
+                <TextBox Text="{Binding Entity.Login, UpdateSourceTrigger=PropertyChanged}"/>
+                <Label Content="Пароль * (при редактировании оставьте пустым, чтобы не менять)"
+                       Margin="0,12,0,0"/>
+                <TextBox Text="{Binding PlainPassword, UpdateSourceTrigger=PropertyChanged}"/>
+                <Label Content="Системная роль (устанавливается автоматически триггером БД)"
+                       Margin="0,12,0,0"/>
+                <TextBox Text="{Binding Entity.SystemRole}" IsReadOnly="True"
+                         Background="#f0f0f0" Foreground="#888"/>
+                <CheckBox Content="Активен"
+                          IsChecked="{Binding Entity.IsActive, Mode=TwoWay}"
+                          Margin="0,14,0,0"/>
             </StackPanel>
         </DataTemplate>
 

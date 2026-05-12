@@ -1,3 +1,20 @@
+-- ══════════════════════════════════════════════════════════════════
+-- HIPPOCRATES — Полный сценарий базы данных
+-- ══════════════════════════════════════════════════════════════════
+
+CREATE TABLE category (
+    category_id   SERIAL PRIMARY KEY,
+    name          VARCHAR(100) NOT NULL UNIQUE,
+    description   TEXT
+);
+
+CREATE TABLE role (
+    role_id       SERIAL PRIMARY KEY,
+    name          VARCHAR(100) NOT NULL UNIQUE,
+    fixed_salary  NUMERIC(10,2) NOT NULL CHECK (fixed_salary > 0),
+    description   TEXT
+);
+
 CREATE TABLE manufacturer (
     manufacturer_id SERIAL PRIMARY KEY,
     name            VARCHAR(150) NOT NULL,
@@ -10,6 +27,7 @@ CREATE TABLE manufacturer (
 CREATE TABLE product (
     product_id            SERIAL PRIMARY KEY,
     name                  VARCHAR(150)  NOT NULL,
+    category_id           INT           NOT NULL REFERENCES category(category_id),
     manufacturer_id       INT           NOT NULL REFERENCES manufacturer(manufacturer_id) ON DELETE CASCADE,
     expiration_date       DATE          NOT NULL,
     production_date       DATE          NOT NULL,
@@ -34,7 +52,17 @@ CREATE TABLE employee (
     phone       VARCHAR(20)   NOT NULL,
     address     VARCHAR(255)  NOT NULL,
     salary      NUMERIC(10,2) NOT NULL,
-    position    VARCHAR(100)  NOT NULL
+    role_id     INT           NOT NULL REFERENCES role(role_id)
+);
+
+CREATE TABLE system_userss (
+    user_id       SERIAL PRIMARY KEY,
+    employee_id   INT          NOT NULL UNIQUE REFERENCES employee(employee_id) ON DELETE CASCADE,
+    login         VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    system_role   VARCHAR(10)  NOT NULL DEFAULT 'user'
+                               CHECK (system_role IN ('admin', 'user')),
+    is_active     BOOLEAN      NOT NULL DEFAULT TRUE
 );
 
 CREATE TABLE receipt (
@@ -53,8 +81,8 @@ CREATE TABLE order_item (
     product_id  INT           NOT NULL REFERENCES product(product_id) ON DELETE CASCADE,
     quantity    INT           NOT NULL CHECK (quantity > 0),
     unit_price  NUMERIC(10,2) NOT NULL,
+	discount    NUMERIC(5,2)  NOT NULL DEFAULT 0 CHECK (discount >= 0 AND discount <= 100),
     total_price NUMERIC(10,2) GENERATED ALWAYS AS (quantity * unit_price * (1 - discount / 100.0)) STORED,
-    discount    NUMERIC(5,2)  NOT NULL DEFAULT 0 CHECK (discount >= 0 AND discount <= 100),
     PRIMARY KEY (receipt_id, product_id)
 );
 
@@ -66,7 +94,7 @@ CREATE TABLE stock_balance (
 );
 
 -- ══════════════════════════════════════════════════════════════════
--- ТРИГГЕР: автозаполнение unit_price из таблицы product
+-- ТРИГГЕРЫ
 -- ══════════════════════════════════════════════════════════════════
 
 CREATE OR REPLACE FUNCTION set_unit_price()
@@ -82,11 +110,65 @@ BEFORE INSERT ON order_item
 FOR EACH ROW
 EXECUTE FUNCTION set_unit_price();
 
+CREATE OR REPLACE FUNCTION set_system_role()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_role_name VARCHAR(100);
+BEGIN
+    SELECT r.name INTO v_role_name
+    FROM employee e
+    JOIN role r ON r.role_id = e.role_id
+    WHERE e.employee_id = NEW.employee_id;
+
+    IF v_role_name = 'Accountant' THEN
+        NEW.system_role := 'admin';
+    ELSE
+        NEW.system_role := 'user';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_set_system_role
+BEFORE INSERT ON system_userss
+FOR EACH ROW
+EXECUTE FUNCTION set_system_role();
+
 -- ══════════════════════════════════════════════════════════════════
 -- ДАННЫЕ
 -- ══════════════════════════════════════════════════════════════════
 
-TRUNCATE stock_balance, order_item, receipt, employee, pharmacy, product, manufacturer RESTART IDENTITY CASCADE;
+TRUNCATE system_userss, stock_balance, order_item, receipt,
+         employee, pharmacy, product, manufacturer, role, category
+RESTART IDENTITY CASCADE;
+
+INSERT INTO category (name, description) VALUES
+('Антибиотики',          'Препараты для борьбы с бактериальными инфекциями'),
+('Обезболивающие',       'Анальгетики и противовоспалительные средства'),
+('Сердечно-сосудистые',  'Препараты для лечения заболеваний сердца и сосудов'),
+('Антидиабетические',    'Препараты для лечения сахарного диабета'),
+('Антигистаминные',      'Препараты против аллергии'),
+('Гастроэнтерология',    'Препараты для лечения ЖКТ'),
+('Гормональные',         'Кортикостероиды и гормональные препараты'),
+('Психиатрические',      'Антидепрессанты, антипсихотики, анксиолитики'),
+('Неврологические',      'Противосудорожные и препараты при болезни Паркинсона'),
+('Противовирусные',      'Препараты против вирусных инфекций'),
+('Противогрибковые',     'Антифунгальные препараты'),
+('Опиоидные анальгетики','Сильные обезболивающие на основе опиоидов'),
+('Витамины и минералы',  'Витаминные и минеральные добавки'),
+('Бронхолегочные',       'Препараты для лечения дыхательных путей'),
+('Диуретики',            'Мочегонные препараты'),
+('Антикоагулянты',       'Препараты для разжижения крови'),
+('Противоподагрические', 'Препараты для лечения подагры'),
+('НПВС',                 'Нестероидные противовоспалительные средства');
+
+-- role_id: 1=Pharmacist, 2=Manager, 3=Cashier, 4=Accountant
+INSERT INTO role (name, fixed_salary, description) VALUES
+('Pharmacist',  9000.00, 'Фармацевт — отпуск лекарственных средств'),
+('Manager',    12000.00, 'Управляющий аптекой'),
+('Cashier',     7500.00, 'Кассир — приём оплаты'),
+('Accountant', 13000.00, 'Бухгалтер — финансовый учёт, доступ admin');
 
 INSERT INTO manufacturer (name, country, address, phone, email) VALUES
 ('Bayer AG','Germany','Leverkusen, Kaiser-Wilhelm-Allee 1','+4921430000','contact@bayer.com'),
@@ -120,107 +202,112 @@ INSERT INTO manufacturer (name, country, address, phone, email) VALUES
 ('Biocon Ltd.','India','Bangalore, 20th KM Hosur Rd','+918028082808','info@biocon.com'),
 ('Egis Pharmaceuticals','Hungary','Budapest, Kereszturi ut 30-38','+3614650900','info@egis.hu');
 
-INSERT INTO product (name, manufacturer_id, expiration_date, production_date, unit, description, prescription_required, purchase_price, sale_price) VALUES
-('Aspirin 500mg',1,'2025-04-25','2024-10-16','шт','Pain reliever and fever reducer',FALSE,5.0,8.5),
-('Amoxicillin 500mg',2,'2025-10-09','2023-01-26','шт','Antibiotic for bacterial infections',TRUE,12.0,18.0),
-('Ibuprofen 400mg',3,'2025-08-17','2023-09-08','шт','Anti-inflammatory painkiller',FALSE,6.5,10.0),
-('Metformin 850mg',4,'2025-04-15','2023-05-23','шт','Diabetes type 2 treatment',TRUE,8.0,13.5),
-('Lisinopril 10mg',5,'2026-07-13','2024-11-23','шт','ACE inhibitor for blood pressure',TRUE,9.0,15.0),
-('Atorvastatin 20mg',6,'2026-08-28','2023-03-31','шт','Cholesterol-lowering statin',TRUE,14.0,22.0),
-('Omeprazole 20mg',7,'2025-02-02','2024-03-08','шт','Proton pump inhibitor for acid reflux',FALSE,7.5,12.0),
-('Paracetamol 500mg',8,'2025-04-06','2023-01-31','шт','Analgesic and antipyretic',FALSE,3.5,6.0),
-('Losartan 50mg',9,'2025-08-27','2023-08-12','шт','Angiotensin receptor blocker',TRUE,10.5,17.0),
-('Cetirizine 10mg',10,'2026-09-09','2024-06-01','шт','Antihistamine for allergies',FALSE,5.5,9.0),
-('Doxycycline 100mg',11,'2026-07-29','2023-01-28','шт','Broad-spectrum antibiotic',TRUE,11.0,16.5),
-('Simvastatin 40mg',12,'2026-10-28','2023-07-23','шт','Statin for cholesterol reduction',TRUE,13.0,20.0),
-('Clopidogrel 75mg',13,'2026-07-13','2024-12-19','шт','Antiplatelet agent',TRUE,16.0,25.0),
-('Pantoprazole 40mg',14,'2025-08-14','2024-03-05','шт','Proton pump inhibitor',FALSE,8.5,14.0),
-('Amlodipine 5mg',15,'2026-08-27','2024-04-04','шт','Calcium channel blocker',TRUE,9.5,15.5),
-('Warfarin 5mg',16,'2025-01-07','2023-10-12','шт','Anticoagulant blood thinner',TRUE,12.5,19.0),
-('Furosemide 40mg',17,'2026-12-16','2023-06-13','шт','Loop diuretic',TRUE,7.0,11.5),
-('Prednisolone 5mg',18,'2025-12-15','2024-03-08','шт','Corticosteroid anti-inflammatory',TRUE,6.0,10.5),
-('Azithromycin 500mg',19,'2025-06-09','2023-10-12','шт','Macrolide antibiotic',TRUE,15.0,23.0),
-('Diclofenac 50mg',20,'2025-12-11','2023-08-09','шт','NSAID anti-inflammatory',FALSE,5.5,9.5),
-('Ciprofloxacin 500mg',21,'2025-04-05','2023-04-15','шт','Fluoroquinolone antibiotic',TRUE,13.0,20.0),
-('Metronidazole 400mg',22,'2025-04-10','2024-01-25','шт','Antiprotozoal antibiotic',TRUE,6.0,9.5),
-('Enalapril 10mg',23,'2025-12-19','2024-01-03','шт','ACE inhibitor',TRUE,8.5,14.0),
-('Ramipril 5mg',24,'2025-09-28','2024-09-10','шт','ACE inhibitor',TRUE,9.0,15.0),
-('Bisoprolol 5mg',25,'2026-04-16','2023-02-14','шт','Beta blocker',TRUE,10.0,16.0),
-('Carvedilol 25mg',26,'2025-05-08','2024-07-03','шт','Beta blocker',TRUE,11.5,18.0),
-('Valsartan 80mg',27,'2025-03-22','2024-01-23','шт','ARB antihypertensive',TRUE,12.0,19.0),
-('Hydrochlorothiazide 25mg',28,'2025-10-28','2024-07-19','шт','Thiazide diuretic',TRUE,5.0,8.0),
-('Spironolactone 50mg',29,'2026-09-26','2024-10-05','шт','Potassium-sparing diuretic',TRUE,8.0,13.0),
-('Digoxin 0.25mg',30,'2026-08-15','2024-01-06','шт','Cardiac glycoside',TRUE,7.5,12.5),
-('Allopurinol 300mg',1,'2026-12-23','2023-07-16','шт','Gout treatment xanthine oxidase inhibitor',FALSE,6.0,10.0),
-('Colchicine 0.5mg',2,'2025-02-16','2023-03-13','шт','Anti-gout agent',TRUE,14.0,22.0),
-('Levothyroxine 100mcg',3,'2025-08-22','2024-11-08','шт','Thyroid hormone replacement',TRUE,7.0,11.5),
-('Insulin Glargine 300IU',4,'2025-03-23','2023-10-24','шт','Long-acting insulin',TRUE,45.0,70.0),
-('Metoprolol 50mg',5,'2025-04-14','2023-08-27','шт','Beta-1 selective blocker',TRUE,9.0,14.5),
-('Propranolol 40mg',6,'2025-10-12','2024-01-25','шт','Beta blocker',TRUE,7.5,12.0),
-('Nifedipine 20mg',7,'2026-10-13','2024-04-09','шт','Calcium channel blocker',TRUE,8.0,13.0),
-('Diltiazem 60mg',8,'2025-06-16','2024-01-09','шт','Calcium channel blocker',TRUE,10.0,16.5),
-('Verapamil 80mg',9,'2025-12-30','2024-01-15','шт','Calcium channel blocker',TRUE,11.0,17.0),
-('Nitroglycerin 0.5mg',10,'2026-11-18','2023-08-03','шт','Antianginal nitrate',TRUE,16.0,25.0),
-('Isosorbide 20mg',11,'2026-12-20','2023-10-01','шт','Organic nitrate',TRUE,12.0,19.0),
-('Cephalexin 500mg',12,'2026-10-26','2024-11-30','шт','First-gen cephalosporin',TRUE,13.0,20.0),
-('Clindamycin 300mg',13,'2026-09-16','2023-03-15','шт','Lincosamide antibiotic',TRUE,14.0,22.0),
-('Erythromycin 500mg',14,'2025-06-25','2024-10-12','шт','Macrolide antibiotic',TRUE,12.0,19.0),
-('Clarithromycin 500mg',15,'2025-09-08','2024-06-30','шт','Macrolide antibiotic',TRUE,16.0,25.0),
-('Tetracycline 500mg',16,'2026-04-19','2023-06-17','шт','Broad-spectrum antibiotic',TRUE,8.0,13.0),
-('Trimethoprim 200mg',17,'2025-10-04','2024-01-24','шт','Antibiotic',TRUE,7.0,11.0),
-('Nitrofurantoin 100mg',18,'2026-12-06','2024-10-17','шт','Urinary antibiotic',TRUE,9.0,14.5),
-('Fluconazole 150mg',19,'2025-08-13','2024-07-24','шт','Antifungal',FALSE,10.0,16.0),
-('Ketoconazole 200mg',20,'2025-11-29','2024-12-02','шт','Antifungal',TRUE,9.0,14.5),
-('Acyclovir 400mg',21,'2025-08-23','2023-02-27','шт','Antiviral',FALSE,11.0,17.5),
-('Oseltamivir 75mg',22,'2025-11-20','2023-02-02','шт','Influenza antiviral',TRUE,25.0,38.0),
-('Hydroxychloroquine 200mg',23,'2025-10-02','2024-02-15','шт','Antimalarial DMARD',TRUE,18.0,28.0),
-('Sulfasalazine 500mg',24,'2025-08-05','2023-03-09','шт','Anti-inflammatory DMARD',TRUE,14.0,22.0),
-('Methotrexate 10mg',25,'2025-11-19','2024-08-03','шт','DMARD chemotherapy',TRUE,22.0,34.0),
-('Prednisone 5mg',26,'2026-11-03','2023-08-06','шт','Corticosteroid',TRUE,6.5,10.5),
-('Dexamethasone 4mg',27,'2026-02-10','2024-05-26','шт','Corticosteroid',TRUE,7.0,11.5),
-('Budesonide 200mcg',28,'2026-04-15','2024-10-20','шт','Inhaled corticosteroid',TRUE,20.0,31.0),
-('Salbutamol 100mcg',29,'2025-09-29','2023-05-27','шт','Beta-2 agonist bronchodilator',FALSE,11.0,17.0),
-('Salmeterol 50mcg',30,'2025-09-10','2023-05-23','шт','Long-acting beta-2 agonist',TRUE,22.0,34.0),
-('Montelukast 10mg',1,'2026-07-06','2024-07-28','шт','Leukotriene receptor antagonist',FALSE,15.0,23.0),
-('Ipratropium 20mcg',2,'2026-08-22','2023-09-27','шт','Anticholinergic bronchodilator',TRUE,18.0,28.0),
-('Esomeprazole 40mg',3,'2026-08-21','2024-03-14','шт','Proton pump inhibitor',FALSE,9.0,14.5),
-('Lansoprazole 30mg',4,'2026-01-06','2024-02-13','шт','Proton pump inhibitor',FALSE,8.0,13.0),
-('Ranitidine 150mg',5,'2025-05-22','2023-08-13','шт','H2 receptor antagonist',FALSE,6.0,9.5),
-('Famotidine 20mg',6,'2026-05-21','2024-06-05','шт','H2 receptor antagonist',FALSE,7.0,11.0),
-('Domperidone 10mg',7,'2025-02-18','2023-04-04','шт','Antiemetic prokinetic',FALSE,8.0,13.0),
-('Metoclopramide 10mg',8,'2025-06-06','2023-04-23','шт','Antiemetic prokinetic',FALSE,5.5,9.0),
-('Ondansetron 8mg',9,'2025-06-13','2024-10-04','шт','5-HT3 antiemetic',TRUE,12.0,19.0),
-('Loperamide 2mg',10,'2026-03-09','2024-11-27','шт','Antidiarrheal',FALSE,5.0,8.0),
-('Bisacodyl 5mg',11,'2025-03-07','2024-09-02','шт','Stimulant laxative',FALSE,4.0,6.5),
-('Lactulose 10g',12,'2026-01-26','2024-01-30','шт','Osmotic laxative',FALSE,6.0,9.5),
-('Sertraline 50mg',13,'2026-04-25','2024-09-02','шт','SSRI antidepressant',TRUE,16.0,25.0),
-('Fluoxetine 20mg',14,'2025-09-15','2024-06-25','шт','SSRI antidepressant',TRUE,14.0,22.0),
-('Escitalopram 10mg',15,'2025-01-12','2024-07-20','шт','SSRI antidepressant',TRUE,18.0,28.0),
-('Amitriptyline 25mg',16,'2025-04-28','2024-11-27','шт','Tricyclic antidepressant',TRUE,12.0,19.0),
-('Diazepam 5mg',17,'2026-07-04','2024-11-29','шт','Benzodiazepine anxiolytic',TRUE,10.0,16.0),
-('Alprazolam 0.5mg',18,'2026-10-19','2023-10-01','шт','Benzodiazepine',TRUE,13.0,20.0),
-('Zolpidem 10mg',19,'2025-04-25','2023-12-15','шт','Non-benzo hypnotic',TRUE,15.0,23.0),
-('Quetiapine 100mg',20,'2026-03-22','2023-10-28','шт','Atypical antipsychotic',TRUE,22.0,34.0),
-('Risperidone 2mg',21,'2026-04-10','2023-06-11','шт','Atypical antipsychotic',TRUE,20.0,31.0),
-('Haloperidol 5mg',22,'2025-09-27','2023-01-04','шт','Typical antipsychotic',TRUE,11.0,17.0),
-('Levodopa 250mg',23,'2025-07-02','2024-05-27','шт','Antiparkinsonian agent',TRUE,18.0,28.0),
-('Gabapentin 300mg',24,'2025-04-19','2024-06-03','шт','Anticonvulsant neuropathic pain',TRUE,14.0,22.0),
-('Pregabalin 75mg',25,'2025-11-02','2024-10-02','шт','Anticonvulsant neuropathic pain',TRUE,20.0,31.0),
-('Carbamazepine 200mg',26,'2026-06-04','2024-10-16','шт','Anticonvulsant mood stabilizer',TRUE,12.0,19.0),
-('Valproate 500mg',27,'2025-07-23','2024-09-15','шт','Anticonvulsant',TRUE,13.0,20.0),
-('Phenobarbital 100mg',28,'2026-01-18','2023-06-06','шт','Barbiturate anticonvulsant',TRUE,8.0,13.0),
-('Tramadol 50mg',29,'2026-07-07','2023-06-15','шт','Opioid analgesic',TRUE,14.0,22.0),
-('Codeine 30mg',30,'2025-01-01','2024-06-27','шт','Opioid analgesic cough suppressant',TRUE,12.0,19.0),
-('Morphine 10mg',1,'2025-11-28','2024-09-05','шт','Opioid analgesic',TRUE,20.0,31.0),
-('Fentanyl patch 25mcg',2,'2025-01-20','2024-05-15','шт','Transdermal opioid',TRUE,38.0,58.0),
-('Naproxen 500mg',3,'2026-01-07','2023-04-25','шт','NSAID analgesic',FALSE,7.0,11.0),
-('Meloxicam 15mg',4,'2025-09-03','2023-11-11','шт','Selective COX-2 NSAID',TRUE,10.0,16.0),
-('Etoricoxib 90mg',5,'2025-09-04','2023-03-01','шт','COX-2 inhibitor',TRUE,16.0,25.0),
-('Calcium carbonate 500mg',6,'2025-03-22','2024-08-03','шт','Antacid calcium supplement',FALSE,4.0,6.5),
-('Vitamin D3 1000IU',7,'2026-05-13','2023-03-29','шт','Vitamin supplement',FALSE,5.0,8.0),
-('Folic acid 5mg',8,'2026-06-30','2023-03-12','шт','B-vitamin supplement',FALSE,3.5,5.5),
-('Zinc sulfate 220mg',9,'2025-05-12','2023-05-09','шт','Mineral supplement',FALSE,4.5,7.0),
-('Magnesium oxide 400mg',10,'2026-05-02','2024-11-06','шт','Mineral supplement',FALSE,5.5,8.5);
+-- category_id: 1=Антибиотики 2=Обезболивающие 3=Сердечно-сосудистые
+-- 4=Антидиабетические 5=Антигистаминные 6=Гастроэнтерология
+-- 7=Гормональные 8=Психиатрические 9=Неврологические 10=Противовирусные
+-- 11=Противогрибковые 12=Опиоидные 13=Витамины 14=Бронхолегочные
+-- 15=Диуретики 16=Антикоагулянты 17=Противоподагрические 18=НПВС
+INSERT INTO product (name, category_id, manufacturer_id, expiration_date, production_date, unit, description, prescription_required, purchase_price, sale_price) VALUES
+('Aspirin 500mg',           2, 1,'2025-04-25','2024-10-16','шт','Pain reliever and fever reducer',FALSE,5.0,8.5),
+('Amoxicillin 500mg',       1, 2,'2025-10-09','2023-01-26','шт','Antibiotic for bacterial infections',TRUE,12.0,18.0),
+('Ibuprofen 400mg',        18, 3,'2025-08-17','2023-09-08','шт','Anti-inflammatory painkiller',FALSE,6.5,10.0),
+('Metformin 850mg',         4, 4,'2025-04-15','2023-05-23','шт','Diabetes type 2 treatment',TRUE,8.0,13.5),
+('Lisinopril 10mg',         3, 5,'2026-07-13','2024-11-23','шт','ACE inhibitor for blood pressure',TRUE,9.0,15.0),
+('Atorvastatin 20mg',       3, 6,'2026-08-28','2023-03-31','шт','Cholesterol-lowering statin',TRUE,14.0,22.0),
+('Omeprazole 20mg',         6, 7,'2025-02-02','2024-03-08','шт','Proton pump inhibitor for acid reflux',FALSE,7.5,12.0),
+('Paracetamol 500mg',       2, 8,'2025-04-06','2023-01-31','шт','Analgesic and antipyretic',FALSE,3.5,6.0),
+('Losartan 50mg',           3, 9,'2025-08-27','2023-08-12','шт','Angiotensin receptor blocker',TRUE,10.5,17.0),
+('Cetirizine 10mg',         5,10,'2026-09-09','2024-06-01','шт','Antihistamine for allergies',FALSE,5.5,9.0),
+('Doxycycline 100mg',       1,11,'2026-07-29','2023-01-28','шт','Broad-spectrum antibiotic',TRUE,11.0,16.5),
+('Simvastatin 40mg',        3,12,'2026-10-28','2023-07-23','шт','Statin for cholesterol reduction',TRUE,13.0,20.0),
+('Clopidogrel 75mg',       16,13,'2026-07-13','2024-12-19','шт','Antiplatelet agent',TRUE,16.0,25.0),
+('Pantoprazole 40mg',       6,14,'2025-08-14','2024-03-05','шт','Proton pump inhibitor',FALSE,8.5,14.0),
+('Amlodipine 5mg',          3,15,'2026-08-27','2024-04-04','шт','Calcium channel blocker',TRUE,9.5,15.5),
+('Warfarin 5mg',           16,16,'2025-01-07','2023-10-12','шт','Anticoagulant blood thinner',TRUE,12.5,19.0),
+('Furosemide 40mg',        15,17,'2026-12-16','2023-06-13','шт','Loop diuretic',TRUE,7.0,11.5),
+('Prednisolone 5mg',        7,18,'2025-12-15','2024-03-08','шт','Corticosteroid anti-inflammatory',TRUE,6.0,10.5),
+('Azithromycin 500mg',      1,19,'2025-06-09','2023-10-12','шт','Macrolide antibiotic',TRUE,15.0,23.0),
+('Diclofenac 50mg',        18,20,'2025-12-11','2023-08-09','шт','NSAID anti-inflammatory',FALSE,5.5,9.5),
+('Ciprofloxacin 500mg',     1,21,'2025-04-05','2023-04-15','шт','Fluoroquinolone antibiotic',TRUE,13.0,20.0),
+('Metronidazole 400mg',     1,22,'2025-04-10','2024-01-25','шт','Antiprotozoal antibiotic',TRUE,6.0,9.5),
+('Enalapril 10mg',          3,23,'2025-12-19','2024-01-03','шт','ACE inhibitor',TRUE,8.5,14.0),
+('Ramipril 5mg',            3,24,'2025-09-28','2024-09-10','шт','ACE inhibitor',TRUE,9.0,15.0),
+('Bisoprolol 5mg',          3,25,'2026-04-16','2023-02-14','шт','Beta blocker',TRUE,10.0,16.0),
+('Carvedilol 25mg',         3,26,'2025-05-08','2024-07-03','шт','Beta blocker',TRUE,11.5,18.0),
+('Valsartan 80mg',          3,27,'2025-03-22','2024-01-23','шт','ARB antihypertensive',TRUE,12.0,19.0),
+('Hydrochlorothiazide 25mg',15,28,'2025-10-28','2024-07-19','шт','Thiazide diuretic',TRUE,5.0,8.0),
+('Spironolactone 50mg',    15,29,'2026-09-26','2024-10-05','шт','Potassium-sparing diuretic',TRUE,8.0,13.0),
+('Digoxin 0.25mg',          3,30,'2026-08-15','2024-01-06','шт','Cardiac glycoside',TRUE,7.5,12.5),
+('Allopurinol 300mg',      17, 1,'2026-12-23','2023-07-16','шт','Gout treatment xanthine oxidase inhibitor',FALSE,6.0,10.0),
+('Colchicine 0.5mg',       17, 2,'2025-02-16','2023-03-13','шт','Anti-gout agent',TRUE,14.0,22.0),
+('Levothyroxine 100mcg',    7, 3,'2025-08-22','2024-11-08','шт','Thyroid hormone replacement',TRUE,7.0,11.5),
+('Insulin Glargine 300IU',  4, 4,'2025-03-23','2023-10-24','шт','Long-acting insulin',TRUE,45.0,70.0),
+('Metoprolol 50mg',         3, 5,'2025-04-14','2023-08-27','шт','Beta-1 selective blocker',TRUE,9.0,14.5),
+('Propranolol 40mg',        3, 6,'2025-10-12','2024-01-25','шт','Beta blocker',TRUE,7.5,12.0),
+('Nifedipine 20mg',         3, 7,'2026-10-13','2024-04-09','шт','Calcium channel blocker',TRUE,8.0,13.0),
+('Diltiazem 60mg',          3, 8,'2025-06-16','2024-01-09','шт','Calcium channel blocker',TRUE,10.0,16.5),
+('Verapamil 80mg',          3, 9,'2025-12-30','2024-01-15','шт','Calcium channel blocker',TRUE,11.0,17.0),
+('Nitroglycerin 0.5mg',     3,10,'2026-11-18','2023-08-03','шт','Antianginal nitrate',TRUE,16.0,25.0),
+('Isosorbide 20mg',         3,11,'2026-12-20','2023-10-01','шт','Organic nitrate',TRUE,12.0,19.0),
+('Cephalexin 500mg',        1,12,'2026-10-26','2024-11-30','шт','First-gen cephalosporin',TRUE,13.0,20.0),
+('Clindamycin 300mg',       1,13,'2026-09-16','2023-03-15','шт','Lincosamide antibiotic',TRUE,14.0,22.0),
+('Erythromycin 500mg',      1,14,'2025-06-25','2024-10-12','шт','Macrolide antibiotic',TRUE,12.0,19.0),
+('Clarithromycin 500mg',    1,15,'2025-09-08','2024-06-30','шт','Macrolide antibiotic',TRUE,16.0,25.0),
+('Tetracycline 500mg',      1,16,'2026-04-19','2023-06-17','шт','Broad-spectrum antibiotic',TRUE,8.0,13.0),
+('Trimethoprim 200mg',      1,17,'2025-10-04','2024-01-24','шт','Antibiotic',TRUE,7.0,11.0),
+('Nitrofurantoin 100mg',    1,18,'2026-12-06','2024-10-17','шт','Urinary antibiotic',TRUE,9.0,14.5),
+('Fluconazole 150mg',      11,19,'2025-08-13','2024-07-24','шт','Antifungal',FALSE,10.0,16.0),
+('Ketoconazole 200mg',     11,20,'2025-11-29','2024-12-02','шт','Antifungal',TRUE,9.0,14.5),
+('Acyclovir 400mg',        10,21,'2025-08-23','2023-02-27','шт','Antiviral',FALSE,11.0,17.5),
+('Oseltamivir 75mg',       10,22,'2025-11-20','2023-02-02','шт','Influenza antiviral',TRUE,25.0,38.0),
+('Hydroxychloroquine 200mg',10,23,'2025-10-02','2024-02-15','шт','Antimalarial DMARD',TRUE,18.0,28.0),
+('Sulfasalazine 500mg',    18,24,'2025-08-05','2023-03-09','шт','Anti-inflammatory DMARD',TRUE,14.0,22.0),
+('Methotrexate 10mg',       7,25,'2025-11-19','2024-08-03','шт','DMARD chemotherapy',TRUE,22.0,34.0),
+('Prednisone 5mg',          7,26,'2026-11-03','2023-08-06','шт','Corticosteroid',TRUE,6.5,10.5),
+('Dexamethasone 4mg',       7,27,'2026-02-10','2024-05-26','шт','Corticosteroid',TRUE,7.0,11.5),
+('Budesonide 200mcg',      14,28,'2026-04-15','2024-10-20','шт','Inhaled corticosteroid',TRUE,20.0,31.0),
+('Salbutamol 100mcg',      14,29,'2025-09-29','2023-05-27','шт','Beta-2 agonist bronchodilator',FALSE,11.0,17.0),
+('Salmeterol 50mcg',       14,30,'2025-09-10','2023-05-23','шт','Long-acting beta-2 agonist',TRUE,22.0,34.0),
+('Montelukast 10mg',       14, 1,'2026-07-06','2024-07-28','шт','Leukotriene receptor antagonist',FALSE,15.0,23.0),
+('Ipratropium 20mcg',      14, 2,'2026-08-22','2023-09-27','шт','Anticholinergic bronchodilator',TRUE,18.0,28.0),
+('Esomeprazole 40mg',       6, 3,'2026-08-21','2024-03-14','шт','Proton pump inhibitor',FALSE,9.0,14.5),
+('Lansoprazole 30mg',       6, 4,'2026-01-06','2024-02-13','шт','Proton pump inhibitor',FALSE,8.0,13.0),
+('Ranitidine 150mg',        6, 5,'2025-05-22','2023-08-13','шт','H2 receptor antagonist',FALSE,6.0,9.5),
+('Famotidine 20mg',         6, 6,'2026-05-21','2024-06-05','шт','H2 receptor antagonist',FALSE,7.0,11.0),
+('Domperidone 10mg',        6, 7,'2025-02-18','2023-04-04','шт','Antiemetic prokinetic',FALSE,8.0,13.0),
+('Metoclopramide 10mg',     6, 8,'2025-06-06','2023-04-23','шт','Antiemetic prokinetic',FALSE,5.5,9.0),
+('Ondansetron 8mg',         6, 9,'2025-06-13','2024-10-04','шт','5-HT3 antiemetic',TRUE,12.0,19.0),
+('Loperamide 2mg',          6,10,'2026-03-09','2024-11-27','шт','Antidiarrheal',FALSE,5.0,8.0),
+('Bisacodyl 5mg',           6,11,'2025-03-07','2024-09-02','шт','Stimulant laxative',FALSE,4.0,6.5),
+('Lactulose 10g',           6,12,'2026-01-26','2024-01-30','шт','Osmotic laxative',FALSE,6.0,9.5),
+('Sertraline 50mg',         8,13,'2026-04-25','2024-09-02','шт','SSRI antidepressant',TRUE,16.0,25.0),
+('Fluoxetine 20mg',         8,14,'2025-09-15','2024-06-25','шт','SSRI antidepressant',TRUE,14.0,22.0),
+('Escitalopram 10mg',       8,15,'2025-01-12','2024-07-20','шт','SSRI antidepressant',TRUE,18.0,28.0),
+('Amitriptyline 25mg',      8,16,'2025-04-28','2024-11-27','шт','Tricyclic antidepressant',TRUE,12.0,19.0),
+('Diazepam 5mg',            8,17,'2026-07-04','2024-11-29','шт','Benzodiazepine anxiolytic',TRUE,10.0,16.0),
+('Alprazolam 0.5mg',        8,18,'2026-10-19','2023-10-01','шт','Benzodiazepine',TRUE,13.0,20.0),
+('Zolpidem 10mg',           8,19,'2025-04-25','2023-12-15','шт','Non-benzo hypnotic',TRUE,15.0,23.0),
+('Quetiapine 100mg',        8,20,'2026-03-22','2023-10-28','шт','Atypical antipsychotic',TRUE,22.0,34.0),
+('Risperidone 2mg',         8,21,'2026-04-10','2023-06-11','шт','Atypical antipsychotic',TRUE,20.0,31.0),
+('Haloperidol 5mg',         8,22,'2025-09-27','2023-01-04','шт','Typical antipsychotic',TRUE,11.0,17.0),
+('Levodopa 250mg',          9,23,'2025-07-02','2024-05-27','шт','Antiparkinsonian agent',TRUE,18.0,28.0),
+('Gabapentin 300mg',        9,24,'2025-04-19','2024-06-03','шт','Anticonvulsant neuropathic pain',TRUE,14.0,22.0),
+('Pregabalin 75mg',         9,25,'2025-11-02','2024-10-02','шт','Anticonvulsant neuropathic pain',TRUE,20.0,31.0),
+('Carbamazepine 200mg',     9,26,'2026-06-04','2024-10-16','шт','Anticonvulsant mood stabilizer',TRUE,12.0,19.0),
+('Valproate 500mg',         9,27,'2025-07-23','2024-09-15','шт','Anticonvulsant',TRUE,13.0,20.0),
+('Phenobarbital 100mg',     9,28,'2026-01-18','2023-06-06','шт','Barbiturate anticonvulsant',TRUE,8.0,13.0),
+('Tramadol 50mg',          12,29,'2026-07-07','2023-06-15','шт','Opioid analgesic',TRUE,14.0,22.0),
+('Codeine 30mg',           12,30,'2025-01-01','2024-06-27','шт','Opioid analgesic cough suppressant',TRUE,12.0,19.0),
+('Morphine 10mg',          12, 1,'2025-11-28','2024-09-05','шт','Opioid analgesic',TRUE,20.0,31.0),
+('Fentanyl patch 25mcg',   12, 2,'2025-01-20','2024-05-15','шт','Transdermal opioid',TRUE,38.0,58.0),
+('Naproxen 500mg',         18, 3,'2026-01-07','2023-04-25','шт','NSAID analgesic',FALSE,7.0,11.0),
+('Meloxicam 15mg',         18, 4,'2025-09-03','2023-11-11','шт','Selective COX-2 NSAID',TRUE,10.0,16.0),
+('Etoricoxib 90mg',        18, 5,'2025-09-04','2023-03-01','шт','COX-2 inhibitor',TRUE,16.0,25.0),
+('Calcium carbonate 500mg',13, 6,'2025-03-22','2024-08-03','шт','Antacid calcium supplement',FALSE,4.0,6.5),
+('Vitamin D3 1000IU',      13, 7,'2026-05-13','2023-03-29','шт','Vitamin supplement',FALSE,5.0,8.0),
+('Folic acid 5mg',         13, 8,'2026-06-30','2023-03-12','шт','B-vitamin supplement',FALSE,3.5,5.5),
+('Zinc sulfate 220mg',     13, 9,'2025-05-12','2023-05-09','шт','Mineral supplement',FALSE,4.5,7.0),
+('Magnesium oxide 400mg',  13,10,'2026-05-02','2024-11-06','шт','Mineral supplement',FALSE,5.5,8.5);
 
 INSERT INTO pharmacy (address, phone, working_hours) VALUES
 ('Chisinau, str. Stefan cel Mare 71','+37320002705','08:00-20:00'),
@@ -274,123 +361,85 @@ INSERT INTO pharmacy (address, phone, working_hours) VALUES
 ('Dubasari, str. Calea Orheiului 22','+37339206658','09:00-18:00'),
 ('Dubasari, str. Uzinelor 63','+37339607886','08:00-20:00');
 
-INSERT INTO employee (full_name, idnp, phone, address, salary, position) VALUES
-('Andrei Popescu','2950105810049','+37360006570','Chisinau, str. Lupascu 4',7405.5,'Pharmacist'),
-('Maria Ionescu','2289439657508','+37360207454','Chisinau, str. Grama 19',8826.54,'Pharmacist'),
-('Ion Rusu','2807270532291','+37360409105','Chisinau, str. Botnari 43',10451.25,'Pharmacist'),
-('Elena Ciobanu','2206823277527','+37360604861','Chisinau, str. Rata 14',11827.9,'Cashier'),
-('Vasile Moraru','2809941412032','+37360808883','Chisinau, str. Popa 4',10613.87,'Manager'),
-('Olga Lupascu','2051785130539','+37361009571','Chisinau, str. Stoica 31',9265.68,'Pharmacist'),
-('Dumitru Grama','2583482989002','+37361202579','Chisinau, str. Munteanu 4',11784.28,'Pharmacist'),
-('Natalia Botnari','2932351979347','+37361403044','Chisinau, str. Cojocaru 5',9772.69,'Pharmacist'),
-('Sergiu Rata','2947792820940','+37361603853','Chisinau, str. Vrabie 26',7159.38,'Cashier'),
-('Cristina Popa','2626594012825','+37361804033','Chisinau, str. Negru 38',9769.86,'Manager'),
-('Alexandru Stoica','2088559569253','+37362006868','Chisinau, str. Sirbu 43',9710.2,'Pharmacist'),
-('Tatiana Munteanu','2345842718357','+37362204272','Chisinau, str. Filipescu 14',10183.49,'Pharmacist'),
-('Mihai Cojocaru','2263342414490','+37362404351','Chisinau, str. Postolachi 26',7219.83,'Pharmacist'),
-('Inna Vrabie','2329189919272','+37362607491','Chisinau, str. Damaschin 21',11609.6,'Cashier'),
-('Petru Negru','2081328359515','+37362800152','Chisinau, str. Taranu 30',9916.38,'Manager'),
-('Alina Sirbu','2077738827541','+37363008808','Chisinau, str. Lungu 14',9282.37,'Pharmacist'),
-('Radu Filipescu','2967866623129','+37363201127','Chisinau, str. Cebotari 16',8532.4,'Pharmacist'),
-('Viorica Postolachi','2481713854648','+37363408900','Chisinau, str. Ursu 46',8163.84,'Pharmacist'),
-('Gheorghe Damaschin','2720726006289','+37363608666','Chisinau, str. Danu 1',10173.25,'Cashier'),
-('Ludmila Taranu','2328799513174','+37363801697','Chisinau, str. Grosu 9',7954.56,'Manager'),
-('Victor Lungu','2119785403991','+37364009064','Chisinau, str. Mija 10',7997.92,'Pharmacist'),
-('Diana Cebotari','2230230991019','+37364205617','Chisinau, str. Melniciuc 14',10281.23,'Pharmacist'),
-('Constantin Ursu','2291426041482','+37364408280','Chisinau, str. Scutaru 32',7881.17,'Pharmacist'),
-('Irina Danu','2931613449336','+37364600832','Chisinau, str. Balan 6',9988.56,'Cashier'),
-('Pavel Grosu','2304209733660','+37364800722','Chisinau, str. Calin 1',8334.56,'Manager'),
-('Svetlana Mija','2700641535392','+37365004291','Chisinau, str. Buza 11',10576.77,'Pharmacist'),
-('Grigore Melniciuc','2775463562649','+37365207007','Chisinau, str. Istrati 36',6553.18,'Pharmacist'),
-('Valentina Scutaru','2759707157168','+37365402442','Chisinau, str. Gherghel 35',6698.15,'Pharmacist'),
-('Marian Balan','2641535897688','+37365609052','Chisinau, str. Zadic 10',8863.83,'Cashier'),
-('Lidia Calin','2335187102686','+37365805974','Chisinau, str. Anghel 3',11444.09,'Manager'),
-('Eugen Buza','2748226581356','+37366004088','Chisinau, str. Olaru 43',7065.36,'Pharmacist'),
-('Larisa Istrati','2617530897084','+37366206658','Chisinau, str. Rotaru 40',10622.13,'Pharmacist'),
-('Bogdan Gherghel','2950204551500','+37366402662','Chisinau, str. Chiper 12',11347.79,'Pharmacist'),
-('Galina Zadic','2193379984954','+37366605442','Chisinau, str. Vascan 27',10912.29,'Cashier'),
-('Adrian Anghel','2811164978375','+37366804065','Chisinau, str. Amariei 18',7375.59,'Manager'),
-('Natalya Olaru','2118976083876','+37367006267','Chisinau, str. Popescu 3',11222.26,'Pharmacist'),
-('Liviu Rotaru','2219998677633','+37367207541','Chisinau, str. Ionescu 23',8178.55,'Pharmacist'),
-('Doina Chiper','2961193689894','+37367403728','Chisinau, str. Rusu 15',6630.15,'Pharmacist'),
-('Florin Vascan','2438916150327','+37367605378','Chisinau, str. Ciobanu 18',11253.94,'Cashier'),
-('Angela Amariei','2850261314384','+37367804573','Chisinau, str. Moraru 23',10028.15,'Manager'),
-('Ciprian Popescu','2744745947806','+37368008785','Chisinau, str. Lupascu 22',11665.8,'Pharmacist'),
-('Mirela Ionescu','2962568063334','+37368204279','Chisinau, str. Grama 12',9693.24,'Pharmacist'),
-('Tudor Rusu','2291987126394','+37368400626','Chisinau, str. Botnari 7',9781.14,'Pharmacist'),
-('Corina Ciobanu','2800348631876','+37368605139','Chisinau, str. Rata 28',9834.15,'Cashier'),
-('Vlad Moraru','2126750596909','+37368806311','Chisinau, str. Popa 37',7545.43,'Manager'),
-('Rodica Lupascu','2777579719274','+37369007144','Chisinau, str. Stoica 1',9359.56,'Pharmacist'),
-('Stefan Grama','2591874457344','+37369203228','Chisinau, str. Munteanu 24',8872.14,'Pharmacist'),
-('Nicoleta Botnari','2734219825197','+37369405409','Chisinau, str. Cojocaru 40',8226.54,'Pharmacist'),
-('Oleg Rata','2136786184083','+37369604920','Chisinau, str. Vrabie 33',8201.07,'Cashier'),
-('Ala Popa','2358236319765','+37369806592','Chisinau, str. Negru 45',8126.1,'Manager'),
-('Andrei Stoica','2211000094454','+37370006888','Chisinau, str. Sirbu 43',11672.0,'Pharmacist'),
-('Maria Munteanu','2823247811948','+37370202851','Chisinau, str. Filipescu 40',9630.08,'Pharmacist'),
-('Ion Cojocaru','2603039501013','+37370400006','Chisinau, str. Postolachi 20',8078.03,'Pharmacist'),
-('Elena Vrabie','2865134782024','+37370609502','Chisinau, str. Damaschin 39',10100.88,'Cashier'),
-('Vasile Negru','2487328413513','+37370807244','Chisinau, str. Taranu 44',7675.36,'Manager'),
-('Olga Sirbu','2873910680258','+37371002780','Chisinau, str. Lungu 43',6966.38,'Pharmacist'),
-('Dumitru Filipescu','2728063322537','+37371205491','Chisinau, str. Cebotari 6',11001.33,'Pharmacist'),
-('Natalia Postolachi','2260924151492','+37371405085','Chisinau, str. Ursu 15',10936.1,'Pharmacist'),
-('Sergiu Damaschin','2026402684235','+37371600757','Chisinau, str. Danu 16',11911.65,'Cashier'),
-('Cristina Taranu','2934633304951','+37371801193','Chisinau, str. Grosu 30',8779.43,'Manager'),
-('Alexandru Lungu','2634065014236','+37372003185','Chisinau, str. Mija 46',10329.95,'Pharmacist'),
-('Tatiana Cebotari','2440209997973','+37372203997','Chisinau, str. Melniciuc 10',10108.32,'Pharmacist'),
-('Mihai Ursu','2979276358279','+37372401746','Chisinau, str. Scutaru 50',8838.3,'Pharmacist'),
-('Inna Danu','2881223723215','+37372608486','Chisinau, str. Balan 30',6776.2,'Cashier'),
-('Petru Grosu','2136787563047','+37372807478','Chisinau, str. Calin 9',10907.79,'Manager'),
-('Alina Mija','2582687809473','+37373009157','Chisinau, str. Buza 39',8245.14,'Pharmacist'),
-('Radu Melniciuc','2982496317586','+37373207251','Chisinau, str. Istrati 40',10982.54,'Pharmacist'),
-('Viorica Scutaru','2557881979182','+37373406991','Chisinau, str. Gherghel 36',8952.52,'Pharmacist'),
-('Gheorghe Balan','2816727364232','+37373607777','Chisinau, str. Zadic 29',7925.55,'Cashier'),
-('Ludmila Calin','2924479855216','+37373804543','Chisinau, str. Anghel 50',10777.21,'Manager'),
-('Victor Buza','2689276095704','+37374003919','Chisinau, str. Olaru 18',8919.3,'Pharmacist'),
-('Diana Istrati','2316597264475','+37374203841','Chisinau, str. Rotaru 18',8347.16,'Pharmacist'),
-('Constantin Gherghel','2596541007901','+37374401320','Chisinau, str. Chiper 9',7329.57,'Pharmacist'),
-('Irina Zadic','2761854335443','+37374602503','Chisinau, str. Vascan 46',7676.74,'Cashier'),
-('Pavel Anghel','2448458442836','+37374805421','Chisinau, str. Amariei 35',9062.58,'Manager'),
-('Svetlana Olaru','2223605728604','+37375006883','Chisinau, str. Popescu 25',11476.61,'Pharmacist'),
-('Grigore Rotaru','2024462084974','+37375209432','Chisinau, str. Ionescu 25',9123.39,'Pharmacist'),
-('Valentina Chiper','2390596101232','+37375404892','Chisinau, str. Rusu 49',8644.93,'Pharmacist'),
-('Marian Vascan','2463150927987','+37375608818','Chisinau, str. Ciobanu 48',10540.49,'Cashier'),
-('Lidia Amariei','2664860371203','+37375803613','Chisinau, str. Moraru 32',7706.82,'Manager'),
-('Eugen Popescu','2534447845982','+37376000475','Chisinau, str. Lupascu 25',8348.71,'Pharmacist'),
-('Larisa Ionescu','2879090220563','+37376206624','Chisinau, str. Grama 47',7407.75,'Pharmacist'),
-('Bogdan Rusu','2586788125561','+37376400441','Chisinau, str. Botnari 26',9755.41,'Pharmacist'),
-('Galina Ciobanu','2028617366055','+37376601375','Chisinau, str. Rata 42',8857.37,'Cashier'),
-('Adrian Moraru','2510529239139','+37376802977','Chisinau, str. Popa 4',7930.86,'Manager'),
-('Natalya Lupascu','2233334202984','+37377007449','Chisinau, str. Stoica 21',8356.25,'Pharmacist'),
-('Liviu Grama','2420389852695','+37377204558','Chisinau, str. Munteanu 49',11731.62,'Pharmacist'),
-('Doina Botnari','2276688514097','+37377401341','Chisinau, str. Cojocaru 31',6606.61,'Pharmacist'),
-('Florin Rata','2058151362046','+37377605733','Chisinau, str. Vrabie 15',10075.79,'Cashier'),
-('Angela Popa','2045748937891','+37377800508','Chisinau, str. Negru 16',7596.48,'Manager'),
-('Ciprian Stoica','2682987331574','+37378002496','Chisinau, str. Sirbu 16',7194.22,'Pharmacist'),
-('Mirela Munteanu','2127429355441','+37378209240','Chisinau, str. Filipescu 14',9057.69,'Pharmacist'),
-('Tudor Cojocaru','2842914148319','+37378406043','Chisinau, str. Postolachi 11',9832.41,'Pharmacist'),
-('Corina Vrabie','2824477962743','+37378601876','Chisinau, str. Damaschin 50',11006.16,'Cashier'),
-('Vlad Negru','2343445860556','+37378801771','Chisinau, str. Taranu 38',6641.23,'Manager'),
-('Rodica Sirbu','2632700038683','+37379006149','Chisinau, str. Lungu 26',11678.09,'Pharmacist'),
-('Stefan Filipescu','2082456198537','+37379209700','Chisinau, str. Cebotari 45',11068.14,'Pharmacist'),
-('Nicoleta Postolachi','2112712179857','+37379404941','Chisinau, str. Ursu 44',9802.26,'Pharmacist'),
-('Oleg Damaschin','2872398288617','+37379609272','Chisinau, str. Danu 3',8409.62,'Cashier'),
-('Ala Taranu','2727689342568','+37379806071','Chisinau, str. Grosu 5',9282.78,'Manager');
+-- role_id: 1=Pharmacist 2=Manager 3=Cashier 4=Accountant
+INSERT INTO employee (full_name, idnp, phone, address, salary, role_id) VALUES
+('Andrei Popescu',   '2950105810049','+37360006570','Chisinau, str. Lupascu 4',   9000.00,1),
+('Maria Ionescu',    '2289439657508','+37360207454','Chisinau, str. Grama 19',    9000.00,1),
+('Ion Rusu',         '2807270532291','+37360409105','Chisinau, str. Botnari 43',  9000.00,1),
+('Elena Ciobanu',    '2206823277527','+37360604861','Chisinau, str. Rata 14',     7500.00,3),
+('Vasile Moraru',    '2809941412032','+37360808883','Chisinau, str. Popa 4',     12000.00,2),
+('Olga Lupascu',     '2051785130539','+37361009571','Chisinau, str. Stoica 31',   9000.00,1),
+('Dumitru Grama',    '2583482989002','+37361202579','Chisinau, str. Munteanu 4',  9000.00,1),
+('Natalia Botnari',  '2932351979347','+37361403044','Chisinau, str. Cojocaru 5',  9000.00,1),
+('Sergiu Rata',      '2947792820940','+37361603853','Chisinau, str. Vrabie 26',   7500.00,3),
+('Cristina Popa',    '2626594012825','+37361804033','Chisinau, str. Negru 38',   12000.00,2),
+('Alexandru Stoica', '2088559569253','+37362006868','Chisinau, str. Sirbu 43',    9000.00,1),
+('Tatiana Munteanu', '2345842718357','+37362204272','Chisinau, str. Filipescu 14',9000.00,1),
+('Mihai Cojocaru',   '2263342414490','+37362404351','Chisinau, str. Postolachi 26',9000.00,1),
+('Inna Vrabie',      '2329189919272','+37362607491','Chisinau, str. Damaschin 21',7500.00,3),
+('Petru Negru',      '2081328359515','+37362800152','Chisinau, str. Taranu 30',  12000.00,2),
+('Alina Sirbu',      '2077738827541','+37363008808','Chisinau, str. Lungu 14',    9000.00,1),
+('Radu Filipescu',   '2967866623129','+37363201127','Chisinau, str. Cebotari 16', 9000.00,1),
+('Viorica Postolachi','2481713854648','+37363408900','Chisinau, str. Ursu 46',    9000.00,1),
+('Gheorghe Damaschin','2720726006289','+37363608666','Chisinau, str. Danu 1',     7500.00,3),
+('Ludmila Taranu',   '2328799513174','+37363801697','Chisinau, str. Grosu 9',   12000.00,2),
+('Victor Lungu',     '2119785403991','+37364009064','Chisinau, str. Mija 10',     9000.00,1),
+('Diana Cebotari',   '2230230991019','+37364205617','Chisinau, str. Melniciuc 14',9000.00,1),
+('Constantin Ursu',  '2291426041482','+37364408280','Chisinau, str. Scutaru 32',  9000.00,1),
+('Irina Danu',       '2931613449336','+37364600832','Chisinau, str. Balan 6',     7500.00,3),
+('Pavel Grosu',      '2304209733660','+37364800722','Chisinau, str. Calin 1',    12000.00,2),
+('Svetlana Mija',    '2700641535392','+37365004291','Chisinau, str. Buza 11',     9000.00,1),
+('Grigore Melniciuc','2775463562649','+37365207007','Chisinau, str. Istrati 36',  9000.00,1),
+('Valentina Scutaru','2759707157168','+37365402442','Chisinau, str. Gherghel 35', 9000.00,1),
+('Marian Balan',     '2641535897688','+37365609052','Chisinau, str. Zadic 10',    7500.00,3),
+('Lidia Calin',      '2335187102686','+37365805974','Chisinau, str. Anghel 3',   12000.00,2),
+('Eugen Buza',       '2748226581356','+37366004088','Chisinau, str. Olaru 43',    9000.00,1),
+('Larisa Istrati',   '2617530897084','+37366206658','Chisinau, str. Rotaru 40',   9000.00,1),
+('Bogdan Gherghel',  '2950204551500','+37366402662','Chisinau, str. Chiper 12',   9000.00,1),
+('Galina Zadic',     '2193379984954','+37366605442','Chisinau, str. Vascan 27',   7500.00,3),
+('Adrian Anghel',    '2811164978375','+37366804065','Chisinau, str. Amariei 18', 12000.00,2),
+('Natalya Olaru',    '2118976083876','+37367006267','Chisinau, str. Popescu 3',   9000.00,1),
+('Liviu Rotaru',     '2219998677633','+37367207541','Chisinau, str. Ionescu 23',  9000.00,1),
+('Doina Chiper',     '2961193689894','+37367403728','Chisinau, str. Rusu 15',     9000.00,1),
+('Florin Vascan',    '2438916150327','+37367605378','Chisinau, str. Ciobanu 18',  7500.00,3),
+('Angela Amariei',   '2850261314384','+37367804573','Chisinau, str. Moraru 23',  12000.00,2),
+('Ciprian Popescu',  '2744745947806','+37368008785','Chisinau, str. Lupascu 22',  9000.00,1),
+('Mirela Ionescu',   '2962568063334','+37368204279','Chisinau, str. Grama 12',    9000.00,1),
+('Tudor Rusu',       '2291987126394','+37368400626','Chisinau, str. Botnari 7',   9000.00,1),
+('Corina Ciobanu',   '2800348631876','+37368605139','Chisinau, str. Rata 28',     7500.00,3),
+('Vlad Moraru',      '2126750596909','+37368806311','Chisinau, str. Popa 37',    12000.00,2),
+('Rodica Lupascu',   '2777579719274','+37369007144','Chisinau, str. Stoica 1',    9000.00,1),
+('Stefan Grama',     '2591874457344','+37369203228','Chisinau, str. Munteanu 24', 9000.00,1),
+('Nicoleta Botnari', '2734219825197','+37369405409','Chisinau, str. Cojocaru 40', 9000.00,1),
+('Oleg Rata',        '2136786184083','+37369604920','Chisinau, str. Vrabie 33',   7500.00,3),
+('Ala Popa',         '2358236319765','+37369806592','Chisinau, str. Negru 45',   13000.00,4);
 
--- ══════════════════════════════════════════════════════════════════
--- Чеки: receipt_number генерируется по pharmacy_id + date
--- Каждая аптека нумерует чеки заново каждый день начиная с 1
--- ══════════════════════════════════════════════════════════════════
+-- Пользователи системы
+-- system_role проставится триггером автоматически:
+-- employee_id=50 (Ala Popa, Accountant) -> admin, остальные -> user
+INSERT INTO system_userss (employee_id, login, password_hash) VALUES
+(1,  'a.popescu',  md5('user123')),
+(2,  'm.ionescu',  md5('user123')),
+(3,  'i.rusu',     md5('user123')),
+(4,  'e.ciobanu',  md5('user123')),
+(5,  'v.moraru',   md5('user123')),
+(6,  'o.lupascu',  md5('user123')),
+(7,  'd.grama',    md5('user123')),
+(8,  'n.botnari',  md5('user123')),
+(9,  's.rata',     md5('user123')),
+(10, 'c.popa',     md5('user123')),
+(50, 'a.popa',     md5('admin123'));
 
 INSERT INTO receipt (receipt_number, pharmacy_id, employee_id, total_amount, date, time) VALUES
-(1,1,1,0,'2025-06-24','08:54:00'),
-(1,2,2,0,'2025-08-04','15:06:00'),
-(1,3,3,0,'2025-08-10','13:40:00'),
-(1,4,4,0,'2025-08-24','10:27:00'),
-(1,5,5,0,'2025-04-01','16:41:00'),
-(1,6,6,0,'2025-05-19','17:51:00'),
-(1,7,7,0,'2025-10-03','15:29:00'),
-(1,8,8,0,'2025-08-12','17:17:00'),
-(1,9,9,0,'2025-06-15','11:53:00'),
+(1, 1, 1,0,'2025-06-24','08:54:00'),
+(1, 2, 2,0,'2025-08-04','15:06:00'),
+(1, 3, 3,0,'2025-08-10','13:40:00'),
+(1, 4, 4,0,'2025-08-24','10:27:00'),
+(1, 5, 5,0,'2025-04-01','16:41:00'),
+(1, 6, 6,0,'2025-05-19','17:51:00'),
+(1, 7, 7,0,'2025-10-03','15:29:00'),
+(1, 8, 8,0,'2025-08-12','17:17:00'),
+(1, 9, 9,0,'2025-06-15','11:53:00'),
 (1,10,10,0,'2025-02-14','12:56:00'),
 (1,11,11,0,'2025-08-19','11:48:00'),
 (1,12,12,0,'2025-08-26','17:39:00'),
@@ -431,7 +480,7 @@ INSERT INTO receipt (receipt_number, pharmacy_id, employee_id, total_amount, dat
 (1,47,47,0,'2025-06-24','10:03:00'),
 (1,48,48,0,'2025-05-10','15:07:00'),
 (1,49,49,0,'2025-02-03','14:31:00'),
-(1,50,50,0,'2025-02-07','17:40:00');
+(1,50, 1,0,'2025-02-07','17:40:00');
 
 INSERT INTO stock_balance (pharmacy_id, product_id, remaining_qty) VALUES
 (1,11,274),(1,20,138),(1,39,222),(1,73,109),
@@ -687,7 +736,6 @@ INSERT INTO order_item (receipt_id, product_id, quantity, unit_price, discount) 
 (50,13,5,(SELECT sale_price FROM product WHERE product_id=13),0),
 (50,28,3,(SELECT sale_price FROM product WHERE product_id=28),0);
 
--- Пересчитываем total_amount по всем чекам
 UPDATE receipt r
 SET total_amount = (
     SELECT COALESCE(SUM(total_price), 0)
@@ -698,20 +746,74 @@ SET total_amount = (
 -- ХРАНИМЫЕ ПРОЦЕДУРЫ
 -- ══════════════════════════════════════════════════════════════════
 
+-- ── CATEGORY ─────────────────────────────────────────────────────
+
+CREATE OR REPLACE PROCEDURE sp_add_category(
+    p_name VARCHAR, p_description TEXT, OUT p_id INT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO category(name, description) VALUES (p_name, p_description)
+    RETURNING category_id INTO p_id;
+END; $$;
+
+CREATE OR REPLACE PROCEDURE sp_update_category(
+    p_id INT, p_name VARCHAR, p_description TEXT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    UPDATE category SET name=p_name, description=p_description
+    WHERE category_id = p_id;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Категория с id=% не найдена', p_id; END IF;
+END; $$;
+
+CREATE OR REPLACE PROCEDURE sp_delete_category(p_id INT)
+LANGUAGE plpgsql AS $$
+BEGIN
+    DELETE FROM category WHERE category_id = p_id;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Категория с id=% не найдена', p_id; END IF;
+END; $$;
+
+-- ── ROLE ─────────────────────────────────────────────────────────
+
+CREATE OR REPLACE PROCEDURE sp_add_role(
+    p_name VARCHAR, p_fixed_salary NUMERIC, p_description TEXT, OUT p_id INT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO role(name, fixed_salary, description) VALUES (p_name, p_fixed_salary, p_description)
+    RETURNING role_id INTO p_id;
+END; $$;
+
+CREATE OR REPLACE PROCEDURE sp_update_role(
+    p_id INT, p_name VARCHAR, p_fixed_salary NUMERIC, p_description TEXT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    UPDATE role SET name=p_name, fixed_salary=p_fixed_salary, description=p_description
+    WHERE role_id = p_id;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Роль с id=% не найдена', p_id; END IF;
+END; $$;
+
+CREATE OR REPLACE PROCEDURE sp_delete_role(p_id INT)
+LANGUAGE plpgsql AS $$
+BEGIN
+    DELETE FROM role WHERE role_id = p_id;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Роль с id=% не найдена', p_id; END IF;
+END; $$;
+
 -- ── MANUFACTURER ─────────────────────────────────────────────────
 
 CREATE OR REPLACE PROCEDURE sp_add_manufacturer(
-    p_name VARCHAR, p_country VARCHAR,
-    p_address VARCHAR, p_phone VARCHAR, p_email VARCHAR,
-    OUT p_id INT
+    p_name VARCHAR, p_country VARCHAR, p_address VARCHAR,
+    p_phone VARCHAR, p_email VARCHAR, OUT p_id INT
 )
 LANGUAGE plpgsql AS $$
 BEGIN
     INSERT INTO manufacturer(name, country, address, phone, email)
     VALUES (p_name, p_country, p_address, p_phone, p_email)
     RETURNING manufacturer_id INTO p_id;
-END;
-$$;
+END; $$;
 
 CREATE OR REPLACE PROCEDURE sp_update_manufacturer(
     p_id INT, p_name VARCHAR, p_country VARCHAR,
@@ -720,183 +822,139 @@ CREATE OR REPLACE PROCEDURE sp_update_manufacturer(
 LANGUAGE plpgsql AS $$
 BEGIN
     UPDATE manufacturer
-    SET name=p_name, country=p_country, address=p_address,
-        phone=p_phone, email=p_email
+    SET name=p_name, country=p_country, address=p_address, phone=p_phone, email=p_email
     WHERE manufacturer_id = p_id;
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Производитель с id=% не найден', p_id;
-    END IF;
-END;
-$$;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Производитель с id=% не найден', p_id; END IF;
+END; $$;
 
 CREATE OR REPLACE PROCEDURE sp_delete_manufacturer(p_id INT)
 LANGUAGE plpgsql AS $$
 BEGIN
     DELETE FROM manufacturer WHERE manufacturer_id = p_id;
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Производитель с id=% не найден', p_id;
-    END IF;
-END;
-$$;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Производитель с id=% не найден', p_id; END IF;
+END; $$;
 
 -- ── PRODUCT ──────────────────────────────────────────────────────
 
 CREATE OR REPLACE PROCEDURE sp_add_product(
-    p_name VARCHAR, p_manufacturer_id INT,
+    p_name VARCHAR, p_category_id INT, p_manufacturer_id INT,
     p_production_date DATE, p_expiration_date DATE,
-    p_unit VARCHAR, p_description TEXT,
-    p_prescription_required BOOLEAN,
-    p_purchase_price NUMERIC, p_sale_price NUMERIC,
-    OUT p_id INT
+    p_unit VARCHAR, p_description TEXT, p_prescription_required BOOLEAN,
+    p_purchase_price NUMERIC, p_sale_price NUMERIC, OUT p_id INT
 )
 LANGUAGE plpgsql AS $$
 BEGIN
-    INSERT INTO product(name, manufacturer_id, production_date, expiration_date,
+    INSERT INTO product(name, category_id, manufacturer_id, production_date, expiration_date,
                         unit, description, prescription_required, purchase_price, sale_price)
-    VALUES (p_name, p_manufacturer_id, p_production_date, p_expiration_date,
+    VALUES (p_name, p_category_id, p_manufacturer_id, p_production_date, p_expiration_date,
             p_unit, p_description, p_prescription_required, p_purchase_price, p_sale_price)
     RETURNING product_id INTO p_id;
-END;
-$$;
+END; $$;
 
 CREATE OR REPLACE PROCEDURE sp_update_product(
-    p_id INT, p_name VARCHAR, p_manufacturer_id INT,
+    p_id INT, p_name VARCHAR, p_category_id INT, p_manufacturer_id INT,
     p_production_date DATE, p_expiration_date DATE,
-    p_unit VARCHAR, p_description TEXT,
-    p_prescription_required BOOLEAN,
+    p_unit VARCHAR, p_description TEXT, p_prescription_required BOOLEAN,
     p_purchase_price NUMERIC, p_sale_price NUMERIC
 )
 LANGUAGE plpgsql AS $$
 BEGIN
     UPDATE product
-    SET name=p_name, manufacturer_id=p_manufacturer_id,
+    SET name=p_name, category_id=p_category_id, manufacturer_id=p_manufacturer_id,
         production_date=p_production_date, expiration_date=p_expiration_date,
         unit=p_unit, description=p_description,
         prescription_required=p_prescription_required,
         purchase_price=p_purchase_price, sale_price=p_sale_price
     WHERE product_id = p_id;
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Товар с id=% не найден', p_id;
-    END IF;
-END;
-$$;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Товар с id=% не найден', p_id; END IF;
+END; $$;
 
 CREATE OR REPLACE PROCEDURE sp_delete_product(p_id INT)
 LANGUAGE plpgsql AS $$
 BEGIN
     DELETE FROM product WHERE product_id = p_id;
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Товар с id=% не найден', p_id;
-    END IF;
-END;
-$$;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Товар с id=% не найден', p_id; END IF;
+END; $$;
 
 -- ── PHARMACY ─────────────────────────────────────────────────────
 
 CREATE OR REPLACE PROCEDURE sp_add_pharmacy(
-    p_address VARCHAR, p_phone VARCHAR, p_working_hours VARCHAR,
-    OUT p_id INT
+    p_address VARCHAR, p_phone VARCHAR, p_working_hours VARCHAR, OUT p_id INT
 )
 LANGUAGE plpgsql AS $$
 BEGIN
-    INSERT INTO pharmacy(address, phone, working_hours)
-    VALUES (p_address, p_phone, p_working_hours)
+    INSERT INTO pharmacy(address, phone, working_hours) VALUES (p_address, p_phone, p_working_hours)
     RETURNING pharmacy_id INTO p_id;
-END;
-$$;
+END; $$;
 
 CREATE OR REPLACE PROCEDURE sp_update_pharmacy(
     p_id INT, p_address VARCHAR, p_phone VARCHAR, p_working_hours VARCHAR
 )
 LANGUAGE plpgsql AS $$
 BEGIN
-    UPDATE pharmacy
-    SET address=p_address, phone=p_phone, working_hours=p_working_hours
+    UPDATE pharmacy SET address=p_address, phone=p_phone, working_hours=p_working_hours
     WHERE pharmacy_id = p_id;
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Аптека с id=% не найдена', p_id;
-    END IF;
-END;
-$$;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Аптека с id=% не найдена', p_id; END IF;
+END; $$;
 
 CREATE OR REPLACE PROCEDURE sp_delete_pharmacy(p_id INT)
 LANGUAGE plpgsql AS $$
 BEGIN
     DELETE FROM pharmacy WHERE pharmacy_id = p_id;
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Аптека с id=% не найдена', p_id;
-    END IF;
-END;
-$$;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Аптека с id=% не найдена', p_id; END IF;
+END; $$;
 
 -- ── EMPLOYEE ─────────────────────────────────────────────────────
 
 CREATE OR REPLACE PROCEDURE sp_add_employee(
     p_full_name VARCHAR, p_idnp VARCHAR, p_phone VARCHAR,
-    p_address VARCHAR, p_salary NUMERIC, p_position VARCHAR,
-    OUT p_id INT
+    p_address VARCHAR, p_salary NUMERIC, p_role_id INT, OUT p_id INT
 )
 LANGUAGE plpgsql AS $$
 BEGIN
-    INSERT INTO employee(full_name, idnp, phone, address, salary, position)
-    VALUES (p_full_name, p_idnp, p_phone, p_address, p_salary, p_position)
+    INSERT INTO employee(full_name, idnp, phone, address, salary, role_id)
+    VALUES (p_full_name, p_idnp, p_phone, p_address, p_salary, p_role_id)
     RETURNING employee_id INTO p_id;
-END;
-$$;
+END; $$;
 
 CREATE OR REPLACE PROCEDURE sp_update_employee(
     p_id INT, p_full_name VARCHAR, p_idnp VARCHAR, p_phone VARCHAR,
-    p_address VARCHAR, p_salary NUMERIC, p_position VARCHAR
+    p_address VARCHAR, p_salary NUMERIC, p_role_id INT
 )
 LANGUAGE plpgsql AS $$
 BEGIN
     UPDATE employee
     SET full_name=p_full_name, idnp=p_idnp, phone=p_phone,
-        address=p_address, salary=p_salary, position=p_position
+        address=p_address, salary=p_salary, role_id=p_role_id
     WHERE employee_id = p_id;
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Сотрудник с id=% не найден', p_id;
-    END IF;
-END;
-$$;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Сотрудник с id=% не найден', p_id; END IF;
+END; $$;
 
 CREATE OR REPLACE PROCEDURE sp_delete_employee(p_id INT)
 LANGUAGE plpgsql AS $$
 BEGIN
     DELETE FROM employee WHERE employee_id = p_id;
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Сотрудник с id=% не найден', p_id;
-    END IF;
-END;
-$$;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Сотрудник с id=% не найден', p_id; END IF;
+END; $$;
 
 -- ── RECEIPT ──────────────────────────────────────────────────────
--- Номер чека уникален в рамках pharmacy_id + date, начинается с 1
 
 CREATE OR REPLACE PROCEDURE sp_add_receipt(
-    p_pharmacy_id INT, p_employee_id INT,
-    p_date DATE,
-    OUT p_id INT
+    p_pharmacy_id INT, p_employee_id INT, p_date DATE, OUT p_id INT
 )
 LANGUAGE plpgsql AS $$
-DECLARE
-    v_number INT;
+DECLARE v_number INT;
 BEGIN
-    SELECT COALESCE(MAX(receipt_number), 0) + 1
-    INTO v_number
-    FROM receipt
-    WHERE pharmacy_id = p_pharmacy_id
-      AND date = p_date;
+    SELECT COALESCE(MAX(receipt_number), 0) + 1 INTO v_number
+    FROM receipt WHERE pharmacy_id = p_pharmacy_id AND date = p_date;
 
     INSERT INTO receipt(receipt_number, pharmacy_id, employee_id, total_amount, date, time)
     VALUES (v_number, p_pharmacy_id, p_employee_id, 0, p_date, CURRENT_TIME)
     RETURNING receipt_id INTO p_id;
-END;
-$$;
+END; $$;
 
 CREATE OR REPLACE PROCEDURE sp_update_receipt(
-    p_id INT, p_pharmacy_id INT,
-    p_employee_id INT, p_date DATE
+    p_id INT, p_pharmacy_id INT, p_employee_id INT, p_date DATE
 )
 LANGUAGE plpgsql AS $$
 DECLARE
@@ -904,97 +962,64 @@ DECLARE
     v_old_pharmacy_id INT;
     v_old_date        DATE;
 BEGIN
-    SELECT pharmacy_id, date
-    INTO v_old_pharmacy_id, v_old_date
+    SELECT pharmacy_id, date INTO v_old_pharmacy_id, v_old_date
     FROM receipt WHERE receipt_id = p_id;
 
     IF v_old_pharmacy_id != p_pharmacy_id OR v_old_date != p_date THEN
-        SELECT COALESCE(MAX(receipt_number), 0) + 1
-        INTO v_number
-        FROM receipt
-        WHERE pharmacy_id = p_pharmacy_id
-          AND date = p_date
-          AND receipt_id != p_id;
+        SELECT COALESCE(MAX(receipt_number), 0) + 1 INTO v_number
+        FROM receipt WHERE pharmacy_id = p_pharmacy_id AND date = p_date AND receipt_id != p_id;
     ELSE
-        SELECT receipt_number INTO v_number
-        FROM receipt WHERE receipt_id = p_id;
+        SELECT receipt_number INTO v_number FROM receipt WHERE receipt_id = p_id;
     END IF;
 
     UPDATE receipt
-    SET pharmacy_id    = p_pharmacy_id,
-        employee_id    = p_employee_id,
-        date           = p_date,
-        receipt_number = v_number
+    SET pharmacy_id=p_pharmacy_id, employee_id=p_employee_id,
+        date=p_date, receipt_number=v_number
     WHERE receipt_id = p_id;
-
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Чек с id=% не найден', p_id;
-    END IF;
-END;
-$$;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Чек с id=% не найден', p_id; END IF;
+END; $$;
 
 CREATE OR REPLACE PROCEDURE sp_delete_receipt(p_id INT)
 LANGUAGE plpgsql AS $$
 BEGIN
     DELETE FROM receipt WHERE receipt_id = p_id;
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Чек с id=% не найден', p_id;
-    END IF;
-END;
-$$;
+    IF NOT FOUND THEN RAISE EXCEPTION 'Чек с id=% не найден', p_id; END IF;
+END; $$;
 
 -- ── ORDER ITEM ───────────────────────────────────────────────────
 
 CREATE OR REPLACE PROCEDURE sp_add_order_item(
-    p_receipt_id INT, p_product_id INT,
-    p_quantity INT, p_discount NUMERIC
+    p_receipt_id INT, p_product_id INT, p_quantity INT, p_discount NUMERIC
 )
 LANGUAGE plpgsql AS $$
 DECLARE
     v_pharmacy_id INT;
     v_stock       INT;
 BEGIN
-    SELECT pharmacy_id INTO v_pharmacy_id
-    FROM receipt WHERE receipt_id = p_receipt_id;
+    SELECT pharmacy_id INTO v_pharmacy_id FROM receipt WHERE receipt_id = p_receipt_id;
+    IF v_pharmacy_id IS NULL THEN RAISE EXCEPTION 'Чек с id=% не найден', p_receipt_id; END IF;
 
-    IF v_pharmacy_id IS NULL THEN
-        RAISE EXCEPTION 'Чек с id=% не найден', p_receipt_id;
-    END IF;
-
-    SELECT remaining_qty INTO v_stock
-    FROM stock_balance
+    SELECT remaining_qty INTO v_stock FROM stock_balance
     WHERE pharmacy_id = v_pharmacy_id AND product_id = p_product_id;
 
-    IF v_stock IS NULL THEN
-        RAISE EXCEPTION 'Товар отсутствует на складе этой аптеки';
-    END IF;
-
-    IF v_stock < p_quantity THEN
-        RAISE EXCEPTION 'Недостаточно товара на складе. Доступно: %', v_stock;
-    END IF;
+    IF v_stock IS NULL THEN RAISE EXCEPTION 'Товар отсутствует на складе этой аптеки'; END IF;
+    IF v_stock < p_quantity THEN RAISE EXCEPTION 'Недостаточно товара. Доступно: %', v_stock; END IF;
 
     INSERT INTO order_item(receipt_id, product_id, quantity, discount)
     VALUES (p_receipt_id, p_product_id, p_quantity, p_discount)
-    ON CONFLICT (receipt_id, product_id)
-    DO UPDATE SET
-        quantity = order_item.quantity + EXCLUDED.quantity,
-        discount = EXCLUDED.discount;
+    ON CONFLICT (receipt_id, product_id) DO UPDATE
+    SET quantity = order_item.quantity + EXCLUDED.quantity, discount = EXCLUDED.discount;
 
-    UPDATE stock_balance
-    SET remaining_qty = remaining_qty - p_quantity
+    UPDATE stock_balance SET remaining_qty = remaining_qty - p_quantity
     WHERE pharmacy_id = v_pharmacy_id AND product_id = p_product_id;
 
-    UPDATE receipt
-    SET total_amount = (
-        SELECT COALESCE(SUM(total_price), 0)
-        FROM order_item WHERE receipt_id = p_receipt_id
-    )
-    WHERE receipt_id = p_receipt_id;
-END;
-$$;
+    UPDATE receipt SET total_amount = (
+        SELECT COALESCE(SUM(total_price), 0) FROM order_item WHERE receipt_id = p_receipt_id
+    ) WHERE receipt_id = p_receipt_id;
+END; $$;
 
 CREATE OR REPLACE PROCEDURE sp_update_order_item(
-    p_receipt_id     INT, p_product_id     INT,
+    p_receipt_id INT, p_product_id INT,
     p_new_receipt_id INT, p_new_product_id INT,
     p_quantity INT, p_discount NUMERIC
 )
@@ -1007,123 +1032,78 @@ DECLARE
     v_price           NUMERIC;
     v_delta           INT;
 BEGIN
-    SELECT pharmacy_id INTO v_old_pharmacy_id
-    FROM receipt WHERE receipt_id = p_receipt_id;
-
-    SELECT pharmacy_id INTO v_new_pharmacy_id
-    FROM receipt WHERE receipt_id = p_new_receipt_id;
-
-    SELECT quantity INTO v_old_qty
-    FROM order_item
+    SELECT pharmacy_id INTO v_old_pharmacy_id FROM receipt WHERE receipt_id = p_receipt_id;
+    SELECT pharmacy_id INTO v_new_pharmacy_id FROM receipt WHERE receipt_id = p_new_receipt_id;
+    SELECT quantity INTO v_old_qty FROM order_item
     WHERE receipt_id = p_receipt_id AND product_id = p_product_id;
 
     IF p_receipt_id != p_new_receipt_id OR p_product_id != p_new_product_id THEN
-
-        UPDATE stock_balance
-        SET remaining_qty = remaining_qty + v_old_qty
+        UPDATE stock_balance SET remaining_qty = remaining_qty + v_old_qty
         WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
 
-        SELECT remaining_qty INTO v_stock
-        FROM stock_balance
+        SELECT remaining_qty INTO v_stock FROM stock_balance
         WHERE pharmacy_id = v_new_pharmacy_id AND product_id = p_new_product_id;
 
         IF v_stock IS NULL THEN
-            UPDATE stock_balance
-            SET remaining_qty = remaining_qty - v_old_qty
+            UPDATE stock_balance SET remaining_qty = remaining_qty - v_old_qty
             WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
             RAISE EXCEPTION 'Товар отсутствует на складе аптеки';
         END IF;
-
         IF v_stock < p_quantity THEN
-            UPDATE stock_balance
-            SET remaining_qty = remaining_qty - v_old_qty
+            UPDATE stock_balance SET remaining_qty = remaining_qty - v_old_qty
             WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
-            RAISE EXCEPTION 'Недостаточно товара на складе. Доступно: %', v_stock;
+            RAISE EXCEPTION 'Недостаточно товара. Доступно: %', v_stock;
         END IF;
 
-        DELETE FROM order_item
-        WHERE receipt_id = p_receipt_id AND product_id = p_product_id;
-
+        DELETE FROM order_item WHERE receipt_id = p_receipt_id AND product_id = p_product_id;
         SELECT sale_price INTO v_price FROM product WHERE product_id = p_new_product_id;
         INSERT INTO order_item(receipt_id, product_id, quantity, unit_price, discount)
         VALUES (p_new_receipt_id, p_new_product_id, p_quantity, v_price, p_discount);
-
-        UPDATE stock_balance
-        SET remaining_qty = remaining_qty - p_quantity
+        UPDATE stock_balance SET remaining_qty = remaining_qty - p_quantity
         WHERE pharmacy_id = v_new_pharmacy_id AND product_id = p_new_product_id;
-
     ELSE
         v_delta := p_quantity - v_old_qty;
-
         IF v_delta > 0 THEN
-            SELECT remaining_qty INTO v_stock
-            FROM stock_balance
+            SELECT remaining_qty INTO v_stock FROM stock_balance
             WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
-
             IF v_stock IS NULL OR v_stock < v_delta THEN
-                RAISE EXCEPTION 'Недостаточно товара на складе. Доступно: %', COALESCE(v_stock, 0);
+                RAISE EXCEPTION 'Недостаточно товара. Доступно: %', COALESCE(v_stock, 0);
             END IF;
-
-            UPDATE stock_balance
-            SET remaining_qty = remaining_qty - v_delta
+            UPDATE stock_balance SET remaining_qty = remaining_qty - v_delta
             WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
-
         ELSIF v_delta < 0 THEN
-            UPDATE stock_balance
-            SET remaining_qty = remaining_qty + ABS(v_delta)
+            UPDATE stock_balance SET remaining_qty = remaining_qty + ABS(v_delta)
             WHERE pharmacy_id = v_old_pharmacy_id AND product_id = p_product_id;
         END IF;
-
-        UPDATE order_item
-        SET quantity = p_quantity, discount = p_discount
+        UPDATE order_item SET quantity=p_quantity, discount=p_discount
         WHERE receipt_id = p_receipt_id AND product_id = p_product_id;
     END IF;
 
-    UPDATE receipt
-    SET total_amount = (
-        SELECT COALESCE(SUM(total_price), 0)
-        FROM order_item WHERE receipt_id = receipt.receipt_id
-    )
-    WHERE receipt_id IN (p_receipt_id, p_new_receipt_id);
-END;
-$$;
+    UPDATE receipt SET total_amount = (
+        SELECT COALESCE(SUM(total_price), 0) FROM order_item WHERE receipt_id = receipt.receipt_id
+    ) WHERE receipt_id IN (p_receipt_id, p_new_receipt_id);
+END; $$;
 
-CREATE OR REPLACE PROCEDURE sp_delete_order_item(
-    p_receipt_id INT,
-    p_product_id INT
-)
+CREATE OR REPLACE PROCEDURE sp_delete_order_item(p_receipt_id INT, p_product_id INT)
 LANGUAGE plpgsql AS $$
 DECLARE
     v_pharmacy_id INT;
     v_qty         INT;
 BEGIN
-    SELECT pharmacy_id INTO v_pharmacy_id
-    FROM receipt WHERE receipt_id = p_receipt_id;
-
-    SELECT quantity INTO v_qty
-    FROM order_item
+    SELECT pharmacy_id INTO v_pharmacy_id FROM receipt WHERE receipt_id = p_receipt_id;
+    SELECT quantity INTO v_qty FROM order_item
     WHERE receipt_id = p_receipt_id AND product_id = p_product_id;
-
     IF NOT FOUND THEN
-        RAISE EXCEPTION 'Позиция не найдена (receipt_id=%, product_id=%)',
-            p_receipt_id, p_product_id;
+        RAISE EXCEPTION 'Позиция не найдена (receipt_id=%, product_id=%)', p_receipt_id, p_product_id;
     END IF;
 
-    DELETE FROM order_item
-    WHERE receipt_id = p_receipt_id AND product_id = p_product_id;
-
-    UPDATE stock_balance
-    SET remaining_qty = remaining_qty + v_qty
+    DELETE FROM order_item WHERE receipt_id = p_receipt_id AND product_id = p_product_id;
+    UPDATE stock_balance SET remaining_qty = remaining_qty + v_qty
     WHERE pharmacy_id = v_pharmacy_id AND product_id = p_product_id;
-
-    UPDATE receipt
-    SET total_amount = (
-        SELECT COALESCE(SUM(total_price), 0)
-        FROM order_item WHERE receipt_id = p_receipt_id
-    )
-    WHERE receipt_id = p_receipt_id;
-END;
-$$;
+    UPDATE receipt SET total_amount = (
+        SELECT COALESCE(SUM(total_price), 0) FROM order_item WHERE receipt_id = p_receipt_id
+    ) WHERE receipt_id = p_receipt_id;
+END; $$;
 
 -- ── STOCK BALANCE ────────────────────────────────────────────────
 
@@ -1134,96 +1114,153 @@ LANGUAGE plpgsql AS $$
 BEGIN
     INSERT INTO stock_balance(pharmacy_id, product_id, remaining_qty)
     VALUES (p_pharmacy_id, p_product_id, p_remaining_qty);
-END;
-$$;
+END; $$;
 
 CREATE OR REPLACE PROCEDURE sp_update_stock_balance(
     p_pharmacy_id INT, p_product_id INT,
-    p_new_pharmacy_id INT, p_new_product_id INT,
-    p_remaining_qty INT
+    p_new_pharmacy_id INT, p_new_product_id INT, p_remaining_qty INT
 )
 LANGUAGE plpgsql AS $$
 BEGIN
     IF p_pharmacy_id != p_new_pharmacy_id OR p_product_id != p_new_product_id THEN
-        DELETE FROM stock_balance
-        WHERE pharmacy_id = p_pharmacy_id AND product_id = p_product_id;
+        DELETE FROM stock_balance WHERE pharmacy_id=p_pharmacy_id AND product_id=p_product_id;
         INSERT INTO stock_balance(pharmacy_id, product_id, remaining_qty)
         VALUES (p_new_pharmacy_id, p_new_product_id, p_remaining_qty);
     ELSE
-        UPDATE stock_balance
-        SET remaining_qty = p_remaining_qty
-        WHERE pharmacy_id = p_pharmacy_id AND product_id = p_product_id;
+        UPDATE stock_balance SET remaining_qty=p_remaining_qty
+        WHERE pharmacy_id=p_pharmacy_id AND product_id=p_product_id;
     END IF;
-END;
-$$;
+END; $$;
 
-CREATE OR REPLACE PROCEDURE sp_delete_stock_balance(
-    p_pharmacy_id INT,
-    p_product_id INT
+CREATE OR REPLACE PROCEDURE sp_delete_stock_balance(p_pharmacy_id INT, p_product_id INT)
+LANGUAGE plpgsql AS $$
+BEGIN
+    DELETE FROM stock_balance WHERE pharmacy_id=p_pharmacy_id AND product_id=p_product_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Остаток не найден (pharmacy_id=%, product_id=%)', p_pharmacy_id, p_product_id;
+    END IF;
+END; $$;
+
+
+
+-- ══════════════════════════════════════════════════════════════════
+-- ХРАНИМЫЕ ПРОЦЕДУРЫ — SYSTEM USER
+-- Добавить в конец SQL-скрипта (после остальных процедур)
+-- ══════════════════════════════════════════════════════════════════
+
+-- ── SYSTEM USER ──────────────────────────────────────────────────
+
+-- system_role проставляется автоматически триггером trg_set_system_role,
+-- поэтому в INSERT/UPDATE его не передаём.
+-- Пароль хешируется функцией md5() на стороне PostgreSQL.
+
+CREATE OR REPLACE PROCEDURE sp_add_system_users(
+    p_employee_id INT,
+    p_login       VARCHAR,
+    p_password    VARCHAR,   -- plain-text, хешируется внутри процедуры
+    p_is_active   BOOLEAN,
+    OUT p_id      INT
 )
 LANGUAGE plpgsql AS $$
 BEGIN
-    DELETE FROM stock_balance
-    WHERE pharmacy_id = p_pharmacy_id AND product_id = p_product_id;
+    -- Гарантируем: один сотрудник — один аккаунт
+    IF EXISTS (
+        SELECT 1 FROM system_users WHERE employee_id = p_employee_id
+    ) THEN
+        RAISE EXCEPTION 'У сотрудника с id=% уже есть системный аккаунт', p_employee_id;
+    END IF;
+
+    INSERT INTO system_users (employee_id, login, password_hash, is_active)
+    VALUES (p_employee_id, p_login, md5(p_password), p_is_active)
+    RETURNING user_id INTO p_id;
+END; $$;
+
+-- При обновлении пароль меняется только если p_password НЕ пустая строка.
+CREATE OR REPLACE PROCEDURE sp_update_system_users(
+    p_id          INT,
+    p_employee_id INT,
+    p_login       VARCHAR,
+    p_password    VARCHAR,   -- '' = не менять пароль
+    p_is_active   BOOLEAN
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    -- Проверяем уникальность employee_id среди других записей
+    IF EXISTS (
+        SELECT 1 FROM system_users
+        WHERE employee_id = p_employee_id AND user_id <> p_id
+    ) THEN
+        RAISE EXCEPTION 'У сотрудника с id=% уже есть системный аккаунт', p_employee_id;
+    END IF;
+
+    IF p_password <> '' THEN
+        UPDATE system_users
+        SET employee_id   = p_employee_id,
+            login         = p_login,
+            password_hash = md5(p_password),
+            is_active     = p_is_active
+        WHERE user_id = p_id;
+    ELSE
+        UPDATE system_users
+        SET employee_id = p_employee_id,
+            login       = p_login,
+            is_active   = p_is_active
+        WHERE user_id = p_id;
+    END IF;
 
     IF NOT FOUND THEN
-        RAISE EXCEPTION 'Остаток не найден (pharmacy_id=%, product_id=%)',
-            p_pharmacy_id, p_product_id;
+        RAISE EXCEPTION 'Пользователь с id=% не найден', p_id;
     END IF;
-END;
-$$;
+END; $$;
+
+CREATE OR REPLACE PROCEDURE sp_delete_system_users(p_id INT)
+LANGUAGE plpgsql AS $$
+BEGIN
+    DELETE FROM system_users WHERE user_id = p_id;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Пользователь с id=% не найден', p_id;
+    END IF;
+END; $$;
 
 -- ══════════════════════════════════════════════════════════════════
--- АНАЛИТИЧЕСКИЕ ПРЕДСТАВЛЕНИЯ (для Dashboard)
+-- АНАЛИТИЧЕСКИЕ ПРЕДСТАВЛЕНИЯ
 -- ══════════════════════════════════════════════════════════════════
 
 CREATE OR REPLACE VIEW vw_revenue_by_month AS
-SELECT
-    TO_CHAR(date, 'YYYY-MM') AS month,
-    SUM(total_amount)        AS total_revenue,
-    COUNT(*)                 AS receipt_count
-FROM receipt
-GROUP BY TO_CHAR(date, 'YYYY-MM')
-ORDER BY month;
+SELECT TO_CHAR(date,'YYYY-MM') AS month, SUM(total_amount) AS total_revenue, COUNT(*) AS receipt_count
+FROM receipt GROUP BY TO_CHAR(date,'YYYY-MM') ORDER BY month;
 
 CREATE OR REPLACE VIEW vw_revenue_by_pharmacy AS
-SELECT
-    ph.address,
-    SUM(r.total_amount) AS total_revenue,
-    COUNT(r.receipt_id) AS receipt_count,
-    AVG(r.total_amount) AS avg_receipt
-FROM receipt r
-JOIN pharmacy ph ON ph.pharmacy_id = r.pharmacy_id
-GROUP BY ph.pharmacy_id, ph.address
-ORDER BY total_revenue DESC;
+SELECT ph.address, SUM(r.total_amount) AS total_revenue,
+       COUNT(r.receipt_id) AS receipt_count, AVG(r.total_amount) AS avg_receipt
+FROM receipt r JOIN pharmacy ph ON ph.pharmacy_id = r.pharmacy_id
+GROUP BY ph.pharmacy_id, ph.address ORDER BY total_revenue DESC;
 
 CREATE OR REPLACE VIEW vw_top_products AS
-SELECT
-    p.name,
-    SUM(oi.quantity)    AS total_qty,
-    SUM(oi.total_price) AS total_revenue,
-    AVG(oi.discount)    AS avg_discount
+SELECT p.name, c.name AS category,
+       SUM(oi.quantity) AS total_qty, SUM(oi.total_price) AS total_revenue, AVG(oi.discount) AS avg_discount
 FROM order_item oi
-JOIN product p ON p.product_id = oi.product_id
-GROUP BY p.product_id, p.name
-ORDER BY total_revenue DESC;
+JOIN product  p ON p.product_id  = oi.product_id
+JOIN category c ON c.category_id = p.category_id
+GROUP BY p.product_id, p.name, c.name ORDER BY total_revenue DESC;
+
+CREATE OR REPLACE VIEW vw_sales_by_category AS
+SELECT c.name AS category, SUM(oi.quantity) AS total_qty, SUM(oi.total_price) AS total_revenue
+FROM order_item oi
+JOIN product  p ON p.product_id  = oi.product_id
+JOIN category c ON c.category_id = p.category_id
+GROUP BY c.category_id, c.name ORDER BY total_revenue DESC;
 
 CREATE OR REPLACE VIEW vw_sales_by_prescription AS
-SELECT
-    CASE WHEN p.prescription_required THEN 'По рецепту' ELSE 'Без рецепта' END AS category,
-    SUM(oi.quantity)    AS total_qty,
-    SUM(oi.total_price) AS total_revenue
-FROM order_item oi
-JOIN product p ON p.product_id = oi.product_id
+SELECT CASE WHEN p.prescription_required THEN 'По рецепту' ELSE 'Без рецепта' END AS category,
+       SUM(oi.quantity) AS total_qty, SUM(oi.total_price) AS total_revenue
+FROM order_item oi JOIN product p ON p.product_id = oi.product_id
 GROUP BY p.prescription_required;
 
 CREATE OR REPLACE VIEW vw_low_stock AS
-SELECT
-    ph.address AS pharmacy,
-    p.name     AS product,
-    sb.remaining_qty
+SELECT ph.address AS pharmacy, p.name AS product, c.name AS category, sb.remaining_qty
 FROM stock_balance sb
 JOIN pharmacy ph ON ph.pharmacy_id = sb.pharmacy_id
-JOIN product  p  ON p.product_id  = sb.product_id
-WHERE sb.remaining_qty < 20
-ORDER BY sb.remaining_qty;
+JOIN product  p  ON p.product_id   = sb.product_id
+JOIN category c  ON c.category_id  = p.category_id
+WHERE sb.remaining_qty < 20 ORDER BY sb.remaining_qty;

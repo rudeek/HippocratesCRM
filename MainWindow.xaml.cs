@@ -72,6 +72,9 @@ namespace MyHippocrates
                 case 4: vm.ReceiptsVM.Reload(); break;
                 case 5: vm.OrderItemsVM.Reload(); break;
                 case 6: vm.StockBalanceVM.Reload(); break;
+                case 7: vm.CategoryVM.Reload(); break;
+                case 8: vm.RoleVM.Reload(); break;
+                case 9: vm.SystemUserVM.Reload(); break;
             }
         }
     }

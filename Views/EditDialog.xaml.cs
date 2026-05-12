@@ -113,12 +113,29 @@ namespace MyHippocrates.Views
                     if (_isNew) DbProcedures.AddStockBalance(_ctx, s);
                     else DbProcedures.UpdateStockBalance(_ctx, _oldPharmacyId, _oldStockProductId, s);
                     break;
+
+                case Category c:
+                    if (_isNew) c.Id = DbProcedures.AddCategory(_ctx, c);
+                    else DbProcedures.UpdateCategory(_ctx, c);
+                    break;
+
+                case Role r:
+                    if (_isNew) r.Id = DbProcedures.AddRole(_ctx, r);
+                    else DbProcedures.UpdateRole(_ctx, r);
+                    break;
+
+                case SystemUserEditorViewModel suvm:
+                    if (_isNew)
+                        suvm.Entity.Id = DbProcedures.AddSystemUser(_ctx, suvm.Entity, suvm.PlainPassword);
+                    else
+                        DbProcedures.UpdateSystemUser(_ctx, suvm.Entity, suvm.PlainPassword);
+                    break;
             }
         }
 
         // ─── Валидация (без изменений) ────────────────────────────
 
-        private static string? Validate(object entity) => entity switch
+        private string? Validate(object entity) => entity switch
         {
             Manufacturer m => ValidateManufacturer(m),
             Pharmacy p => ValidatePharmacy(p),
@@ -127,6 +144,9 @@ namespace MyHippocrates.Views
             Receipt r => ValidateReceipt(r),
             OrderItem o => ValidateOrderItem(o),
             StockBalance s => ValidateStockBalance(s),
+            Category c => ValidateCategory(c),
+            Role r => ValidateRole(r),
+            SystemUserEditorViewModel suvm => ValidateSystemUser(suvm,_isNew),
             _ => null
         };
 
@@ -159,7 +179,7 @@ namespace MyHippocrates.Views
             if (!IsAllDigits(e.Idnp)) return "IDNP должен содержать только цифры.";
             if (string.IsNullOrWhiteSpace(e.Phone)) return "Введите телефон.";
             if (!e.Phone.StartsWith("+")) return "Телефон должен начинаться с '+'.";
-            if (string.IsNullOrWhiteSpace(e.Position)) return "Введите должность.";
+            if (e.RoleId == 0) return "Выберите должность.";
             if (e.Salary <= 0) return "Зарплата должна быть больше нуля.";
             return null;
         }
@@ -198,6 +218,27 @@ namespace MyHippocrates.Views
             if (s.PharmacyId == 0) return "Выберите аптеку.";
             if (s.ProductId == 0) return "Выберите товар.";
             if (s.RemainingQty < 0) return "Остаток не может быть отрицательным.";
+            return null;
+        }
+
+        private static string? ValidateCategory(Category c)
+        {
+            if (string.IsNullOrWhiteSpace(c.Name)) return "Введите название категории.";
+            return null;
+        }
+
+        private static string? ValidateRole(Role r)
+        {
+            if (string.IsNullOrWhiteSpace(r.Name)) return "Введите название должности.";
+            if (r.FixedSalary <= 0) return "Зарплата должна быть больше нуля.";
+            return null;
+        }
+
+        private static string? ValidateSystemUser(SystemUserEditorViewModel vm, bool isNew)
+        {
+            if (vm.Entity.EmployeeId == 0) return "Выберите сотрудника.";
+            if (string.IsNullOrWhiteSpace(vm.Entity.Login)) return "Введите логин.";
+            if (isNew && string.IsNullOrWhiteSpace(vm.PlainPassword)) return "Введите пароль.";
             return null;
         }
 

@@ -17,6 +17,7 @@ namespace MyHippocrates.ViewModels
     {
         private readonly AppDbContext _ctx;
         private readonly ObservableCollection<Manufacturer> _manufacturers;
+        private readonly ObservableCollection<Category> _categories;
         private readonly ObservableCollection<Product> _products;
         public ICollectionView View { get; }
 
@@ -33,10 +34,12 @@ namespace MyHippocrates.ViewModels
 
         public ProductsViewModel(AppDbContext ctx,
             ObservableCollection<Manufacturer> manufacturers,
+            ObservableCollection<Category> categories,
             ObservableCollection<Product> products)
         {
             _ctx = ctx;
             _manufacturers = manufacturers;
+            _categories = categories;
             _products = products;
 
             View = CollectionViewSource.GetDefaultView(_products);
@@ -45,7 +48,8 @@ namespace MyHippocrates.ViewModels
                 if (string.IsNullOrWhiteSpace(_search)) return true;
                 if (obj is not Product p) return false;
                 return p.Name.ToLower().Contains(_search.ToLower())
-                    || (p.Manufacturer?.Name?.ToLower().Contains(_search.ToLower()) ?? false);
+                    || (p.Manufacturer?.Name?.ToLower().Contains(_search.ToLower()) ?? false)
+                    || (p.Category?.Name?.ToLower().Contains(_search.ToLower()) ?? false);
             };
 
             AddCommand = new RelayCommand(_ => Add());
@@ -66,7 +70,7 @@ namespace MyHippocrates.ViewModels
         private void Add()
         {
             var entity = new Product();
-            var vm = new ProductEditorViewModel(entity, _manufacturers);
+            var vm = new ProductEditorViewModel(entity, _manufacturers, _categories);
             var dlg = new EditDialog(vm, _ctx, isNew: true)
             { Owner = Application.Current.MainWindow, Title = "Добавить товар", Icon = new BitmapImage(new Uri("pack://application:,,,/add.ico")) };
             dlg.TxtTitle.Text = "Добавление записи";
@@ -86,6 +90,7 @@ namespace MyHippocrates.ViewModels
                 Id = p.Id,
                 Name = p.Name,
                 ManufacturerId = p.ManufacturerId,
+                CategoryId = p.CategoryId,
                 ExpirationDate = p.ExpirationDate,
                 ProductionDate = p.ProductionDate,
                 Unit = p.Unit,
@@ -94,7 +99,7 @@ namespace MyHippocrates.ViewModels
                 PurchasePrice = p.PurchasePrice,
                 SalePrice = p.SalePrice
             };
-            var vm = new ProductEditorViewModel(copy, _manufacturers);
+            var vm = new ProductEditorViewModel(copy, _manufacturers, _categories);
             var dlg = new EditDialog(vm, _ctx, isNew: false)
             { Owner = Application.Current.MainWindow, Title = "Редактировать товар", Icon = new BitmapImage(new Uri("pack://application:,,,/edit.ico")) };
             if (dlg.ShowDialog() == true)
@@ -102,6 +107,7 @@ namespace MyHippocrates.ViewModels
                 // Обновляем поля оригинального объекта
                 p.Name = copy.Name;
                 p.ManufacturerId = copy.ManufacturerId;
+                p.CategoryId = copy.CategoryId;
                 p.ExpirationDate = copy.ExpirationDate;
                 p.ProductionDate = copy.ProductionDate;
                 p.Unit = copy.Unit;
