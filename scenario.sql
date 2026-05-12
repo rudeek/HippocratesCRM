@@ -55,7 +55,7 @@ CREATE TABLE employee (
     role_id     INT           NOT NULL REFERENCES role(role_id)
 );
 
-CREATE TABLE system_userss (
+CREATE TABLE system_users (
     user_id       SERIAL PRIMARY KEY,
     employee_id   INT          NOT NULL UNIQUE REFERENCES employee(employee_id) ON DELETE CASCADE,
     login         VARCHAR(100) NOT NULL UNIQUE,
@@ -131,7 +131,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_set_system_role
-BEFORE INSERT ON system_userss
+BEFORE INSERT ON system_users
 FOR EACH ROW
 EXECUTE FUNCTION set_system_role();
 
@@ -139,7 +139,7 @@ EXECUTE FUNCTION set_system_role();
 -- ДАННЫЕ
 -- ══════════════════════════════════════════════════════════════════
 
-TRUNCATE system_userss, stock_balance, order_item, receipt,
+TRUNCATE system_users, stock_balance, order_item, receipt,
          employee, pharmacy, product, manufacturer, role, category
 RESTART IDENTITY CASCADE;
 
@@ -417,7 +417,7 @@ INSERT INTO employee (full_name, idnp, phone, address, salary, role_id) VALUES
 -- Пользователи системы
 -- system_role проставится триггером автоматически:
 -- employee_id=50 (Ala Popa, Accountant) -> admin, остальные -> user
-INSERT INTO system_userss (employee_id, login, password_hash) VALUES
+INSERT INTO system_users (employee_id, login, password_hash) VALUES
 (1,  'a.popescu',  md5('user123')),
 (2,  'm.ionescu',  md5('user123')),
 (3,  'i.rusu',     md5('user123')),
