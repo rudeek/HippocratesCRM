@@ -113,15 +113,18 @@ namespace MyHippocrates.Models
         [Column("address"), Required, MaxLength(255)]
         public string Address { get; set; } = "";
 
-        [Column("salary"), ColumnType("numeric(10,2)")]
-        public decimal Salary { get; set; }
-
         [Column("role_id")]
         public int RoleId { get; set; }
 
-        public SystemUser? SystemUser { get; set; }
         public Role? Role { get; set; }
+        public SystemUser? SystemUser { get; set; }
         public ICollection<Receipt> Receipts { get; set; } = new List<Receipt>();
+
+        /// <summary>
+        /// Вычисляемое свойство для отображения зарплаты из роли.
+        /// </summary>
+        [NotMapped]
+        public decimal Salary => Role?.FixedSalary ?? 0;
     }
 
     [Table("receipt")]

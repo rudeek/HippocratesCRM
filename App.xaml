@@ -35,7 +35,7 @@
             </StackPanel>
         </DataTemplate>
 
-        <!-- EMPLOYEE (обновлённый — через EmployeeEditorViewModel) -->
+        <!-- EMPLOYEE (обновлённый — БЕЗ зарплаты, через EmployeeEditorViewModel) -->
         <DataTemplate DataType="{x:Type vm:EmployeeEditorViewModel}">
             <StackPanel Width="440">
                 <Label Content="ФИО *"/>
@@ -50,15 +50,7 @@
                          PreviewTextInput="PhoneNumber_PreviewTextInput"/>
                 <Label Content="Адрес" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Entity.Address, UpdateSourceTrigger=PropertyChanged}"/>
-                <Label Content="Зарплата * (> 0)" Margin="0,12,0,0"/>
-                <TextBox PreviewTextInput="Price_PreviewTextInput">
-                    <TextBox.Text>
-                        <Binding Path="Entity.Salary"
-                                 UpdateSourceTrigger="LostFocus"
-                                 StringFormat="{}{0:0.##}"/>
-                    </TextBox.Text>
-                </TextBox>
-                <Label Content="Должность *" Margin="0,12,0,0"/>
+                <Label Content="Должность * (зарплата указана в роли)" Margin="0,12,0,0"/>
                 <ComboBox ItemsSource="{Binding Roles}"
                           SelectedValue="{Binding Entity.RoleId, Mode=TwoWay}"
                           SelectedValuePath="Id"
@@ -79,7 +71,7 @@
             </StackPanel>
         </DataTemplate>
 
-        <!-- PRODUCT -->
+        <!-- PRODUCT (с категориями как роли в сотрудников) -->
         <DataTemplate DataType="{x:Type vm:ProductEditorViewModel}">
             <StackPanel Width="440">
                 <Label Content="Название *"/>
@@ -87,7 +79,6 @@
                 <Label Content="Производитель *" Margin="0,12,0,0"/>
                 <ComboBox ItemsSource="{Binding Manufacturers}"
                           SelectedValuePath="Id"
-                          DisplayMemberPath="Name"
                           SelectedValue="{Binding Entity.ManufacturerId, Mode=TwoWay}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
@@ -98,7 +89,6 @@
                 <Label Content="Категория *" Margin="0,12,0,0"/>
                 <ComboBox ItemsSource="{Binding Categories}"
                           SelectedValuePath="Id"
-                          DisplayMemberPath="Name"
                           SelectedValue="{Binding Entity.CategoryId, Mode=TwoWay}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
@@ -188,7 +178,6 @@
             </StackPanel>
         </DataTemplate>
 
-        <!-- STOCK BALANCE -->
         <!-- STOCK BALANCE -->
         <DataTemplate DataType="{x:Type vm:StockBalanceEditorViewModel}">
             <StackPanel Width="440">

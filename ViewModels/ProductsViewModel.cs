@@ -16,9 +16,9 @@ namespace MyHippocrates.ViewModels
     internal class ProductsViewModel : BaseViewModel
     {
         private readonly AppDbContext _ctx;
+        private readonly ObservableCollection<Product> _products;
         private readonly ObservableCollection<Manufacturer> _manufacturers;
         private readonly ObservableCollection<Category> _categories;
-        private readonly ObservableCollection<Product> _products;
         public ICollectionView View { get; }
 
         private string _search = "";
@@ -49,7 +49,9 @@ namespace MyHippocrates.ViewModels
                 if (obj is not Product p) return false;
                 return p.Name.ToLower().Contains(_search.ToLower())
                     || (p.Manufacturer?.Name?.ToLower().Contains(_search.ToLower()) ?? false)
-                    || (p.Category?.Name?.ToLower().Contains(_search.ToLower()) ?? false);
+                    || (p.Category?.Name?.ToLower().Contains(_search.ToLower()) ?? false)
+                    || p.PurchasePrice.ToString().Contains(_search)
+                    || p.SalePrice.ToString().Contains(_search);
             };
 
             AddCommand = new RelayCommand(_ => Add());
@@ -59,11 +61,16 @@ namespace MyHippocrates.ViewModels
             Load();
         }
 
+        public void Reload() => Load();
+
         private void Load()
         {
             _ctx.ChangeTracker.Clear();
             _products.Clear();
-            foreach (var p in _ctx.Products.Include(x => x.Manufacturer).OrderBy(x => x.Id).ToList())
+            foreach (var p in _ctx.Products
+                .Include(x => x.Manufacturer)
+                .Include(x => x.Category)
+                .OrderBy(x => x.Id).ToList())
                 _products.Add(p);
         }
 
@@ -71,12 +78,17 @@ namespace MyHippocrates.ViewModels
         {
             var entity = new Product();
             var vm = new ProductEditorViewModel(entity, _manufacturers, _categories);
-            var dlg = new EditDialog(vm, _ctx, isNew: true)
-            { Owner = Application.Current.MainWindow, Title = "Добавить товар", Icon = new BitmapImage(new Uri("pack://application:,,,/add.ico")) };
+            var dlg = new Views.EditDialog(vm, _ctx, isNew: true)
+            {
+                Owner = Application.Current.MainWindow,
+                Title = "Добавить товар",
+                Icon = new BitmapImage(new Uri("pack://application:,,,/add.ico"))
+            };
             dlg.TxtTitle.Text = "Добавление записи";
             if (dlg.ShowDialog() == true)
             {
                 entity.Manufacturer = _manufacturers.FirstOrDefault(m => m.Id == entity.ManufacturerId);
+                entity.Category = _categories.FirstOrDefault(c => c.Id == entity.CategoryId);
                 _products.Add(entity);
                 View.Refresh();
             }
@@ -89,8 +101,8 @@ namespace MyHippocrates.ViewModels
             {
                 Id = p.Id,
                 Name = p.Name,
-                ManufacturerId = p.ManufacturerId,
                 CategoryId = p.CategoryId,
+                ManufacturerId = p.ManufacturerId,
                 ExpirationDate = p.ExpirationDate,
                 ProductionDate = p.ProductionDate,
                 Unit = p.Unit,
@@ -100,14 +112,17 @@ namespace MyHippocrates.ViewModels
                 SalePrice = p.SalePrice
             };
             var vm = new ProductEditorViewModel(copy, _manufacturers, _categories);
-            var dlg = new EditDialog(vm, _ctx, isNew: false)
-            { Owner = Application.Current.MainWindow, Title = "Редактировать товар", Icon = new BitmapImage(new Uri("pack://application:,,,/edit.ico")) };
+            var dlg = new Views.EditDialog(vm, _ctx, isNew: false)
+            {
+                Owner = Application.Current.MainWindow,
+                Title = "Редактировать товар",
+                Icon = new BitmapImage(new Uri("pack://application:,,,/edit.ico"))
+            };
             if (dlg.ShowDialog() == true)
             {
-                // Обновляем поля оригинального объекта
                 p.Name = copy.Name;
-                p.ManufacturerId = copy.ManufacturerId;
                 p.CategoryId = copy.CategoryId;
+                p.ManufacturerId = copy.ManufacturerId;
                 p.ExpirationDate = copy.ExpirationDate;
                 p.ProductionDate = copy.ProductionDate;
                 p.Unit = copy.Unit;
@@ -116,6 +131,7 @@ namespace MyHippocrates.ViewModels
                 p.PurchasePrice = copy.PurchasePrice;
                 p.SalePrice = copy.SalePrice;
                 p.Manufacturer = _manufacturers.FirstOrDefault(m => m.Id == copy.ManufacturerId);
+                p.Category = _categories.FirstOrDefault(c => c.Id == copy.CategoryId);
 
                 var idx = _products.IndexOf(p);
                 if (idx >= 0)
@@ -144,15 +160,6 @@ namespace MyHippocrates.ViewModels
                 MessageBox.Show(ex.InnerException?.Message ?? ex.Message,
                     "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
-        public void Reload()
-        {
-            _ctx.ChangeTracker.Clear();
-            _products.Clear();
-            foreach (var p in _ctx.Products.Include(x => x.Manufacturer).OrderBy(x => x.Id).ToList())
-                _products.Add(p);
-            View.Refresh();
         }
     }
 }

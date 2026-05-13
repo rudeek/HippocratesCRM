@@ -9,13 +9,19 @@ using MyHippocrates.Models;
 namespace MyHippocrates.ViewModels
 {
     // ── ProductEditorViewModel ────────────────────────────────────
-    public class ProductEditorViewModel
+    public class ProductEditorViewModel : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler? PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string name = "") =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
         public Product Entity { get; }
         public ObservableCollection<Manufacturer> Manufacturers { get; }
         public ObservableCollection<Category> Categories { get; }
 
-        public ProductEditorViewModel(Product entity, ObservableCollection<Manufacturer> manufacturers, ObservableCollection<Category> categories)
+        public ProductEditorViewModel(Product entity,
+            ObservableCollection<Manufacturer> manufacturers,
+            ObservableCollection<Category> categories)
         {
             Entity = entity;
             Manufacturers = manufacturers;

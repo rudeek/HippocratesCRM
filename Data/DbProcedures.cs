@@ -129,7 +129,7 @@ namespace MyHippocrates.Data
                         @p_purchase_price, @p_sale_price, @p_id)";
 
                 cmd.Parameters.AddWithValue("p_name", p.Name);
-                cmd.Parameters.AddWithValue("p_category_id", p.CategoryId); // ← ДОБАВЛЕНО
+                cmd.Parameters.AddWithValue("p_category_id", p.CategoryId);
                 cmd.Parameters.AddWithValue("p_manufacturer_id", p.ManufacturerId);
                 cmd.Parameters.Add(CreateDateParam("p_production_date", p.ProductionDate));
                 cmd.Parameters.Add(CreateDateParam("p_expiration_date", p.ExpirationDate));
@@ -163,7 +163,6 @@ namespace MyHippocrates.Data
             {
                 using var cmd = cn.CreateCommand();
                 cmd.Transaction = tx;
-                // ✅ Добавлен @p_category_id
                 cmd.CommandText = @"
                     CALL sp_update_product(
                         @p_id, @p_name, @p_category_id, @p_manufacturer_id,
@@ -173,7 +172,7 @@ namespace MyHippocrates.Data
 
                 cmd.Parameters.AddWithValue("p_id", p.Id);
                 cmd.Parameters.AddWithValue("p_name", p.Name);
-                cmd.Parameters.AddWithValue("p_category_id", p.CategoryId); // ← ДОБАВЛЕНО
+                cmd.Parameters.AddWithValue("p_category_id", p.CategoryId);
                 cmd.Parameters.AddWithValue("p_manufacturer_id", p.ManufacturerId);
                 cmd.Parameters.Add(CreateDateParam("p_production_date", p.ProductionDate));
                 cmd.Parameters.Add(CreateDateParam("p_expiration_date", p.ExpirationDate));
@@ -304,13 +303,12 @@ namespace MyHippocrates.Data
             {
                 using var cmd = cn.CreateCommand();
                 cmd.Transaction = tx;
-                cmd.CommandText = "CALL sp_add_employee(@p_full_name, @p_idnp, @p_phone, @p_address, @p_salary, @p_role_id, @p_id)";
+                cmd.CommandText = "CALL sp_add_employee(@p_full_name, @p_idnp, @p_phone, @p_address, @p_role_id, @p_id)";
 
                 cmd.Parameters.AddWithValue("p_full_name", e.FullName);
                 cmd.Parameters.AddWithValue("p_idnp", e.Idnp);
                 cmd.Parameters.AddWithValue("p_phone", e.Phone);
                 cmd.Parameters.Add(CreateNullableParam("p_address", e.Address));
-                cmd.Parameters.AddWithValue("p_salary", e.Salary);
                 cmd.Parameters.AddWithValue("p_role_id", e.RoleId);
 
                 var pOut = new NpgsqlParameter("p_id", NpgsqlDbType.Integer)
@@ -337,14 +335,13 @@ namespace MyHippocrates.Data
             {
                 using var cmd = cn.CreateCommand();
                 cmd.Transaction = tx;
-                cmd.CommandText = "CALL sp_update_employee(@p_id, @p_full_name, @p_idnp, @p_phone, @p_address, @p_salary, @p_role_id)";
+                cmd.CommandText = "CALL sp_update_employee(@p_id, @p_full_name, @p_idnp, @p_phone, @p_address, @p_role_id)";
 
                 cmd.Parameters.AddWithValue("p_id", e.Id);
                 cmd.Parameters.AddWithValue("p_full_name", e.FullName);
                 cmd.Parameters.AddWithValue("p_idnp", e.Idnp);
                 cmd.Parameters.AddWithValue("p_phone", e.Phone);
                 cmd.Parameters.Add(CreateNullableParam("p_address", e.Address));
-                cmd.Parameters.AddWithValue("p_salary", e.Salary);
                 cmd.Parameters.AddWithValue("p_role_id", e.RoleId);
 
                 cmd.ExecuteNonQuery();

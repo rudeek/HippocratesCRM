@@ -84,7 +84,6 @@ namespace MyHippocrates.ViewModels
                 Idnp = e.Idnp,
                 Phone = e.Phone,
                 Address = e.Address,
-                Salary = e.Salary,
                 RoleId = e.RoleId
             };
             var vm = new EmployeeEditorViewModel(copy, _roles);
@@ -100,7 +99,6 @@ namespace MyHippocrates.ViewModels
                 e.Idnp = copy.Idnp;
                 e.Phone = copy.Phone;
                 e.Address = copy.Address;
-                e.Salary = copy.Salary;
                 e.RoleId = copy.RoleId;
                 e.Role = _roles.FirstOrDefault(r => r.Id == copy.RoleId);
 
