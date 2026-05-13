@@ -42,6 +42,7 @@ namespace MyHippocrates.Views
             {
                 ProductEditorViewModel vm => (object)vm.Entity,
                 ReceiptEditorViewModel vm => vm.Entity,
+                EmployeeEditorViewModel vm => vm.Entity,
                 OrderItemEditorViewModel vm => vm.Entity,
                 StockBalanceEditorViewModel vm => vm.Entity,
                 _ => DataContext
@@ -180,7 +181,6 @@ namespace MyHippocrates.Views
             if (string.IsNullOrWhiteSpace(e.Phone)) return "Введите телефон.";
             if (!e.Phone.StartsWith("+")) return "Телефон должен начинаться с '+'.";
             if (e.RoleId == 0) return "Выберите должность.";
-            if (e.Salary <= 0) return "Зарплата должна быть больше нуля.";
             return null;
         }
 

@@ -50,7 +50,7 @@ namespace MyHippocrates.ViewModels
             PharmaciesVM = new PharmaciesViewModel(dbContext, Pharmacies);
             EmployeesVM = new EmployeesViewModel(dbContext, Employees, Roles);
             ReceiptsVM = new ReceiptsViewModel(dbContext, Pharmacies, Employees, Receipts);
-            OrderItemsVM = new OrderItemsViewModel(dbContext, Receipts, Products);
+            OrderItemsVM = new OrderItemsViewModel(dbContext, Receipts, Products, Pharmacies);
             StockBalanceVM = new StockBalanceViewModel(dbContext, Pharmacies, Products);
             CategoryVM = new CategoryViewModel(dbContext, Categories);
             RoleVM = new RoleViewModel(dbContext, Roles);

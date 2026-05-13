@@ -158,23 +158,50 @@
         <!-- ORDER ITEM -->
         <DataTemplate DataType="{x:Type vm:OrderItemEditorViewModel}">
             <StackPanel Width="440">
-                <Label Content="Чек *"/>
-                <ComboBox ItemsSource="{Binding Receipts}"
-                          DisplayMemberPath="ReceiptNumber"
-                          SelectedValuePath="Id"
-                          SelectedItem="{Binding SelectedReceipt, Mode=TwoWay}"/>
+                <!-- Фильтр по аптеке -->
+                <Label Content="Аптека (фильтр чеков) *"/>
+                <ComboBox ItemsSource="{Binding Pharmacies}"
+                  SelectedItem="{Binding SelectedPharmacy, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Address}" Padding="2 4"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <Label Content="Чек * (только сегодняшние)" Margin="0,12,0,0"/>
+                <ComboBox ItemsSource="{Binding FilteredReceipts}"
+                  SelectedItem="{Binding SelectedReceipt, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Padding="2 4">
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="№{0} — {1:dd.MM.yyyy}">
+                                        <Binding Path="ReceiptNumber"/>
+                                        <Binding Path="Date"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
                 <Label Content="Товар * (только из склада выбранной аптеки)" Margin="0,12,0,0"/>
-                
                 <ComboBox ItemsSource="{Binding AvailableProducts}"
-                          DisplayMemberPath="Name"
-                          SelectedValuePath="Id"
-                          SelectedItem="{Binding SelectedProduct, Mode=TwoWay}"/>
+                  SelectedItem="{Binding SelectedProduct, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" Padding="2 4"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
                 <Label Content="Количество * (> 0)" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Entity.Quantity, UpdateSourceTrigger=PropertyChanged}"
-                         PreviewTextInput="OnlyDigits_PreviewTextInput"/>
+                 PreviewTextInput="OnlyDigits_PreviewTextInput"/>
                 <Label Content="Скидка % (0–100)" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Entity.Discount, UpdateSourceTrigger=PropertyChanged}"
-                         PreviewTextInput="Price_PreviewTextInput"/>
+                 PreviewTextInput="Price_PreviewTextInput"/>
             </StackPanel>
         </DataTemplate>
 
@@ -243,9 +270,7 @@
             <StackPanel Width="440">
                 <Label Content="Сотрудник *"/>
                 <ComboBox ItemsSource="{Binding AvailableEmployees}"
-                          SelectedItem="{Binding SelectedEmployee, Mode=TwoWay}"
-                          DisplayMemberPath="FullName"
-                          SelectedValuePath="Id">
+                          SelectedItem="{Binding SelectedEmployee, Mode=TwoWay}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding FullName}" Padding="2 4"/>

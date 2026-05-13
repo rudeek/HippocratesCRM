@@ -63,9 +63,6 @@ namespace MyHippocrates.ViewModels
                 Entity.Date = DateTime.Today;
         }
     }
-
-    // ── OrderItemEditorViewModel ──────────────────────────────────
-    // Фильтрует список товаров по аптеке выбранного чека.
     public class OrderItemEditorViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -74,14 +71,23 @@ namespace MyHippocrates.ViewModels
 
         public OrderItem Entity { get; }
 
-        //Все чеки для ComboBox
-        public ObservableCollection<Receipt> Receipts { get; }
-
-        //Все товары + все остатки (для фильтрации)
+        // Все чеки (для фильтрации)
+        private readonly ObservableCollection<Receipt> _allReceipts;
         private readonly ObservableCollection<Product> _allProducts;
         private readonly IReadOnlyList<StockBalance> _stockBalances;
 
-        //Товары, доступные в аптеке выбранного чека
+        // Аптеки для фильтра
+        public ObservableCollection<Pharmacy> Pharmacies { get; }
+
+        // Чеки только за сегодня и выбранной аптеки
+        private ObservableCollection<Receipt> _filteredReceipts = new();
+        public ObservableCollection<Receipt> FilteredReceipts
+        {
+            get => _filteredReceipts;
+            private set { _filteredReceipts = value; OnPropertyChanged(); }
+        }
+
+        // Товары доступные в аптеке выбранного чека
         private ObservableCollection<Product> _availableProducts = new();
         public ObservableCollection<Product> AvailableProducts
         {
@@ -89,7 +95,23 @@ namespace MyHippocrates.ViewModels
             private set { _availableProducts = value; OnPropertyChanged(); }
         }
 
-        //Выбранный чек — при смене обновляем список товаров
+        // Выбранная аптека (фильтр чеков)
+        private Pharmacy? _selectedPharmacy;
+        public Pharmacy? SelectedPharmacy
+        {
+            get => _selectedPharmacy;
+            set
+            {
+                _selectedPharmacy = value;
+                OnPropertyChanged();
+                // При смене аптеки — сбрасываем чек и товар
+                SelectedReceipt = null;
+                SelectedProduct = null;
+                RefreshFilteredReceipts();
+            }
+        }
+
+        // Выбранный чек
         private Receipt? _selectedReceipt;
         public Receipt? SelectedReceipt
         {
@@ -100,15 +122,14 @@ namespace MyHippocrates.ViewModels
                 Entity.ReceiptId = value?.Id ?? 0;
                 OnPropertyChanged();
                 RefreshAvailableProducts();
-
-                //Если выбранный товар недоступен в новой аптеке — сбрасываем
+                // Сбрасываем товар если недоступен
                 if (SelectedProduct != null &&
                     !AvailableProducts.Any(p => p.Id == SelectedProduct.Id))
                     SelectedProduct = null;
             }
         }
 
-        //Выбранный товар
+        // Выбранный товар
         private Product? _selectedProduct;
         public Product? SelectedProduct
         {
@@ -123,36 +144,69 @@ namespace MyHippocrates.ViewModels
 
         public OrderItemEditorViewModel(
             OrderItem entity,
-            ObservableCollection<Receipt> receipts,
+            ObservableCollection<Receipt> allReceipts,
             ObservableCollection<Product> allProducts,
-            IReadOnlyList<StockBalance> stockBalances)
+            IReadOnlyList<StockBalance> stockBalances,
+            ObservableCollection<Pharmacy> pharmacies)
         {
             Entity = entity;
-            Receipts = receipts;
+            _allReceipts = allReceipts;
             _allProducts = allProducts;
             _stockBalances = stockBalances;
+            Pharmacies = pharmacies;
 
-            //Восстанавливаем выбранные значения при редактировании
-            _selectedReceipt = receipts.FirstOrDefault(r => r.Id == entity.ReceiptId);
-            RefreshAvailableProducts();
-            _selectedProduct = _availableProducts.FirstOrDefault(p => p.Id == entity.ProductId);
+            // Восстанавливаем при редактировании
+            if (entity.ReceiptId != 0)
+            {
+                var receipt = allReceipts.FirstOrDefault(r => r.Id == entity.ReceiptId);
+                if (receipt != null)
+                {
+                    // Сначала выставляем аптеку чтобы отфильтровались чеки
+                    _selectedPharmacy = pharmacies.FirstOrDefault(p => p.Id == receipt.PharmacyId);
+                    RefreshFilteredReceipts();
+                    // Потом выставляем чек через сеттер
+                    _selectedReceipt = FilteredReceipts.FirstOrDefault(r => r.Id == entity.ReceiptId);
+                    Entity.ReceiptId = _selectedReceipt?.Id ?? 0;
+                    RefreshAvailableProducts();
+                    // Потом товар
+                    _selectedProduct = AvailableProducts.FirstOrDefault(p => p.Id == entity.ProductId);
+                    Entity.ProductId = _selectedProduct?.Id ?? 0;
+                }
+            }
+            else
+            {
+                RefreshFilteredReceipts();
+            }
+        }
+
+        private void RefreshFilteredReceipts()
+        {
+            var today = DateTime.Today;
+            var result = _allReceipts
+                .Where(r => r.Date.Date == today)
+                .AsEnumerable();
+
+            if (_selectedPharmacy != null)
+                result = result.Where(r => r.PharmacyId == _selectedPharmacy.Id);
+
+            FilteredReceipts = new ObservableCollection<Receipt>(result.OrderBy(r => r.ReceiptNumber));
         }
 
         private void RefreshAvailableProducts()
         {
             if (_selectedReceipt == null)
             {
-                AvailableProducts = new ObservableCollection<Product>(_allProducts);
+                AvailableProducts = new ObservableCollection<Product>();
                 return;
             }
 
             var pharmacyId = _selectedReceipt.PharmacyId;
-            //Товары, у которых есть остаток > 0 в данной аптеке
             var available = _stockBalances
                 .Where(sb => sb.PharmacyId == pharmacyId && sb.RemainingQty > 0)
                 .Select(sb => _allProducts.FirstOrDefault(p => p.Id == sb.ProductId))
                 .Where(p => p != null)
                 .Cast<Product>()
+                .OrderBy(p => p.Name)
                 .ToList();
 
             AvailableProducts = new ObservableCollection<Product>(available);
@@ -235,7 +289,7 @@ namespace MyHippocrates.ViewModels
         {
             Entity = entity;
             AvailableEmployees = availableEmployees;
-            _selectedEmployee = availableEmployees.FirstOrDefault(e => e.Id == entity.EmployeeId);
+            SelectedEmployee = availableEmployees.FirstOrDefault(e => e.Id == entity.EmployeeId);
         }
     }
 }

@@ -18,6 +18,7 @@ namespace MyHippocrates.ViewModels
         private readonly AppDbContext _ctx;
         private readonly ObservableCollection<Receipt> _receipts;
         private readonly ObservableCollection<Product> _products;
+        private readonly ObservableCollection<Pharmacy> _pharmacies;
         private readonly ObservableCollection<OrderItem> _items = new();
 
         // Кэш остатков — обновляется при каждом Reload()
@@ -38,11 +39,13 @@ namespace MyHippocrates.ViewModels
 
         public OrderItemsViewModel(AppDbContext ctx,
             ObservableCollection<Receipt> receipts,
-            ObservableCollection<Product> products)
+            ObservableCollection<Product> products,
+            ObservableCollection<Pharmacy> pharmacies)
         {
             _ctx = ctx;
             _receipts = receipts;
             _products = products;
+            _pharmacies = pharmacies;
 
             View = CollectionViewSource.GetDefaultView(_items);
             View.Filter = obj =>
@@ -81,7 +84,7 @@ namespace MyHippocrates.ViewModels
         private void Add()
         {
             var entity = new OrderItem();
-            var vm = new OrderItemEditorViewModel(entity, _receipts, _products, _stockBalances);
+            var vm = new OrderItemEditorViewModel(entity, _receipts, _products, _stockBalances, _pharmacies);
             var dlg = new Views.EditDialog(vm, _ctx, isNew: true)
             { Owner = Application.Current.MainWindow, Title = "Добавить позицию", Icon = new BitmapImage(new Uri("pack://application:,,,/add.ico")) };
             dlg.TxtTitle.Text = "Добавление записи";
@@ -119,7 +122,7 @@ namespace MyHippocrates.ViewModels
                 TotalPrice = o.TotalPrice
             };
 
-            var vm = new OrderItemEditorViewModel(copy, _receipts, _products, _stockBalances);
+            var vm = new OrderItemEditorViewModel(copy, _receipts, _products, _stockBalances, _pharmacies);
             var dlg = new Views.EditDialog(vm, _ctx, isNew: false)
             { Owner = Application.Current.MainWindow, Title = "Редактировать позицию", Icon = new BitmapImage(new Uri("pack://application:,,,/edit.ico")) };
 
