@@ -59,6 +59,9 @@ namespace MyHippocrates.Models
         [Column("description")]
         public string? Description { get; set; }
 
+        [Column("file_path")]
+        public string? FilePath { get; set; }
+
         [Column("prescription_required")]
         public bool PrescriptionRequired { get; set; }
 

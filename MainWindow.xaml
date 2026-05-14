@@ -513,6 +513,7 @@
                             <DataGridTextColumn Header="Рецепт"        Binding="{Binding PrescriptionRequired}"                         Width="70"/>
                             <DataGridTextColumn Header="Закупка"       Binding="{Binding PurchasePrice, StringFormat={}{0:F2}}"          Width="90"/>
                             <DataGridTextColumn Header="Продажа"       Binding="{Binding SalePrice, StringFormat={}{0:F2}}"              Width="90"/>
+                            <DataGridTextColumn Header="Картинка"      Binding="{Binding FilePath}"                                    Width="150"/>
                             <DataGridTextColumn Header="Описание"      Binding="{Binding Description}"                                  Width="*"/>
                         </DataGrid.Columns>
                     </DataGrid>

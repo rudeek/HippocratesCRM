@@ -115,9 +115,21 @@ namespace MyHippocrates.ViewModels
         private void Delete(Receipt? r)
         {
             if (r == null) return;
+
+            var itemCount = _ctx.OrderItems.Count(o => o.ReceiptId == r.Id);
+            if (itemCount > 0)
+            {
+                MessageBox.Show(
+                    $"Невозможно удалить чек №{r.ReceiptNumber}.\n\n" +
+                    $"В нём содержится позиций заказов: {itemCount}.\n" +
+                    "Сначала удалите все позиции этого чека.",
+                    "Удаление невозможно", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             var res = MessageBox.Show(
-                $"Удалить чек №{r.ReceiptNumber}?\n\nВнимание: все позиции этого чека будут удалены.",
-                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                $"Удалить чек №{r.ReceiptNumber}?",
+                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (res != MessageBoxResult.Yes) return;
             try
             {

@@ -99,9 +99,22 @@ namespace MyHippocrates.ViewModels
         private void Delete(Manufacturer? m)
         {
             if (m == null) return;
+
+            // Проверка зависимостей
+            var productCount = _ctx.Products.Count(p => p.ManufacturerId == m.Id);
+            if (productCount > 0)
+            {
+                MessageBox.Show(
+                    $"Невозможно удалить производителя «{m.Name}».\n\n" +
+                    $"С ним связано товаров: {productCount}.\n" +
+                    "Сначала удалите или переназначьте все товары этого производителя.",
+                    "Удаление невозможно", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             var res = MessageBox.Show(
-                $"Удалить производителя «{m.Name}»?\n\nВнимание: все связанные товары, позиции заказов и остатки склада будут удалены.",
-                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                $"Удалить производителя «{m.Name}»?",
+                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (res != MessageBoxResult.Yes) return;
             try
             {

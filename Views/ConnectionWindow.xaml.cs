@@ -1,12 +1,20 @@
-﻿using System;
+using System;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Windows;
+using Microsoft.EntityFrameworkCore;
 using MyHippocrates.Data;
 using MyHippocrates.ViewModels;
+using MyHippocrates.Views;
 
 namespace MyHippocrates
 {
     public partial class ConnectionWindow : Window
     {
+        private const string ConnectionString =
+            "Host=localhost;Port=5432;Database=Hippocrates;Username=postgres;Password=root";
+
         public ConnectionWindow()
         {
             InitializeComponent();
@@ -14,22 +22,52 @@ namespace MyHippocrates
 
         private void ConnectButton_Click(object sender, RoutedEventArgs e)
         {
-            TxtError.Visibility = Visibility.Collapsed;
+            ErrorPanel.Visibility = Visibility.Collapsed;
 
-            var cs = $"Host={TxtHost.Text};Port={TxtPort.Text};" +
-                     $"Database={TxtDatabase.Text};" +
-                     $"Username={TxtUser.Text};Password=root";
+            var login = TxtLogin.Text.Trim();
+            var password = PwdBox.Password;
+
+            if (string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(password))
+            {
+                ShowError("Введите логин и пароль.");
+                return;
+            }
+
             try
             {
-                var ctx = new AppDbContext(cs);
+                var ctx = new AppDbContext(ConnectionString);
                 if (!ctx.Database.CanConnect())
                 {
-                    ShowError("Не удалось подключиться. Проверьте параметры.");
+                    ShowError("Не удалось подключиться к базе данных.");
                     return;
                 }
-                var vm = new MainViewModel(ctx);
-                var main = new MainWindow { DataContext = vm };
-                main.Show();
+
+                var passwordHash = Md5Hash(password);
+                var user = ctx.SystemUsers
+                    .Include(u => u.Employee)
+                    .ThenInclude(e => e!.Role)
+                    .FirstOrDefault(u => u.Login == login &&
+                                         u.PasswordHash == passwordHash &&
+                                         u.IsActive);
+
+                if (user == null)
+                {
+                    ShowError("Неверный логин или пароль.");
+                    return;
+                }
+
+                Window nextWindow;
+                if (string.Equals(user.SystemRole, "admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    nextWindow = new MainWindow { DataContext = new MainViewModel(ctx) };
+                }
+                else
+                {
+                    nextWindow = new CashierWindow(ctx, user);
+                }
+
+                Application.Current.MainWindow = nextWindow;
+                nextWindow.Show();
                 Close();
             }
             catch (Exception ex)
@@ -41,7 +79,14 @@ namespace MyHippocrates
         private void ShowError(string msg)
         {
             TxtError.Text = msg;
-            TxtError.Visibility = Visibility.Visible;
+            ErrorPanel.Visibility = Visibility.Visible;
+        }
+
+        private static string Md5Hash(string input)
+        {
+            using var md5 = MD5.Create();
+            var bytes = md5.ComputeHash(Encoding.UTF8.GetBytes(input));
+            return string.Concat(bytes.Select(b => b.ToString("x2")));
         }
     }
 }

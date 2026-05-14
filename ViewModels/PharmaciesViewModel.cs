@@ -85,9 +85,27 @@ namespace MyHippocrates.ViewModels
         private void Delete(Pharmacy? p)
         {
             if (p == null) return;
+
+            var receiptCount = _ctx.Receipts.Count(r => r.PharmacyId == p.Id);
+            var stockCount = _ctx.StockBalances.Count(s => s.PharmacyId == p.Id);
+
+            if (receiptCount > 0 || stockCount > 0)
+            {
+                var details = new List<string>();
+                if (receiptCount > 0) details.Add($"чеков: {receiptCount}");
+                if (stockCount > 0) details.Add($"записей на складе: {stockCount}");
+
+                MessageBox.Show(
+                    $"Невозможно удалить аптеку «{p.Address}».\n\n" +
+                    $"С ней связано: {string.Join(", ", details)}.\n" +
+                    "Сначала удалите все связанные чеки и остатки склада.",
+                    "Удаление невозможно", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             var res = MessageBox.Show(
-                $"Удалить аптеку «{p.Address}»?\n\nВнимание: все чеки, позиции заказов и остатки склада для этой аптеки будут удалены.",
-                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                $"Удалить аптеку «{p.Address}»?",
+                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (res != MessageBoxResult.Yes) return;
             try
             {

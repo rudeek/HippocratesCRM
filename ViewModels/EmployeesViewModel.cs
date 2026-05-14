@@ -115,9 +115,27 @@ namespace MyHippocrates.ViewModels
         private void Delete(Employee? e)
         {
             if (e == null) return;
+
+            var receiptCount = _ctx.Receipts.Count(r => r.EmployeeId == e.Id);
+            var hasUser = _ctx.SystemUsers.Any(u => u.EmployeeId == e.Id);
+
+            if (receiptCount > 0 || hasUser)
+            {
+                var details = new List<string>();
+                if (receiptCount > 0) details.Add($"чеков: {receiptCount}");
+                if (hasUser) details.Add("системный аккаунт");
+
+                MessageBox.Show(
+                    $"Невозможно удалить сотрудника «{e.FullName}».\n\n" +
+                    $"С ним связано: {string.Join(", ", details)}.\n" +
+                    "Сначала удалите все связанные записи.",
+                    "Удаление невозможно", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             var res = MessageBox.Show(
-                $"Удалить сотрудника «{e.FullName}»?\n\nВнимание: все связанные чеки и позиции заказов будут удалены.",
-                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                $"Удалить сотрудника «{e.FullName}»?",
+                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (res != MessageBoxResult.Yes) return;
             try
             {

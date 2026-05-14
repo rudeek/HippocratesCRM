@@ -32,6 +32,7 @@ CREATE TABLE product (
     production_date       DATE          NOT NULL,
     unit                  VARCHAR(50)   DEFAULT 'шт',
     description           TEXT,
+    file_path             TEXT          DEFAULT NULL,
     prescription_required BOOLEAN       NOT NULL DEFAULT FALSE,
     purchase_price        NUMERIC(10,2) NOT NULL CHECK(purchase_price > 0),
     sale_price            NUMERIC(10,2) NOT NULL CHECK(sale_price > 0)
@@ -838,14 +839,14 @@ CREATE OR REPLACE PROCEDURE sp_add_product(
     p_name VARCHAR, p_category_id INT, p_manufacturer_id INT,
     p_production_date DATE, p_expiration_date DATE,
     p_unit VARCHAR, p_description TEXT, p_prescription_required BOOLEAN,
-    p_purchase_price NUMERIC, p_sale_price NUMERIC, OUT p_id INT
+    p_purchase_price NUMERIC, p_sale_price NUMERIC, p_file_path TEXT, OUT p_id INT
 )
 LANGUAGE plpgsql AS $$
 BEGIN
     INSERT INTO product(name, category_id, manufacturer_id, production_date, expiration_date,
-                        unit, description, prescription_required, purchase_price, sale_price)
+                        unit, description, prescription_required, purchase_price, sale_price, file_path)
     VALUES (p_name, p_category_id, p_manufacturer_id, p_production_date, p_expiration_date,
-            p_unit, p_description, p_prescription_required, p_purchase_price, p_sale_price)
+            p_unit, p_description, p_prescription_required, p_purchase_price, p_sale_price, p_file_path)
     RETURNING product_id INTO p_id;
 END; $$;
 
@@ -853,7 +854,7 @@ CREATE OR REPLACE PROCEDURE sp_update_product(
     p_id INT, p_name VARCHAR, p_category_id INT, p_manufacturer_id INT,
     p_production_date DATE, p_expiration_date DATE,
     p_unit VARCHAR, p_description TEXT, p_prescription_required BOOLEAN,
-    p_purchase_price NUMERIC, p_sale_price NUMERIC
+    p_purchase_price NUMERIC, p_sale_price NUMERIC, p_file_path TEXT
 )
 LANGUAGE plpgsql AS $$
 BEGIN
@@ -862,7 +863,8 @@ BEGIN
         production_date=p_production_date, expiration_date=p_expiration_date,
         unit=p_unit, description=p_description,
         prescription_required=p_prescription_required,
-        purchase_price=p_purchase_price, sale_price=p_sale_price
+        purchase_price=p_purchase_price, sale_price=p_sale_price,
+        file_path=p_file_path
     WHERE product_id = p_id;
     IF NOT FOUND THEN RAISE EXCEPTION 'Товар с id=% не найден', p_id; END IF;
 END; $$;

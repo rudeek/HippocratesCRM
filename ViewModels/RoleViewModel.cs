@@ -100,9 +100,21 @@ namespace MyHippocrates.ViewModels
         private void Delete(Role? r)
         {
             if (r == null) return;
+
+            var employeeCount = _ctx.Employees.Count(e => e.RoleId == r.Id);
+            if (employeeCount > 0)
+            {
+                MessageBox.Show(
+                    $"Невозможно удалить должность «{r.Name}».\n\n" +
+                    $"На этой должности работает сотрудников: {employeeCount}.\n" +
+                    "Сначала переназначьте всех сотрудников на другую должность.",
+                    "Удаление невозможно", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             var res = MessageBox.Show(
-                $"Удалить должность «{r.Name}»?\n\nВнимание: сотрудники с этой должностью потеряют привязку.",
-                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                $"Удалить должность «{r.Name}»?",
+                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (res != MessageBoxResult.Yes) return;
             try
             {

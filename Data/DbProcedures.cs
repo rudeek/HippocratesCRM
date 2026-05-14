@@ -126,7 +126,7 @@ namespace MyHippocrates.Data
                         @p_name, @p_category_id, @p_manufacturer_id,
                         @p_production_date, @p_expiration_date,
                         @p_unit, @p_description, @p_prescription_required,
-                        @p_purchase_price, @p_sale_price, @p_id)";
+                        @p_purchase_price, @p_sale_price, @p_file_path, @p_id)";
 
                 cmd.Parameters.AddWithValue("p_name", p.Name);
                 cmd.Parameters.AddWithValue("p_category_id", p.CategoryId);
@@ -138,6 +138,7 @@ namespace MyHippocrates.Data
                 cmd.Parameters.AddWithValue("p_prescription_required", p.PrescriptionRequired);
                 cmd.Parameters.AddWithValue("p_purchase_price", p.PurchasePrice);
                 cmd.Parameters.AddWithValue("p_sale_price", p.SalePrice);
+                cmd.Parameters.Add(CreateNullableParam("p_file_path", p.FilePath));
 
                 var pOut = new NpgsqlParameter("p_id", NpgsqlDbType.Integer)
                 { Direction = ParameterDirection.InputOutput, Value = 0 };
@@ -168,7 +169,7 @@ namespace MyHippocrates.Data
                         @p_id, @p_name, @p_category_id, @p_manufacturer_id,
                         @p_production_date, @p_expiration_date,
                         @p_unit, @p_description, @p_prescription_required,
-                        @p_purchase_price, @p_sale_price)";
+                        @p_purchase_price, @p_sale_price, @p_file_path)";
 
                 cmd.Parameters.AddWithValue("p_id", p.Id);
                 cmd.Parameters.AddWithValue("p_name", p.Name);
@@ -181,6 +182,7 @@ namespace MyHippocrates.Data
                 cmd.Parameters.AddWithValue("p_prescription_required", p.PrescriptionRequired);
                 cmd.Parameters.AddWithValue("p_purchase_price", p.PurchasePrice);
                 cmd.Parameters.AddWithValue("p_sale_price", p.SalePrice);
+                cmd.Parameters.Add(CreateNullableParam("p_file_path", p.FilePath));
 
                 cmd.ExecuteNonQuery();
                 tx.Commit();
@@ -445,6 +447,45 @@ namespace MyHippocrates.Data
                 cmd.CommandText = "CALL sp_delete_receipt(@p_id)";
                 cmd.Parameters.AddWithValue("p_id", id);
                 cmd.ExecuteNonQuery();
+                tx.Commit();
+            }
+            catch
+            {
+                tx.Rollback();
+                throw;
+            }
+        }
+
+        public static void CancelReceipt(AppDbContext ctx, int receiptId)
+        {
+            using var cn = new NpgsqlConnection(ctx.ConnectionString);
+            cn.Open();
+            using var tx = cn.BeginTransaction();
+            try
+            {
+                using (var restore = cn.CreateCommand())
+                {
+                    restore.Transaction = tx;
+                    restore.CommandText = @"
+                        UPDATE stock_balance sb
+                        SET remaining_qty = sb.remaining_qty + oi.quantity
+                        FROM order_item oi
+                        JOIN receipt r ON r.receipt_id = oi.receipt_id
+                        WHERE oi.receipt_id = @p_receipt_id
+                          AND sb.pharmacy_id = r.pharmacy_id
+                          AND sb.product_id = oi.product_id";
+                    restore.Parameters.AddWithValue("p_receipt_id", receiptId);
+                    restore.ExecuteNonQuery();
+                }
+
+                using (var delete = cn.CreateCommand())
+                {
+                    delete.Transaction = tx;
+                    delete.CommandText = "DELETE FROM receipt WHERE receipt_id = @p_receipt_id";
+                    delete.Parameters.AddWithValue("p_receipt_id", receiptId);
+                    delete.ExecuteNonQuery();
+                }
+
                 tx.Commit();
             }
             catch

@@ -105,6 +105,8 @@
                 <Label Content="Описание" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Entity.Description, UpdateSourceTrigger=PropertyChanged}"
                          Height="60" AcceptsReturn="True" TextWrapping="Wrap"/>
+                <Label Content="Путь к картинке" Margin="0,12,0,0"/>
+                <TextBox Text="{Binding Entity.FilePath, UpdateSourceTrigger=PropertyChanged}"/>
                 <Label Content="Закупочная цена * (> 0)" Margin="0,12,0,0"/>
                 <TextBox PreviewTextInput="Price_PreviewTextInput">
                     <TextBox.Text>

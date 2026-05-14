@@ -107,6 +107,7 @@ namespace MyHippocrates.ViewModels
                 ProductionDate = p.ProductionDate,
                 Unit = p.Unit,
                 Description = p.Description,
+                FilePath = p.FilePath,
                 PrescriptionRequired = p.PrescriptionRequired,
                 PurchasePrice = p.PurchasePrice,
                 SalePrice = p.SalePrice
@@ -127,6 +128,7 @@ namespace MyHippocrates.ViewModels
                 p.ProductionDate = copy.ProductionDate;
                 p.Unit = copy.Unit;
                 p.Description = copy.Description;
+                p.FilePath = copy.FilePath;
                 p.PrescriptionRequired = copy.PrescriptionRequired;
                 p.PurchasePrice = copy.PurchasePrice;
                 p.SalePrice = copy.SalePrice;
@@ -146,9 +148,27 @@ namespace MyHippocrates.ViewModels
         private void Delete(Product? p)
         {
             if (p == null) return;
+
+            var orderCount = _ctx.OrderItems.Count(o => o.ProductId == p.Id);
+            var stockCount = _ctx.StockBalances.Count(s => s.ProductId == p.Id);
+
+            if (orderCount > 0 || stockCount > 0)
+            {
+                var details = new List<string>();
+                if (orderCount > 0) details.Add($"позиций заказов: {orderCount}");
+                if (stockCount > 0) details.Add($"записей на складе: {stockCount}");
+
+                MessageBox.Show(
+                    $"Невозможно удалить товар «{p.Name}».\n\n" +
+                    $"С ним связано: {string.Join(", ", details)}.\n" +
+                    "Сначала удалите все связанные позиции заказов и остатки склада.",
+                    "Удаление невозможно", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             var res = MessageBox.Show(
-                $"Удалить товар «{p.Name}»?\n\nВнимание: все позиции заказов и остатки склада для этого товара будут удалены.",
-                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                $"Удалить товар «{p.Name}»?",
+                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (res != MessageBoxResult.Yes) return;
             try
             {

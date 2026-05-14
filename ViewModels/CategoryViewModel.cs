@@ -97,9 +97,21 @@ namespace MyHippocrates.ViewModels
         private void Delete(Category? c)
         {
             if (c == null) return;
+
+            var productCount = _ctx.Products.Count(p => p.CategoryId == c.Id);
+            if (productCount > 0)
+            {
+                MessageBox.Show(
+                    $"Невозможно удалить категорию «{c.Name}».\n\n" +
+                    $"К ней привязано товаров: {productCount}.\n" +
+                    "Сначала переназначьте или удалите все товары этой категории.",
+                    "Удаление невозможно", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             var res = MessageBox.Show(
-                $"Удалить категорию «{c.Name}»?\n\nВнимание: все связанные товары будут удалены.",
-                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                $"Удалить категорию «{c.Name}»?",
+                "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (res != MessageBoxResult.Yes) return;
             try
             {
