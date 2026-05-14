@@ -6,7 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using Microsoft.EntityFrameworkCore;
 using MyHippocrates.Data;
@@ -169,18 +171,41 @@ namespace MyHippocrates.Views
 
         private void AddProduct_Click(object sender, RoutedEventArgs e)
         {
-            if (_currentReceipt == null) return;
             if ((sender as FrameworkElement)?.Tag is not CashierProductCard card) return;
+            AddReceiptProduct(card.Product.Id, 1);
+        }
+
+        private void IncreaseLine_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as FrameworkElement)?.Tag is not CashierReceiptLine line) return;
+            AddReceiptProduct(line.ProductId, 1, line.Discount);
+        }
+
+        private void DecreaseLine_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentReceipt == null) return;
+            if ((sender as FrameworkElement)?.Tag is not CashierReceiptLine line) return;
 
             try
             {
-                DbProcedures.AddOrderItem(_ctx, new OrderItem
+                if (line.Quantity <= 1)
                 {
-                    ReceiptId = _currentReceipt.Id,
-                    ProductId = card.Product.Id,
-                    Quantity = 1,
-                    Discount = 0
-                });
+                    DbProcedures.DeleteOrderItem(_ctx, _currentReceipt.Id, line.ProductId);
+                }
+                else
+                {
+                    DbProcedures.UpdateOrderItem(
+                        _ctx,
+                        _currentReceipt.Id,
+                        line.ProductId,
+                        new OrderItem
+                        {
+                            ReceiptId = _currentReceipt.Id,
+                            ProductId = line.ProductId,
+                            Quantity = line.Quantity - 1,
+                            Discount = line.Discount
+                        });
+                }
 
                 _ctx.ChangeTracker.Clear();
                 ReloadReceipt();
@@ -190,6 +215,43 @@ namespace MyHippocrates.Views
             {
                 ShowError(ex);
             }
+        }
+
+        private void DeleteLine_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentReceipt == null) return;
+            if ((sender as FrameworkElement)?.Tag is not CashierReceiptLine line) return;
+
+            try
+            {
+                DbProcedures.DeleteOrderItem(_ctx, _currentReceipt.Id, line.ProductId);
+                _ctx.ChangeTracker.Clear();
+                ReloadReceipt();
+                ReloadProducts();
+            }
+            catch (Exception ex)
+            {
+                ShowError(ex);
+            }
+        }
+
+        private void Discount_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !e.Text.All(char.IsDigit);
+        }
+
+        private void Discount_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Enter || sender is not TextBox textBox) return;
+
+            ApplyDiscount(textBox);
+            Keyboard.ClearFocus();
+        }
+
+        private void Discount_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (sender is TextBox textBox)
+                ApplyDiscount(textBox);
         }
 
         private void CloseReceipt_Click(object sender, RoutedEventArgs e)
@@ -205,6 +267,77 @@ namespace MyHippocrates.Views
             _currentReceipt = null;
             CurrentLines.Clear();
             RefreshReceiptState();
+        }
+
+        private void AddReceiptProduct(int productId, int quantity, decimal? discount = null)
+        {
+            if (_currentReceipt == null) return;
+
+            try
+            {
+                var appliedDiscount = discount ??
+                    CurrentLines.FirstOrDefault(x => x.ProductId == productId)?.Discount ??
+                    0m;
+
+                DbProcedures.AddOrderItem(_ctx, new OrderItem
+                {
+                    ReceiptId = _currentReceipt.Id,
+                    ProductId = productId,
+                    Quantity = quantity,
+                    Discount = appliedDiscount
+                });
+
+                _ctx.ChangeTracker.Clear();
+                ReloadReceipt();
+                ReloadProducts();
+            }
+            catch (Exception ex)
+            {
+                ShowError(ex);
+            }
+        }
+
+        private void ApplyDiscount(TextBox textBox)
+        {
+            if (_currentReceipt == null) return;
+            if (textBox.Tag is not CashierReceiptLine line) return;
+
+            var discount = 0m;
+            if (!string.IsNullOrWhiteSpace(textBox.Text) &&
+                (!decimal.TryParse(textBox.Text, out discount) || discount < 0))
+            {
+                discount = 0;
+            }
+
+            if (discount > 30)
+                discount = 30;
+
+            textBox.Text = discount.ToString("0");
+            if (discount == line.Discount)
+                return;
+
+            try
+            {
+                DbProcedures.UpdateOrderItem(
+                    _ctx,
+                    _currentReceipt.Id,
+                    line.ProductId,
+                    new OrderItem
+                    {
+                        ReceiptId = _currentReceipt.Id,
+                        ProductId = line.ProductId,
+                        Quantity = line.Quantity,
+                        Discount = discount
+                    });
+
+                _ctx.ChangeTracker.Clear();
+                ReloadReceipt();
+                ReloadProducts();
+            }
+            catch (Exception ex)
+            {
+                ShowError(ex);
+            }
         }
 
         private void CancelReceipt_Click(object sender, RoutedEventArgs e)
@@ -278,6 +411,7 @@ namespace MyHippocrates.Views
 
     public sealed class CashierReceiptLine
     {
+        public int ProductId { get; }
         public string ProductName { get; }
         public int Quantity { get; }
         public decimal UnitPrice { get; }
@@ -289,6 +423,7 @@ namespace MyHippocrates.Views
 
         public CashierReceiptLine(OrderItem item)
         {
+            ProductId = item.ProductId;
             ProductName = item.Product?.Name ?? $"Товар #{item.ProductId}";
             Quantity = item.Quantity;
             UnitPrice = item.UnitPrice;

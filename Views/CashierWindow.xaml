@@ -6,6 +6,7 @@
         MinWidth="1180"
         MinHeight="760"
         WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
         Background="#EEF8F5"
         Icon="/icon.ico">
 
@@ -14,7 +15,7 @@
         <local:MissingImageVisibilityConverter x:Key="MissingImageVisibilityConverter"/>
 
         <Style x:Key="PrimaryButton" TargetType="Button">
-            <Setter Property="Background" Value="#047857"/>
+            <Setter Property="Background" Value="#035b4b"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -44,7 +45,72 @@
 
         <Style x:Key="LightButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
             <Setter Property="Background" Value="#E5F3EF"/>
-            <Setter Property="Foreground" Value="#064E3B"/>
+            <Setter Property="Foreground" Value="#035b4b"/>
+        </Style>
+
+        <Style x:Key="CircleActionButton" TargetType="Button">
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Background" Value="#E5F3EF"/>
+            <Setter Property="Foreground" Value="#035b4b"/>
+            <Setter Property="BorderBrush" Value="#C7E4DD"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="14">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#D4ECE5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DeleteLineButton" TargetType="Button" BasedOn="{StaticResource CircleActionButton}">
+            <Setter Property="Background" Value="#FFF1F2"/>
+            <Setter Property="Foreground" Value="#BE123C"/>
+            <Setter Property="BorderBrush" Value="#FECDD3"/>
+        </Style>
+
+        <Style x:Key="DiscountBox" TargetType="TextBox">
+            <Setter Property="Width" Value="42"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#035b4b"/>
+            <Setter Property="BorderBrush" Value="#B8DDD4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="4 0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style TargetType="TextBox">
@@ -143,20 +209,32 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-                             VerticalAlignment="Center"/>
+                    <!-- Поиск: добавили x:Name="SearchTextBox" -->
+                    <TextBox x:Name="SearchTextBox"
+                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     VerticalAlignment="Center"/>
+
+                    <!-- Placeholder текст -->
                     <TextBlock Text="Поиск товара"
-                               Margin="14 0 0 0"
-                               Foreground="#6B9086"
-                               IsHitTestVisible="False"
-                               VerticalAlignment="Center">
+                           Margin="14 0 0 0"
+                           Foreground="#6B9086"
+                           IsHitTestVisible="False"
+                           VerticalAlignment="Center">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
+                                <!-- По умолчанию скрыт -->
                                 <Setter Property="Visibility" Value="Collapsed"/>
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding SearchText}" Value="">
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <!-- Условие 1: текст в поле пустой -->
+                                            <Condition Binding="{Binding SearchText}" Value=""/>
+                                            <!-- Условие 2: поле НЕ в фокусе (ссылка через ElementName) -->
+                                            <Condition Binding="{Binding IsFocused, ElementName=SearchTextBox}" Value="False"/>
+                                        </MultiDataTrigger.Conditions>
+                                        <!-- Если оба условия истинны → показываем подсказку -->
                                         <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
+                                    </MultiDataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </TextBlock.Style>
@@ -310,12 +388,44 @@
                                                        FontSize="12"
                                                        Margin="0 3 0 0"/>
                                         </StackPanel>
-                                        <TextBlock Grid.Column="1"
-                                                   Text="{Binding TotalText}"
-                                                   Foreground="#035b4b"
-                                                   FontWeight="Bold"
-                                                   Margin="12 0 0 0"
-                                                   VerticalAlignment="Center"/>
+                                        <StackPanel Grid.Column="1"
+                                                    Orientation="Horizontal"
+                                                    VerticalAlignment="Center"
+                                                    Margin="12 0 0 0">
+                                            <Button Content="-"
+                                                    Style="{StaticResource CircleActionButton}"
+                                                    Tag="{Binding}"
+                                                    Click="DecreaseLine_Click"/>
+                                            <TextBlock Text="{Binding TotalText}"
+                                                       Foreground="#035b4b"
+                                                       FontWeight="Bold"
+                                                       MinWidth="58"
+                                                       TextAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       Margin="6 0"/>
+                                            <TextBox Text="{Binding Discount, Mode=OneWay, StringFormat={}{0:0}}"
+                                                     Style="{StaticResource DiscountBox}"
+                                                     Tag="{Binding}"
+                                                     MaxLength="2"
+                                                     ToolTip="Скидка, максимум 30%"
+                                                     PreviewTextInput="Discount_PreviewTextInput"
+                                                     LostFocus="Discount_LostFocus"
+                                                     KeyDown="Discount_KeyDown"/>
+                                            <TextBlock Text="%"
+                                                       Foreground="#6B9086"
+                                                       FontWeight="SemiBold"
+                                                       VerticalAlignment="Center"
+                                                       Margin="3 0 7 0"/>
+                                            <Button Content="+"
+                                                    Style="{StaticResource CircleActionButton}"
+                                                    Tag="{Binding}"
+                                                    Click="IncreaseLine_Click"/>
+                                            <Button Content="×"
+                                                    Style="{StaticResource DeleteLineButton}"
+                                                    Tag="{Binding}"
+                                                    Margin="6 0 0 0"
+                                                    Click="DeleteLine_Click"/>
+                                        </StackPanel>
                                     </Grid>
                                 </Border>
                             </DataTemplate>

@@ -53,6 +53,7 @@ namespace MyHippocrates.ViewModels
                 if (string.IsNullOrWhiteSpace(_search)) return true;
                 if (obj is not OrderItem o) return false;
                 return (o.Product?.Name?.ToLower().Contains(_search.ToLower()) ?? false)
+                    || (o.Receipt?.Pharmacy?.Address?.ToLower().Contains(_search.ToLower()) ?? false)
                     || o.Quantity.ToString().Contains(_search)
                     || o.TotalPrice.ToString().Contains(_search);
             };
@@ -73,6 +74,7 @@ namespace MyHippocrates.ViewModels
             _items.Clear();
             foreach (var o in _ctx.OrderItems
                 .Include(x => x.Receipt)
+                    .ThenInclude(r => r!.Pharmacy)
                 .Include(x => x.Product)
                 .OrderBy(x => x.ReceiptId).ToList())
                 _items.Add(o);

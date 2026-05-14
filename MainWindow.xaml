@@ -756,6 +756,7 @@
                             </DataGridTemplateColumn>
                             <DataGridTextColumn Header="Чек №"     Binding="{Binding Receipt.ReceiptNumber}"                       Width="90"/>
                             <DataGridTextColumn Header="Дата чека" Binding="{Binding Receipt.Date, StringFormat={}{0:dd.MM.yyyy}}" Width="110"/>
+                            <DataGridTextColumn Header="Аптека"    Binding="{Binding Receipt.Pharmacy.Address}"                    SortMemberPath="Receipt.Pharmacy.Address" Width="220"/>
                             <DataGridTextColumn Header="Товар"     Binding="{Binding Product.Name}"                                Width="*"/>
                             <DataGridTextColumn Header="Кол-во"    Binding="{Binding Quantity}"                                    Width="90"/>
                             <DataGridTextColumn Header="Цена ед."  Binding="{Binding UnitPrice, StringFormat={}{0:F2}}"            Width="100"/>

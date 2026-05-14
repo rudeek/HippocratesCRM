@@ -189,9 +189,7 @@
        Height="60"
        RenderOptions.BitmapScalingMode="HighQuality"
        VerticalAlignment="Center"/>
-                        <TextBlock Text="     Панель аналитики"
-                                   FontSize="11" Foreground="#9dd5c8"/>
-					</StackPanel>
+                    </StackPanel>
 				</StackPanel>
 
 				<!-- Статус -->
