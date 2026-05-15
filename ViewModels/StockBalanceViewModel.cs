@@ -134,6 +134,7 @@ namespace MyHippocrates.ViewModels
             {
                 DbProcedures.DeleteStockBalance(_ctx, s.PharmacyId, s.ProductId);
                 _items.Remove(s);
+                MyHippocrates.Views.ToastService.ShowSuccess("Запись успешно удалена.");
             }
             catch (Exception ex)
             {

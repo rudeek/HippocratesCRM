@@ -111,6 +111,7 @@ namespace MyHippocrates.ViewModels
             {
                 DbProcedures.DeletePharmacy(_ctx, p.Id);
                 _pharmacies.Remove(p);
+                MyHippocrates.Views.ToastService.ShowSuccess("Запись успешно удалена.");
             }
             catch (Exception ex)
             {

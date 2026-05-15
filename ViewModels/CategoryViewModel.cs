@@ -117,6 +117,7 @@ namespace MyHippocrates.ViewModels
             {
                 DbProcedures.DeleteCategory(_ctx, c.Id);
                 _categories.Remove(c);
+                MyHippocrates.Views.ToastService.ShowSuccess("Запись успешно удалена.");
             }
             catch (Exception ex)
             {

@@ -207,8 +207,7 @@ namespace MyHippocrates.Views
                 paginator.PageSize = new System.Windows.Size(1100, 850);
                 writer.Write(paginator);
 
-                MessageBox.Show($"Отчёт сохранён:\n{dlg.FileName}",
-                    "Готово", MessageBoxButton.OK, MessageBoxImage.Information);
+                ToastService.ShowSuccess($"Отчёт сохранён:\n{dlg.FileName}");
             }
             catch (Exception ex)
             {

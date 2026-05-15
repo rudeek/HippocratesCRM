@@ -145,6 +145,7 @@ namespace MyHippocrates.ViewModels
             {
                 DbProcedures.DeleteSystemUser(_ctx, u.Id);
                 _users.Remove(u);
+                MyHippocrates.Views.ToastService.ShowSuccess("Запись успешно удалена.");
             }
             catch (Exception ex)
             {

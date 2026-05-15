@@ -60,6 +60,7 @@ namespace MyHippocrates.Views
             try
             {
                 ExecuteProcedure(entity);
+                ToastService.ShowSuccess(_isNew ? "Запись успешно добавлена." : "Запись успешно изменена.");
                 DialogResult = true;
             }
             catch (Exception ex)

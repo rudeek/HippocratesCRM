@@ -85,15 +85,15 @@
             <Setter Property="BorderBrush" Value="#FECDD3"/>
         </Style>
 
-        <Style x:Key="DiscountBox" TargetType="TextBox">
-            <Setter Property="Width" Value="42"/>
-            <Setter Property="Height" Value="28"/>
+        <Style x:Key="ReceiptDiscountBox" TargetType="TextBox">
+            <Setter Property="Width" Value="64"/>
+            <Setter Property="Height" Value="34"/>
             <Setter Property="Background" Value="White"/>
             <Setter Property="Foreground" Value="#035b4b"/>
             <Setter Property="BorderBrush" Value="#B8DDD4"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontSize" Value="15"/>
             <Setter Property="Padding" Value="4 0"/>
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -262,7 +262,10 @@
                                         BorderBrush="#D0EAE3"
                                         BorderThickness="1"
                                         CornerRadius="8"
-                                        Margin="0 0 14 14">
+                                        Margin="0 0 14 14"
+                                        Cursor="Hand"
+                                        Tag="{Binding}"
+                                        MouseLeftButtonUp="ProductCard_MouseLeftButtonUp">
                                     <Grid>
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="128"/>
@@ -350,18 +353,22 @@
                     </StackPanel>
 
                     <UniformGrid Grid.Row="1"
-                                 Columns="2"
+                                 Columns="3"
                                  Margin="0 20 0 16">
                         <Button Content="Открыть"
                                 Style="{StaticResource PrimaryButton}"
-                                Margin="0 0 8 0"
+                                Margin="0 0 6 0"
                                 IsEnabled="{Binding CanOpenReceipt}"
                                 Click="OpenReceipt_Click"/>
                         <Button Content="Отменить"
                                 Style="{StaticResource LightButton}"
-                                Margin="8 0 0 0"
+                                Margin="6 0"
                                 IsEnabled="{Binding HasOpenReceipt}"
                                 Click="CancelReceipt_Click"/>
+                        <Button Content="Печать"
+                                Style="{StaticResource LightButton}"
+                                Margin="6 0 0 0"
+                                Click="PrintTodayReceipts_Click"/>
                     </UniformGrid>
 
                     <ListBox Grid.Row="2"
@@ -403,19 +410,6 @@
                                                        TextAlignment="Center"
                                                        VerticalAlignment="Center"
                                                        Margin="6 0"/>
-                                            <TextBox Text="{Binding Discount, Mode=OneWay, StringFormat={}{0:0}}"
-                                                     Style="{StaticResource DiscountBox}"
-                                                     Tag="{Binding}"
-                                                     MaxLength="2"
-                                                     ToolTip="Скидка, максимум 30%"
-                                                     PreviewTextInput="Discount_PreviewTextInput"
-                                                     LostFocus="Discount_LostFocus"
-                                                     KeyDown="Discount_KeyDown"/>
-                                            <TextBlock Text="%"
-                                                       Foreground="#6B9086"
-                                                       FontWeight="SemiBold"
-                                                       VerticalAlignment="Center"
-                                                       Margin="3 0 7 0"/>
                                             <Button Content="+"
                                                     Style="{StaticResource CircleActionButton}"
                                                     Tag="{Binding}"
@@ -433,8 +427,43 @@
                     </ListBox>
 
                     <StackPanel Grid.Row="3" Margin="0 18 0 0">
+                        <Grid Margin="0 0 0 10">
+                            <TextBlock Text="Сумма товаров"
+                                       Foreground="#416D63"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding SubtotalText}"
+                                       Foreground="#416D63"
+                                       FontSize="15"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Right"/>
+                        </Grid>
+                        <Grid Margin="0 0 0 10">
+                            <TextBlock Text="Скидка"
+                                       Foreground="#416D63"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"/>
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center">
+                                <TextBox Text="{Binding ReceiptDiscountText, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource ReceiptDiscountBox}"
+                                         MaxLength="2"
+                                         ToolTip="Скидка на весь чек, максимум 30%"
+                                         PreviewTextInput="ReceiptDiscount_PreviewTextInput"
+                                         LostFocus="ReceiptDiscount_LostFocus"
+                                         KeyDown="ReceiptDiscount_KeyDown"/>
+                                <TextBlock Text="%"
+                                           Foreground="#416D63"
+                                           FontSize="15"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center"
+                                           Margin="6 0 0 0"/>
+                            </StackPanel>
+                        </Grid>
                         <Grid Margin="0 0 0 16">
-                            <TextBlock Text="Итого"
+                            <TextBlock Text="К оплате"
                                        Foreground="#416D63"
                                        FontSize="14"
                                        FontWeight="SemiBold"/>

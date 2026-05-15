@@ -135,6 +135,7 @@ namespace MyHippocrates.ViewModels
             {
                 DbProcedures.DeleteReceipt(_ctx, r.Id);
                 _receipts.Remove(r);
+                MyHippocrates.Views.ToastService.ShowSuccess("Запись успешно удалена.");
             }
             catch (Exception ex)
             {

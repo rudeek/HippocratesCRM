@@ -435,6 +435,76 @@ namespace MyHippocrates.Data
             }
         }
 
+        public static void SetReceiptTotal(AppDbContext ctx, int receiptId, decimal totalAmount)
+        {
+            using var cn = new NpgsqlConnection(ctx.ConnectionString);
+            cn.Open();
+            using var tx = cn.BeginTransaction();
+            try
+            {
+                using var cmd = cn.CreateCommand();
+                cmd.Transaction = tx;
+                cmd.CommandText = @"
+                    UPDATE receipt
+                    SET total_amount = @p_total_amount
+                    WHERE receipt_id = @p_receipt_id";
+
+                cmd.Parameters.AddWithValue("p_receipt_id", receiptId);
+                cmd.Parameters.AddWithValue("p_total_amount", totalAmount);
+
+                cmd.ExecuteNonQuery();
+                tx.Commit();
+            }
+            catch
+            {
+                tx.Rollback();
+                throw;
+            }
+        }
+
+        public static void ApplyReceiptDiscount(AppDbContext ctx, int receiptId, decimal discount)
+        {
+            using var cn = new NpgsqlConnection(ctx.ConnectionString);
+            cn.Open();
+            using var tx = cn.BeginTransaction();
+            try
+            {
+                using (var updateItems = cn.CreateCommand())
+                {
+                    updateItems.Transaction = tx;
+                    updateItems.CommandText = @"
+                        UPDATE order_item
+                        SET discount = @p_discount
+                        WHERE receipt_id = @p_receipt_id";
+                    updateItems.Parameters.AddWithValue("p_receipt_id", receiptId);
+                    updateItems.Parameters.AddWithValue("p_discount", discount);
+                    updateItems.ExecuteNonQuery();
+                }
+
+                using (var updateReceipt = cn.CreateCommand())
+                {
+                    updateReceipt.Transaction = tx;
+                    updateReceipt.CommandText = @"
+                        UPDATE receipt
+                        SET total_amount = (
+                            SELECT COALESCE(SUM(total_price), 0)
+                            FROM order_item
+                            WHERE receipt_id = @p_receipt_id
+                        )
+                        WHERE receipt_id = @p_receipt_id";
+                    updateReceipt.Parameters.AddWithValue("p_receipt_id", receiptId);
+                    updateReceipt.ExecuteNonQuery();
+                }
+
+                tx.Commit();
+            }
+            catch
+            {
+                tx.Rollback();
+                throw;
+            }
+        }
+
         public static void DeleteReceipt(AppDbContext ctx, int id)
         {
             using var cn = new NpgsqlConnection(ctx.ConnectionString);

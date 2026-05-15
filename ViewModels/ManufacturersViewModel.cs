@@ -120,6 +120,7 @@ namespace MyHippocrates.ViewModels
             {
                 DbProcedures.DeleteManufacturer(_ctx, m.Id);
                 _manufacturers.Remove(m);
+                MyHippocrates.Views.ToastService.ShowSuccess("Запись успешно удалена.");
             }
             catch (Exception ex)
             {

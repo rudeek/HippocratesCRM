@@ -120,6 +120,7 @@ namespace MyHippocrates.ViewModels
             {
                 DbProcedures.DeleteRole(_ctx, r.Id);
                 _roles.Remove(r);
+                MyHippocrates.Views.ToastService.ShowSuccess("Запись успешно удалена.");
             }
             catch (Exception ex)
             {

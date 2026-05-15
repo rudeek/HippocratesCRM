@@ -165,6 +165,7 @@ namespace MyHippocrates.ViewModels
 
                 //Обновляем кэш остатков
                 _stockBalances = _ctx.StockBalances.ToList();
+                MyHippocrates.Views.ToastService.ShowSuccess("Запись успешно удалена.");
             }
             catch (Exception ex)
             {

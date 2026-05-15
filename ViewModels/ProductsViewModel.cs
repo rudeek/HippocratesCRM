@@ -174,6 +174,7 @@ namespace MyHippocrates.ViewModels
             {
                 DbProcedures.DeleteProduct(_ctx, p.Id);
                 _products.Remove(p);
+                MyHippocrates.Views.ToastService.ShowSuccess("Запись успешно удалена.");
             }
             catch (Exception ex)
             {
