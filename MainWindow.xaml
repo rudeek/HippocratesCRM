@@ -324,26 +324,35 @@
                        RenderOptions.BitmapScalingMode="HighQuality"
                        VerticalAlignment="Center"/>
 
-                <!-- Кнопки справа -->
                 <StackPanel Grid.Column="2"
-                            Orientation="Horizontal"
-                            VerticalAlignment="Center">
+            Orientation="Horizontal"
+            VerticalAlignment="Center">
                     <Button Style="{StaticResource BtnHeader}"
-                            Margin="0 0 10 0"
-                            Click="OpenReports_Click">
+            Margin="0 0 10 0"
+            Click="OpenReports_Click">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="📄" FontSize="14" Margin="0 0 6 0"
-                                       VerticalAlignment="Center"/>
+                       VerticalAlignment="Center"/>
                             <TextBlock Text="Отчёты" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 
                     <Button Style="{StaticResource BtnAdd}"
-                            Click="OpenDashboard">
+            Margin="0 0 10 0"
+            Click="OpenDashboard">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="⊞" FontSize="15" Margin="0 0 6 0"
-                                       VerticalAlignment="Center"/>
+                       VerticalAlignment="Center"/>
                             <TextBlock Text="Dashboard" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource BtnDelete}"
+            Click="Logout_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="⏻" FontSize="14" Margin="0 0 6 0"
+                       VerticalAlignment="Center"/>
+                            <TextBlock Text="Выход" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>

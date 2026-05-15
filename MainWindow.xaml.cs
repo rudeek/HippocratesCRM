@@ -16,9 +16,7 @@ namespace MyHippocrates
         private void OpenDashboard(object sender, RoutedEventArgs e)
         {
             var vm = (MainViewModel)DataContext;
-
             var w = new DashboardWindow(vm.Db);
-
             w.Owner = this;
             w.Show();
         }
@@ -26,16 +24,21 @@ namespace MyHippocrates
         private void OpenReports_Click(object sender, RoutedEventArgs e)
         {
             var vm = (MainViewModel)DataContext;
-
-            var reportsWindow = new ReportsWindow(vm.Db) // ВАЖНО: передаём DbContext
+            var reportsWindow = new ReportsWindow(vm.Db)
             {
                 Owner = this
             };
-
             reportsWindow.ShowDialog();
         }
 
-        // Нумерация строк в DataGrid через Header
+        private void Logout_Click(object sender, RoutedEventArgs e)
+        {
+            var login = new ConnectionWindow();
+            Application.Current.MainWindow = login;
+            login.Show();
+            Close();
+        }
+
         private void DataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
         {
             e.Row.Header = (e.Row.GetIndex() + 1).ToString();
@@ -59,7 +62,6 @@ namespace MyHippocrates
             if (DataContext is not MainViewModel vm) return;
             if (sender is not TabControl tc) return;
 
-            // Срабатывает только при смене вкладки
             if (tc.SelectedIndex == _lastTabIndex) return;
             _lastTabIndex = tc.SelectedIndex;
 

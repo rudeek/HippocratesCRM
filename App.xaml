@@ -35,7 +35,7 @@
             </StackPanel>
         </DataTemplate>
 
-        <!-- EMPLOYEE (обновлённый — БЕЗ зарплаты, через EmployeeEditorViewModel) -->
+        <!-- EMPLOYEE -->
         <DataTemplate DataType="{x:Type vm:EmployeeEditorViewModel}">
             <StackPanel Width="440">
                 <Label Content="ФИО *"/>
@@ -71,7 +71,7 @@
             </StackPanel>
         </DataTemplate>
 
-        <!-- PRODUCT (с категориями как роли в сотрудников) -->
+        <!-- PRODUCT -->
         <DataTemplate DataType="{x:Type vm:ProductEditorViewModel}">
             <StackPanel Width="440">
                 <Label Content="Название *"/>
@@ -105,8 +105,27 @@
                 <Label Content="Описание" Margin="0,12,0,0"/>
                 <TextBox Text="{Binding Entity.Description, UpdateSourceTrigger=PropertyChanged}"
                          Height="60" AcceptsReturn="True" TextWrapping="Wrap"/>
+
+                <!-- FilePath с кнопкой проводника -->
                 <Label Content="Путь к картинке" Margin="0,12,0,0"/>
-                <TextBox Text="{Binding Entity.FilePath, UpdateSourceTrigger=PropertyChanged}"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0"
+                             Text="{Binding FilePath, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,6,0"/>
+                    <Button Grid.Column="1"
+                            Content="📁"
+                            Width="38"
+                            Height="38"
+                            VerticalAlignment="Top"
+                            Tag="{Binding}"
+                            Click="BrowseImage_Click"
+                            ToolTip="Выбрать файл"/>
+                </Grid>
+
                 <Label Content="Закупочная цена * (> 0)" Margin="0,12,0,0"/>
                 <TextBox PreviewTextInput="Price_PreviewTextInput">
                     <TextBox.Text>
@@ -160,7 +179,6 @@
         <!-- ORDER ITEM -->
         <DataTemplate DataType="{x:Type vm:OrderItemEditorViewModel}">
             <StackPanel Width="440">
-                <!-- Фильтр по аптеке -->
                 <Label Content="Аптека (фильтр чеков) *"/>
                 <ComboBox ItemsSource="{Binding Pharmacies}"
                   SelectedItem="{Binding SelectedPharmacy, Mode=TwoWay}">
@@ -234,8 +252,6 @@
                 <TextBox Text="{Binding Entity.RemainingQty, UpdateSourceTrigger=PropertyChanged}"/>
             </StackPanel>
         </DataTemplate>
-
-        <!-- ══ Добавить в Application.Resources в App.xaml ══ -->
 
         <!-- CATEGORY -->
         <DataTemplate DataType="{x:Type models:Category}">
