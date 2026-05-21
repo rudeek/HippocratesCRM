@@ -42,16 +42,18 @@
                            VerticalAlignment="Center"/>
             </Border>
 
-            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+            <StackPanel Grid.Column="1" 
+            VerticalAlignment="Center"
+            Margin="8 0 0 0">
                 <TextBlock Text="{Binding Title}"
-                           Foreground="White"
-                           FontSize="14"
-                           FontWeight="SemiBold"/>
+               Foreground="White"
+               FontSize="14"
+               FontWeight="SemiBold"/>
                 <TextBlock Text="{Binding Message}"
-                           Foreground="#D6F4EE"
-                           FontSize="12"
-                           Margin="0 3 0 0"
-                           TextWrapping="Wrap"/>
+               Foreground="#D6F4EE"
+               FontSize="12"
+               Margin="0 3 0 0"
+               TextWrapping="Wrap"/>
             </StackPanel>
         </Grid>
     </Border>

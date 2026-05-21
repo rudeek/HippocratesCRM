@@ -278,7 +278,7 @@
                                                 ClipToBounds="True">
                                             <Grid>
                                                 <Image Source="{Binding Product.FilePath, Converter={StaticResource ProductImageConverter}}"
-                                                       Stretch="UniformToFill"
+                                                       Stretch="Uniform"
                                                        RenderOptions.BitmapScalingMode="HighQuality"/>
                                                 <TextBlock Text="Нет фото"
                                                            Foreground="#6A9489"

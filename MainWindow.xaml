@@ -328,6 +328,23 @@
             Orientation="Horizontal"
             VerticalAlignment="Center">
                     <Button Style="{StaticResource BtnHeader}"
+        Margin="0 0 10 0"
+        Click="CreateBackup_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="💾" FontSize="14" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Бэкап" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource BtnHeader}"
+        Margin="0 0 10 0"
+        Click="RestoreBackup_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📂" FontSize="14" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Восстановить" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{StaticResource BtnHeader}"
             Margin="0 0 10 0"
             Click="OpenReports_Click">
                         <StackPanel Orientation="Horizontal">

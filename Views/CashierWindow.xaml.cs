@@ -626,21 +626,35 @@ namespace MyHippocrates.Views
     {
         public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is not string path || string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            if (value is not string path || string.IsNullOrWhiteSpace(path))
                 return null;
 
-            var image = new BitmapImage();
-            image.BeginInit();
-            image.CacheOption = BitmapCacheOption.OnLoad;
-            image.UriSource = new Uri(path, UriKind.Absolute);
-            image.EndInit();
-            image.Freeze();
-            return image;
+            if (!Path.IsPathRooted(path))
+                path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, path);
+
+            if (!File.Exists(path))
+                return null;
+
+            try
+            {
+                var image = new BitmapImage();
+                image.BeginInit();
+                image.CacheOption = BitmapCacheOption.OnLoad;
+                image.UriSource = new Uri(path, UriKind.Absolute);
+                image.EndInit();
+                image.Freeze();
+                return image;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
             Binding.DoNothing;
     }
+
 
     public sealed class MissingImageVisibilityConverter : IValueConverter
     {

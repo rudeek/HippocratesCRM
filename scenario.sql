@@ -1264,3 +1264,50 @@ JOIN pharmacy ph ON ph.pharmacy_id = sb.pharmacy_id
 JOIN product  p  ON p.product_id   = sb.product_id
 JOIN category c  ON c.category_id  = p.category_id
 WHERE sb.remaining_qty < 20 ORDER BY sb.remaining_qty;
+
+
+
+
+
+
+
+
+UPDATE product SET file_path = 'Images\' || name || '.jpg' WHERE name IN (
+    'Acyclovir 400mg','Allopurinol 300mg','Alprazolam 0.5mg','Amitriptyline 25mg',
+    'Amlodipine 5mg','Amoxicillin 500mg','Aspirin 500mg','Atorvastatin 20mg',
+    'Azithromycin 500mg','Bisacodyl 5mg','Bisoprolol 5mg','Budesonide 200mcg',
+    'Calcium carbonate 500mg','Carbamazepine 200mg','Carvedilol 25mg','Cephalexin 500mg',
+    'Cetirizine 10mg','Ciprofloxacin 500mg','Clarithromycin 500mg','Clindamycin 300mg',
+    'Clopidogrel 75mg','Codeine 30mg','Colchicine 0.5mg','Dexamethasone 4mg',
+    'Diazepam 5mg','Diclofenac 50mg','Digoxin 0.25mg','Diltiazem 60mg',
+    'Domperidone 10mg','Doxycycline 100mg','Enalapril 10mg','Erythromycin 500mg',
+    'Escitalopram 10mg','Esomeprazole 40mg','Etoricoxib 90mg','Famotidine 20mg',
+    'Fentanyl patch 25mcg','Fluconazole 150mg','Folic acid 5mg','Furosemide 40mg',
+    'Gabapentin 300mg','Haloperidol 5mg','Hydrochlorothiazide 25mg','Hydroxychloroquine 200mg',
+    'Ibuprofen 400mg','Insulin Glargine 300IU','Ipratropium 20mcg','Isosorbide 20mg',
+    'Ketoconazole 200mg','Lactulose 10g','Lansoprazole 30mg','Levodopa 250mg',
+    'Levothyroxine 100mcg','Lisinopril 10mg','Loperamide 2mg','Losartan 50mg',
+    'Magnesium oxide 400mg','Meloxicam 15mg','Metformin 850mg','Methotrexate 10mg',
+    'Metoclopramide 10mg','Metoprolol 50mg','Metronidazole 400mg','Montelukast 10mg',
+    'Morphine 10mg','Naproxen 500mg','Nifedipine 20mg','Nitrofurantoin 100mg',
+    'Nitroglycerin 0.5mg','Omeprazole 20mg','Ondansetron 8mg','Oseltamivir 75mg',
+    'Pantoprazole 40mg','Paracetamol 500mg','Phenobarbital 100mg','Prednisolone 5mg',
+    'Prednisone 5mg','Pregabalin 75mg','Propranolol 40mg','Quetiapine 100mg',
+    'Ramipril 5mg','Ranitidine 150mg','Risperidone 2mg','Salbutamol 100mcg',
+    'Salmeterol 50mcg','Sertraline 50mg','Simvastatin 40mg','Spironolactone 50mg',
+    'Sulfasalazine 500mg','Tetracycline 500mg','Tramadol 50mg','Trimethoprim 200mg',
+    'Valproate 500mg','Valsartan 80mg','Verapamil 80mg','Vitamin D3 1000IU',
+    'Warfarin 5mg','Zinc sulfate 220mg','Zolpidem 10mg'
+);
+
+-- .png файлы
+UPDATE product SET file_path = 'Images\' || name || '.png' WHERE name IN (
+    'Amlodipine 5mg','Bisoprolol 5mg','Budesonide 200mcg','Calcium carbonate 500mg',
+    'Folic acid 5mg','Metformin 850mg','Phenobarbital 100mg','Ramipril 5mg',
+    'Risperidone 2mg','Spironolactone 50mg','Vitamin D3 1000IU'
+);
+
+-- .jpeg файлы
+UPDATE product SET file_path = 'Images\' || name || '.jpeg' WHERE name IN (
+    'Bisacodyl 5mg','Oseltamivir 75mg','Pregabalin 75mg','Trimethoprim 200mg'
+);
