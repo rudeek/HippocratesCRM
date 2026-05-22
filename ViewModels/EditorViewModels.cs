@@ -48,11 +48,13 @@ namespace MyHippocrates.ViewModels
     {
         public Employee Entity { get; }
         public ObservableCollection<Role> Roles { get; }
+        public ObservableCollection<Pharmacy> Pharmacies { get; }
 
-        public EmployeeEditorViewModel(Employee entity, ObservableCollection<Role> roles)
+        public EmployeeEditorViewModel(Employee entity, ObservableCollection<Role> roles, ObservableCollection<Pharmacy> pharmacies)
         {
             Entity = entity;
             Roles = roles;
+            Pharmacies = pharmacies;    
         }
     }
 

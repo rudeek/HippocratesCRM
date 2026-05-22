@@ -47,6 +47,7 @@ CREATE TABLE pharmacy (
 
 CREATE TABLE employee (
     employee_id SERIAL PRIMARY KEY,
+    pharmacy_id INT REFERENCES pharmacy(pharmacy_id) ON DELETE SET NULL,
     full_name   VARCHAR(150)  NOT NULL,
     idnp        VARCHAR(13)   UNIQUE NOT NULL,
     phone       VARCHAR(20)   NOT NULL,
@@ -360,58 +361,57 @@ INSERT INTO pharmacy (address, phone, working_hours) VALUES
 ('Dubasari, str. Calea Orheiului 22','+37339206658','09:00-18:00'),
 ('Dubasari, str. Uzinelor 63','+37339607886','08:00-20:00');
 
--- role_id: 1=Pharmacist 2=Manager 3=Cashier 4=Accountant
-INSERT INTO employee (full_name, idnp, phone, address, role_id) VALUES
-('Andrei Popescu',   '2950105810049','+37360006570','Chisinau, str. Lupascu 4',   1),
-('Maria Ionescu',    '2289439657508','+37360207454','Chisinau, str. Grama 19',    1),
-('Ion Rusu',         '2807270532291','+37360409105','Chisinau, str. Botnari 43',  1),
-('Elena Ciobanu',    '2206823277527','+37360604861','Chisinau, str. Rata 14',     3),
-('Vasile Moraru',    '2809941412032','+37360808883','Chisinau, str. Popa 4',     2),
-('Olga Lupascu',     '2051785130539','+37361009571','Chisinau, str. Stoica 31',   1),
-('Dumitru Grama',    '2583482989002','+37361202579','Chisinau, str. Munteanu 4',  1),
-('Natalia Botnari',  '2932351979347','+37361403044','Chisinau, str. Cojocaru 5',  1),
-('Sergiu Rata',      '2947792820940','+37361603853','Chisinau, str. Vrabie 26',   3),
-('Cristina Popa',    '2626594012825','+37361804033','Chisinau, str. Negru 38',   2),
-('Alexandru Stoica', '2088559569253','+37362006868','Chisinau, str. Sirbu 43',    1),
-('Tatiana Munteanu', '2345842718357','+37362204272','Chisinau, str. Filipescu 14',1),
-('Mihai Cojocaru',   '2263342414490','+37362404351','Chisinau, str. Postolachi 26',1),
-('Inna Vrabie',      '2329189919272','+37362607491','Chisinau, str. Damaschin 21',3),
-('Petru Negru',      '2081328359515','+37362800152','Chisinau, str. Taranu 30',  2),
-('Alina Sirbu',      '2077738827541','+37363008808','Chisinau, str. Lungu 14',    1),
-('Radu Filipescu',   '2967866623129','+37363201127','Chisinau, str. Cebotari 16', 1),
-('Viorica Postolachi','2481713854648','+37363408900','Chisinau, str. Ursu 46',    1),
-('Gheorghe Damaschin','2720726006289','+37363608666','Chisinau, str. Danu 1',     3),
-('Ludmila Taranu',   '2328799513174','+37363801697','Chisinau, str. Grosu 9',   2),
-('Victor Lungu',     '2119785403991','+37364009064','Chisinau, str. Mija 10',     1),
-('Diana Cebotari',   '2230230991019','+37364205617','Chisinau, str. Melniciuc 14',1),
-('Constantin Ursu',  '2291426041482','+37364408280','Chisinau, str. Scutaru 32',  1),
-('Irina Danu',       '2931613449336','+37364600832','Chisinau, str. Balan 6',     3),
-('Pavel Grosu',      '2304209733660','+37364800722','Chisinau, str. Calin 1',    2),
-('Svetlana Mija',    '2700641535392','+37365004291','Chisinau, str. Buza 11',     1),
-('Grigore Melniciuc','2775463562649','+37365207007','Chisinau, str. Istrati 36',  1),
-('Valentina Scutaru','2759707157168','+37365402442','Chisinau, str. Gherghel 35', 1),
-('Marian Balan',     '2641535897688','+37365609052','Chisinau, str. Zadic 10',    3),
-('Lidia Calin',      '2335187102686','+37365805974','Chisinau, str. Anghel 3',   2),
-('Eugen Buza',       '2748226581356','+37366004088','Chisinau, str. Olaru 43',    1),
-('Larisa Istrati',   '2617530897084','+37366206658','Chisinau, str. Rotaru 40',   1),
-('Bogdan Gherghel',  '2950204551500','+37366402662','Chisinau, str. Chiper 12',   1),
-('Galina Zadic',     '2193379984954','+37366605442','Chisinau, str. Vascan 27',   3),
-('Adrian Anghel',    '2811164978375','+37366804065','Chisinau, str. Amariei 18', 2),
-('Natalya Olaru',    '2118976083876','+37367006267','Chisinau, str. Popescu 3',   1),
-('Liviu Rotaru',     '2219998677633','+37367207541','Chisinau, str. Ionescu 23',  1),
-('Doina Chiper',     '2961193689894','+37367403728','Chisinau, str. Rusu 15',     1),
-('Florin Vascan',    '2438916150327','+37367605378','Chisinau, str. Ciobanu 18',  3),
-('Angela Amariei',   '2850261314384','+37367804573','Chisinau, str. Moraru 23',  2),
-('Ciprian Popescu',  '2744745947806','+37368008785','Chisinau, str. Lupascu 22',  1),
-('Mirela Ionescu',   '2962568063334','+37368204279','Chisinau, str. Grama 12',    1),
-('Tudor Rusu',       '2291987126394','+37368400626','Chisinau, str. Botnari 7',   1),
-('Corina Ciobanu',   '2800348631876','+37368605139','Chisinau, str. Rata 28',     3),
-('Vlad Moraru',      '2126750596909','+37368806311','Chisinau, str. Popa 37',    2),
-('Rodica Lupascu',   '2777579719274','+37369007144','Chisinau, str. Stoica 1',    1),
-('Stefan Grama',     '2591874457344','+37369203228','Chisinau, str. Munteanu 24', 1),
-('Nicoleta Botnari', '2734219825197','+37369405409','Chisinau, str. Cojocaru 40', 1),
-('Oleg Rata',        '2136786184083','+37369604920','Chisinau, str. Vrabie 33',   3),
-('Ala Popa',         '2358236319765','+37369806592','Chisinau, str. Negru 45',   4);
+INSERT INTO employee (full_name, idnp, phone, address, role_id, pharmacy_id) VALUES
+('Andrei Popescu',    '2950105810049','+37360006570','Chisinau, str. Lupascu 4',    1, 1),
+('Maria Ionescu',     '2289439657508','+37360207454','Chisinau, str. Grama 19',     1, 2),
+('Ion Rusu',          '2807270532291','+37360409105','Chisinau, str. Botnari 43',   1, 3),
+('Elena Ciobanu',     '2206823277527','+37360604861','Chisinau, str. Rata 14',      3, 4),
+('Vasile Moraru',     '2809941412032','+37360808883','Chisinau, str. Popa 4',       2, NULL),
+('Olga Lupascu',      '2051785130539','+37361009571','Chisinau, str. Stoica 31',    1, 5),
+('Dumitru Grama',     '2583482989002','+37361202579','Chisinau, str. Munteanu 4',   1, 6),
+('Natalia Botnari',   '2932351979347','+37361403044','Chisinau, str. Cojocaru 5',   1, 7),
+('Sergiu Rata',       '2947792820940','+37361603853','Chisinau, str. Vrabie 26',    3, 8),
+('Cristina Popa',     '2626594012825','+37361804033','Chisinau, str. Negru 38',     2, NULL),
+('Alexandru Stoica',  '2088559569253','+37362006868','Chisinau, str. Sirbu 43',     1, 9),
+('Tatiana Munteanu',  '2345842718357','+37362204272','Chisinau, str. Filipescu 14', 1, 10),
+('Mihai Cojocaru',    '2263342414490','+37362404351','Chisinau, str. Postolachi 26',1, 11),
+('Inna Vrabie',       '2329189919272','+37362607491','Chisinau, str. Damaschin 21', 3, 12),
+('Petru Negru',       '2081328359515','+37362800152','Chisinau, str. Taranu 30',    2, NULL),
+('Alina Sirbu',       '2077738827541','+37363008808','Chisinau, str. Lungu 14',     1, 13),
+('Radu Filipescu',    '2967866623129','+37363201127','Chisinau, str. Cebotari 16',  1, 14),
+('Viorica Postolachi','2481713854648','+37363408900','Chisinau, str. Ursu 46',      1, 15),
+('Gheorghe Damaschin','2720726006289','+37363608666','Chisinau, str. Danu 1',       3, 16),
+('Ludmila Taranu',    '2328799513174','+37363801697','Chisinau, str. Grosu 9',      2, NULL),
+('Victor Lungu',      '2119785403991','+37364009064','Chisinau, str. Mija 10',      1, 17),
+('Diana Cebotari',    '2230230991019','+37364205617','Chisinau, str. Melniciuc 14', 1, 18),
+('Constantin Ursu',   '2291426041482','+37364408280','Chisinau, str. Scutaru 32',   1, 19),
+('Irina Danu',        '2931613449336','+37364600832','Chisinau, str. Balan 6',      3, 20),
+('Pavel Grosu',       '2304209733660','+37364800722','Chisinau, str. Calin 1',      2, NULL),
+('Svetlana Mija',     '2700641535392','+37365004291','Chisinau, str. Buza 11',      1, 21),
+('Grigore Melniciuc', '2775463562649','+37365207007','Chisinau, str. Istrati 36',   1, 22),
+('Valentina Scutaru', '2759707157168','+37365402442','Chisinau, str. Gherghel 35',  1, 23),
+('Marian Balan',      '2641535897688','+37365609052','Chisinau, str. Zadic 10',     3, 24),
+('Lidia Calin',       '2335187102686','+37365805974','Chisinau, str. Anghel 3',     2, NULL),
+('Eugen Buza',        '2748226581356','+37366004088','Chisinau, str. Olaru 43',     1, 25),
+('Larisa Istrati',    '2617530897084','+37366206658','Chisinau, str. Rotaru 40',    1, 26),
+('Bogdan Gherghel',   '2950204551500','+37366402662','Chisinau, str. Chiper 12',    1, 27),
+('Galina Zadic',      '2193379984954','+37366605442','Chisinau, str. Vascan 27',    3, 28),
+('Adrian Anghel',     '2811164978375','+37366804065','Chisinau, str. Amariei 18',   2, NULL),
+('Natalya Olaru',     '2118976083876','+37367006267','Chisinau, str. Popescu 3',    1, 29),
+('Liviu Rotaru',      '2219998677633','+37367207541','Chisinau, str. Ionescu 23',   1, 30),
+('Doina Chiper',      '2961193689894','+37367403728','Chisinau, str. Rusu 15',      1, 31),
+('Florin Vascan',     '2438916150327','+37367605378','Chisinau, str. Ciobanu 18',   3, 32),
+('Angela Amariei',    '2850261314384','+37367804573','Chisinau, str. Moraru 23',    2, NULL),
+('Ciprian Popescu',   '2744745947806','+37368008785','Chisinau, str. Lupascu 22',   1, 33),
+('Mirela Ionescu',    '2962568063334','+37368204279','Chisinau, str. Grama 12',     1, 34),
+('Tudor Rusu',        '2291987126394','+37368400626','Chisinau, str. Botnari 7',    1, 35),
+('Corina Ciobanu',    '2800348631876','+37368605139','Chisinau, str. Rata 28',      3, 36),
+('Vlad Moraru',       '2126750596909','+37368806311','Chisinau, str. Popa 37',      2, NULL),
+('Rodica Lupascu',    '2777579719274','+37369007144','Chisinau, str. Stoica 1',     1, 37),
+('Stefan Grama',      '2591874457344','+37369203228','Chisinau, str. Munteanu 24',  1, 38),
+('Nicoleta Botnari',  '2734219825197','+37369405409','Chisinau, str. Cojocaru 40',  1, 39),
+('Oleg Rata',         '2136786184083','+37369604920','Chisinau, str. Vrabie 33',    3, 40),
+('Ala Popa',          '2358236319765','+37369806592','Chisinau, str. Negru 45',     4, NULL);
 
 -- Пользователи системы
 -- system_role проставится триггером автоматически:
@@ -907,27 +907,43 @@ END; $$;
 -- ── EMPLOYEE ─────────────────────────────────────────────────────
 
 CREATE OR REPLACE PROCEDURE sp_add_employee(
-    p_full_name VARCHAR, p_idnp VARCHAR, p_phone VARCHAR,
-    p_address VARCHAR, p_role_id INT, OUT p_id INT
+    p_full_name   VARCHAR,
+    p_idnp        VARCHAR,
+    p_phone       VARCHAR,
+    p_address     VARCHAR,
+    p_role_id     INT,
+    p_pharmacy_id INT,
+    OUT p_id      INT
 )
 LANGUAGE plpgsql AS $$
 BEGIN
-    INSERT INTO employee(full_name, idnp, phone, address, role_id)
-    VALUES (p_full_name, p_idnp, p_phone, p_address, p_role_id)
+    INSERT INTO employee(full_name, idnp, phone, address, role_id, pharmacy_id)
+    VALUES (p_full_name, p_idnp, p_phone, p_address, p_role_id, p_pharmacy_id)
     RETURNING employee_id INTO p_id;
 END; $$;
 
 CREATE OR REPLACE PROCEDURE sp_update_employee(
-    p_id INT, p_full_name VARCHAR, p_idnp VARCHAR, p_phone VARCHAR,
-    p_address VARCHAR, p_role_id INT
+    p_id          INT,
+    p_full_name   VARCHAR,
+    p_idnp        VARCHAR,
+    p_phone       VARCHAR,
+    p_address     VARCHAR,
+    p_role_id     INT,
+    p_pharmacy_id INT
 )
 LANGUAGE plpgsql AS $$
 BEGIN
     UPDATE employee
-    SET full_name=p_full_name, idnp=p_idnp, phone=p_phone,
-        address=p_address, role_id=p_role_id
+    SET full_name   = p_full_name,
+        idnp        = p_idnp,
+        phone       = p_phone,
+        address     = p_address,
+        role_id     = p_role_id,
+        pharmacy_id = p_pharmacy_id
     WHERE employee_id = p_id;
-    IF NOT FOUND THEN RAISE EXCEPTION 'Сотрудник с id=% не найден', p_id; END IF;
+    IF NOT FOUND THEN 
+        RAISE EXCEPTION 'Сотрудник с id=% не найден', p_id; 
+    END IF;
 END; $$;
 
 CREATE OR REPLACE PROCEDURE sp_delete_employee(p_id INT)

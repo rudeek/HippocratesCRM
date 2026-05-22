@@ -37,7 +37,10 @@ namespace MyHippocrates.ViewModels
             // Загружаем общие справочники один раз
             foreach (var m in dbContext.Manufacturers.OrderBy(x => x.Id).ToList()) Manufacturers.Add(m);
             foreach (var p in dbContext.Pharmacies.OrderBy(x => x.Id).ToList()) Pharmacies.Add(p);
-            foreach (var e in dbContext.Employees.Include(x => x.Role).OrderBy(x => x.Id).ToList())
+            foreach (var e in dbContext.Employees
+                .Include(x => x.Role)
+                .Include(x => x.Pharmacy)  // ← добавить
+                .OrderBy(x => x.Id).ToList())
                 Employees.Add(e);
             foreach (var p in dbContext.Products.OrderBy(x => x.Id).ToList()) Products.Add(p);
             foreach (var r in dbContext.Receipts.OrderBy(x => x.Id).ToList()) Receipts.Add(r);
@@ -48,7 +51,7 @@ namespace MyHippocrates.ViewModels
             ManufacturersVM = new ManufacturersViewModel(dbContext, Manufacturers);
             ProductsVM = new ProductsViewModel(dbContext, Manufacturers, Categories, Products);
             PharmaciesVM = new PharmaciesViewModel(dbContext, Pharmacies);
-            EmployeesVM = new EmployeesViewModel(dbContext, Employees, Roles);
+            EmployeesVM = new EmployeesViewModel(dbContext, Employees, Roles, Pharmacies);  // ← добавить Pharmacies
             ReceiptsVM = new ReceiptsViewModel(dbContext, Pharmacies, Employees, Receipts);
             OrderItemsVM = new OrderItemsViewModel(dbContext, Receipts, Products, Pharmacies);
             StockBalanceVM = new StockBalanceViewModel(dbContext, Pharmacies, Products);

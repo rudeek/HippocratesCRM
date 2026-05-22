@@ -42,6 +42,11 @@ namespace MyHippocrates.Data
                 .WithMany(r => r.Employees)
                 .HasForeignKey(e => e.RoleId);
 
+            modelBuilder.Entity<Employee>()          // ← добавить
+                .HasOne(e => e.Pharmacy)
+                .WithMany(p => p.Employees)
+                .HasForeignKey(e => e.PharmacyId);
+
             modelBuilder.Entity<Employee>()
                 .HasOne(e => e.SystemUser)
                 .WithOne(u => u.Employee)

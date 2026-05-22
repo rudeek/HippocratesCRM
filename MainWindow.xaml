@@ -648,24 +648,26 @@
                         </StackPanel>
                     </Grid>
                     <DataGrid Grid.Row="1" x:Name="EmployeesGrid"
-                              ItemsSource="{Binding EmployeesVM.View}"
-                              LoadingRow="DataGrid_LoadingRow"
-                              UnloadingRow="DataGrid_UnloadingRow">
+          ItemsSource="{Binding EmployeesVM.View}"
+          LoadingRow="DataGrid_LoadingRow"
+          UnloadingRow="DataGrid_UnloadingRow">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="№" Width="56">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Style="{StaticResource RowNumStyle}"
-                                                   Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
+                               Text="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=Header}"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="ФИО"       Binding="{Binding FullName}"                           Width="*"/>
-                            <DataGridTextColumn Header="IDNP"      Binding="{Binding Idnp}"                               Width="140"/>
-                            <DataGridTextColumn Header="Телефон"   Binding="{Binding Phone}"                              Width="140"/>
-                            <DataGridTextColumn Header="Адрес"     Binding="{Binding Address}"                            Width="220"/>
-                            <DataGridTextColumn Header="Зарплата"  Binding="{Binding Salary, StringFormat={}{0:F2}}"      Width="110"/>
-                            <DataGridTextColumn Header="Должность" Binding="{Binding Role.Name}"                           Width="130"/>
+                            <DataGridTextColumn Header="ФИО"       Binding="{Binding FullName}"                          Width="*"/>
+                            <DataGridTextColumn Header="IDNP"      Binding="{Binding Idnp}"                              Width="140"/>
+                            <DataGridTextColumn Header="Телефон"   Binding="{Binding Phone}"                             Width="140"/>
+                            <DataGridTextColumn Header="Адрес"     Binding="{Binding Address}"                           Width="220"/>
+                            <DataGridTextColumn Header="Зарплата"  Binding="{Binding Salary, StringFormat={}{0:F2}}"     Width="110"/>
+                            <DataGridTextColumn Header="Должность" Binding="{Binding Role.Name}"                         Width="130"/>
+                            <DataGridTextColumn Header="Аптека"    Binding="{Binding Pharmacy.Address}"                  Width="200"/>
+     
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>

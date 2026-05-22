@@ -29,8 +29,6 @@ namespace MyHippocrates.Views
         private string _receiptDiscountText = "0";
 
         public event PropertyChangedEventHandler? PropertyChanged;
-
-        public ObservableCollection<Pharmacy> Pharmacies { get; } = new();
         public ObservableCollection<CashierProductCard> ProductCards { get; } = new();
         public ObservableCollection<CashierReceiptLine> CurrentLines { get; } = new();
 
@@ -93,18 +91,15 @@ namespace MyHippocrates.Views
             _user = user;
             DataContext = this;
 
-            LoadPharmacies();
+           
+            if (user.Employee?.PharmacyId != null)
+            {
+                SelectedPharmacy = _ctx.Pharmacies
+                    .FirstOrDefault(p => p.Id == user.Employee.PharmacyId);
+            }
+
             ReloadProducts();
             RefreshReceiptState();
-        }
-
-        private void LoadPharmacies()
-        {
-            Pharmacies.Clear();
-            foreach (var pharmacy in _ctx.Pharmacies.OrderBy(p => p.Id).ToList())
-                Pharmacies.Add(pharmacy);
-
-            SelectedPharmacy = Pharmacies.FirstOrDefault();
         }
 
         private void ReloadProducts()

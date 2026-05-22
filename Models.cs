@@ -95,6 +95,7 @@ namespace MyHippocrates.Models
 
         public ICollection<Receipt> Receipts { get; set; } = new List<Receipt>();
         public ICollection<StockBalance> StockBalances { get; set; } = new List<StockBalance>();
+        public ICollection<Employee> Employees { get; set; } = new List<Employee>();
     }
 
     [Table("employee")]
@@ -116,12 +117,17 @@ namespace MyHippocrates.Models
         [Column("address"), Required, MaxLength(255)]
         public string Address { get; set; } = "";
 
+        [Column("pharmacy_id")]       
+        public int? PharmacyId { get; set; }
+
         [Column("role_id")]
         public int RoleId { get; set; }
 
         public Role? Role { get; set; }
+        public Pharmacy? Pharmacy { get; set; }
         public SystemUser? SystemUser { get; set; }
         public ICollection<Receipt> Receipts { get; set; } = new List<Receipt>();
+        
 
         /// <summary>
         /// Вычисляемое свойство для отображения зарплаты из роли.

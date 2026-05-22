@@ -2,6 +2,7 @@
 using MyHippocrates.ViewModels;
 using MyHippocrates.Views;
 using System.IO;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -24,7 +25,38 @@ namespace MyHippocrates
         private const string DbPort = "5432";
         private const string DbName = "Hippocrates";
         private const string DbUser = "postgres";
-        private const string DbPassword = "root";
+
+        private static string GetDbPassword()
+        {
+            var path = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "appsettings.json");
+
+            if (!File.Exists(path))
+                return "root";
+
+            try
+            {
+                var json = File.ReadAllText(path);
+                var doc = JsonDocument.Parse(json);
+                var cs = doc.RootElement
+                            .GetProperty("ConnectionString")
+                            .GetString() ?? "";
+
+                // Парсим Password= из строки подключения
+                foreach (var part in cs.Split(';'))
+                {
+                    var kv = part.Split('=', 2);
+                    if (kv.Length == 2 &&
+                        kv[0].Trim().Equals("Password",
+                            StringComparison.OrdinalIgnoreCase))
+                        return kv[1].Trim();
+                }
+            }
+            catch { }
+
+            return "root";
+        }
 
         private void CreateBackup_Click(object sender, RoutedEventArgs e)
         {
@@ -59,7 +91,7 @@ namespace MyHippocrates
                     RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true,
-                    Environment = { ["PGPASSWORD"] = DbPassword }
+                    Environment = { ["PGPASSWORD"] = GetDbPassword() }
                 };
 
                 using var process = System.Diagnostics.Process.Start(psi)!;
@@ -125,7 +157,7 @@ namespace MyHippocrates
                     RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true,
-                    Environment = { ["PGPASSWORD"] = DbPassword }
+                    Environment = { ["PGPASSWORD"] = GetDbPassword() }
                 };
 
                 using (var drop = System.Diagnostics.Process.Start(psiDrop)!)
@@ -147,7 +179,7 @@ namespace MyHippocrates
                     RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true,
-                    Environment = { ["PGPASSWORD"] = DbPassword }
+                    Environment = { ["PGPASSWORD"] = GetDbPassword() }
                 };
 
                 using var restore = System.Diagnostics.Process.Start(psiRestore)!;

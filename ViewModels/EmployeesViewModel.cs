@@ -17,6 +17,7 @@ namespace MyHippocrates.ViewModels
         private readonly AppDbContext _ctx;
         private readonly ObservableCollection<Employee> _employees;
         private readonly ObservableCollection<Role> _roles;
+        private readonly ObservableCollection<Pharmacy> _pharmacies;  // ← добавить
         public ICollectionView View { get; }
 
         private string _search = "";
@@ -32,11 +33,13 @@ namespace MyHippocrates.ViewModels
 
         public EmployeesViewModel(AppDbContext ctx,
             ObservableCollection<Employee> employees,
-            ObservableCollection<Role> roles)
+            ObservableCollection<Role> roles,
+            ObservableCollection<Pharmacy> pharmacies)
         {
             _ctx = ctx;
             _employees = employees;
             _roles = roles;
+            _pharmacies = pharmacies; 
 
             View = CollectionViewSource.GetDefaultView(_employees);
             View.Filter = obj =>
@@ -58,7 +61,7 @@ namespace MyHippocrates.ViewModels
         private void Add()
         {
             var entity = new Employee();
-            var vm = new EmployeeEditorViewModel(entity, _roles);
+            var vm = new EmployeeEditorViewModel(entity, _roles, _pharmacies);  
             var dlg = new Views.EditDialog(vm, _ctx, isNew: true)
             {
                 Owner = Application.Current.MainWindow,
@@ -69,6 +72,7 @@ namespace MyHippocrates.ViewModels
             if (dlg.ShowDialog() == true)
             {
                 entity.Role = _roles.FirstOrDefault(r => r.Id == entity.RoleId);
+                entity.Pharmacy = _pharmacies.FirstOrDefault(p => p.Id == entity.PharmacyId);  
                 _employees.Add(entity);
                 View.Refresh();
             }
@@ -84,9 +88,10 @@ namespace MyHippocrates.ViewModels
                 Idnp = e.Idnp,
                 Phone = e.Phone,
                 Address = e.Address,
-                RoleId = e.RoleId
+                RoleId = e.RoleId,
+                PharmacyId = e.PharmacyId  
             };
-            var vm = new EmployeeEditorViewModel(copy, _roles);
+            var vm = new EmployeeEditorViewModel(copy, _roles, _pharmacies);  
             var dlg = new Views.EditDialog(vm, _ctx, isNew: false)
             {
                 Owner = Application.Current.MainWindow,
@@ -100,7 +105,9 @@ namespace MyHippocrates.ViewModels
                 e.Phone = copy.Phone;
                 e.Address = copy.Address;
                 e.RoleId = copy.RoleId;
+                e.PharmacyId = copy.PharmacyId; 
                 e.Role = _roles.FirstOrDefault(r => r.Id == copy.RoleId);
+                e.Pharmacy = _pharmacies.FirstOrDefault(p => p.Id == copy.PharmacyId);  
 
                 var idx = _employees.IndexOf(e);
                 if (idx >= 0)
@@ -156,6 +163,7 @@ namespace MyHippocrates.ViewModels
             _employees.Clear();
             foreach (var e in _ctx.Employees
                 .Include(x => x.Role)
+                .Include(x => x.Pharmacy) 
                 .OrderBy(x => x.Id).ToList())
                 _employees.Add(e);
             View.Refresh();

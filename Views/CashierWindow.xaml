@@ -170,19 +170,19 @@
                 </StackPanel>
 
                 <StackPanel Grid.Column="1"
-                            Orientation="Horizontal"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center">
-                    <TextBlock Text="Аптека"
-                               Foreground="#A7E2D5"
-                               FontWeight="SemiBold"
-                               VerticalAlignment="Center"
-                               Margin="0 0 10 0"/>
-                    <ComboBox ItemsSource="{Binding Pharmacies}"
-                              SelectedItem="{Binding SelectedPharmacy, Mode=TwoWay}"
-                              DisplayMemberPath="Address"
-                              Width="360"
-                              Padding="8 6"/>
+            Orientation="Horizontal"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+                    <TextBlock Text="Аптека:"
+               Foreground="#A7E2D5"
+               FontWeight="SemiBold"
+               VerticalAlignment="Center"
+               Margin="0 0 10 0"/>
+                    <TextBlock Text="{Binding SelectedPharmacy.Address}"
+               Foreground="White"
+               FontSize="15"
+               FontWeight="SemiBold"
+               VerticalAlignment="Center"/>
                 </StackPanel>
 
                 <Button Grid.Column="2"

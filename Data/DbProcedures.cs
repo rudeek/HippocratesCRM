@@ -305,13 +305,14 @@ namespace MyHippocrates.Data
             {
                 using var cmd = cn.CreateCommand();
                 cmd.Transaction = tx;
-                cmd.CommandText = "CALL sp_add_employee(@p_full_name, @p_idnp, @p_phone, @p_address, @p_role_id, @p_id)";
+                cmd.CommandText = "CALL sp_add_employee(@p_full_name, @p_idnp, @p_phone, @p_address, @p_role_id, @p_pharmacy_id, @p_id)";
 
                 cmd.Parameters.AddWithValue("p_full_name", e.FullName);
                 cmd.Parameters.AddWithValue("p_idnp", e.Idnp);
                 cmd.Parameters.AddWithValue("p_phone", e.Phone);
                 cmd.Parameters.Add(CreateNullableParam("p_address", e.Address));
                 cmd.Parameters.AddWithValue("p_role_id", e.RoleId);
+                cmd.Parameters.Add(CreateNullableParam("p_pharmacy_id", e.PharmacyId));  // ← добавить
 
                 var pOut = new NpgsqlParameter("p_id", NpgsqlDbType.Integer)
                 { Direction = ParameterDirection.InputOutput, Value = 0 };
@@ -337,7 +338,7 @@ namespace MyHippocrates.Data
             {
                 using var cmd = cn.CreateCommand();
                 cmd.Transaction = tx;
-                cmd.CommandText = "CALL sp_update_employee(@p_id, @p_full_name, @p_idnp, @p_phone, @p_address, @p_role_id)";
+                cmd.CommandText = "CALL sp_update_employee(@p_id, @p_full_name, @p_idnp, @p_phone, @p_address, @p_role_id, @p_pharmacy_id)";
 
                 cmd.Parameters.AddWithValue("p_id", e.Id);
                 cmd.Parameters.AddWithValue("p_full_name", e.FullName);
@@ -345,6 +346,7 @@ namespace MyHippocrates.Data
                 cmd.Parameters.AddWithValue("p_phone", e.Phone);
                 cmd.Parameters.Add(CreateNullableParam("p_address", e.Address));
                 cmd.Parameters.AddWithValue("p_role_id", e.RoleId);
+                cmd.Parameters.Add(CreateNullableParam("p_pharmacy_id", e.PharmacyId));  // ← добавить
 
                 cmd.ExecuteNonQuery();
                 tx.Commit();

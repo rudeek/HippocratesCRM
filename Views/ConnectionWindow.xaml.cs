@@ -1,19 +1,44 @@
-using System;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Windows;
 using Microsoft.EntityFrameworkCore;
 using MyHippocrates.Data;
 using MyHippocrates.ViewModels;
 using MyHippocrates.Views;
+using System;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.IO;
+using System.Text.Json;
+using System.Windows;
 
 namespace MyHippocrates
 {
     public partial class ConnectionWindow : Window
     {
-        private const string ConnectionString =
-            "Host=localhost;Port=5432;Database=Hippocrates;Username=postgres;Password=root";
+        private const string DefaultConnection =
+     "Host=localhost;Port=5432;Database=Hippocrates;Username=postgres;Password=root";
+
+        private static string GetConnectionString()
+        {
+            var path = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "appsettings.json");
+
+            if (!File.Exists(path))
+                return DefaultConnection;
+
+            try
+            {
+                var json = File.ReadAllText(path);
+                var doc = JsonDocument.Parse(json);
+                return doc.RootElement
+                          .GetProperty("ConnectionString")
+                          .GetString() ?? DefaultConnection;
+            }
+            catch
+            {
+                return DefaultConnection;
+            }
+        }
 
         public ConnectionWindow()
         {
@@ -35,7 +60,7 @@ namespace MyHippocrates
 
             try
             {
-                var ctx = new AppDbContext(ConnectionString);
+                var ctx = new AppDbContext(GetConnectionString());
                 if (!ctx.Database.CanConnect())
                 {
                     ShowError("Не удалось подключиться к базе данных.");
@@ -46,6 +71,8 @@ namespace MyHippocrates
                 var user = ctx.SystemUsers
                     .Include(u => u.Employee)
                     .ThenInclude(e => e!.Role)
+                    .Include(u => u.Employee)       
+                    .ThenInclude(e => e!.Pharmacy)
                     .FirstOrDefault(u => u.Login == login &&
                                          u.PasswordHash == passwordHash &&
                                          u.IsActive);
