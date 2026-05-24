@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows.Threading;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -10,6 +11,27 @@ namespace MyHippocrates
 {
     public partial class App : Application
     {
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+            DispatcherUnhandledException += (s, ex) =>
+            {
+                File.WriteAllText(
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "error.log"),
+                    ex.Exception.ToString());
+                MessageBox.Show(ex.Exception.Message, "Ошибка");
+                ex.Handled = true;
+            };
+
+            AppDomain.CurrentDomain.UnhandledException += (s, ex) =>
+            {
+                File.WriteAllText(
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "error.log"),
+                    ex.ExceptionObject.ToString());
+            };
+        }
         private void OnlyLetters_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !e.Text.All(char.IsLetter);
