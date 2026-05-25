@@ -694,7 +694,17 @@
                                     <TextBlock Text="Добавить" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
-                            <Button Style="{StaticResource BtnDelete}" Margin="8 0 0 0"
+                            <Button Style="{StaticResource BtnEdit}"
+                                    Margin="8 0"
+                                    x:Name="BtnViewReceiptItems"
+                                    IsEnabled="False"
+                                    Click="ViewReceiptItems_Click">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="📋" FontSize="13" Margin="0 0 6 0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Позиции" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Style="{StaticResource BtnDelete}"
                                     Command="{Binding ReceiptsVM.DeleteCommand}"
                                     CommandParameter="{Binding SelectedItem, ElementName=ReceiptsGrid}">
                                 <StackPanel Orientation="Horizontal">
@@ -707,7 +717,8 @@
                     <DataGrid Grid.Row="1" x:Name="ReceiptsGrid"
                               ItemsSource="{Binding ReceiptsVM.View}"
                               LoadingRow="DataGrid_LoadingRow"
-                              UnloadingRow="DataGrid_UnloadingRow">
+                              UnloadingRow="DataGrid_UnloadingRow"
+                              SelectionChanged="ReceiptsGrid_SelectionChanged">
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Header="№" Width="56">
                                 <DataGridTemplateColumn.CellTemplate>

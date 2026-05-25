@@ -1,4 +1,6 @@
-﻿using MyHippocrates.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using MyHippocrates.Data;
+using MyHippocrates.Models;
 using MyHippocrates.ViewModels;
 using MyHippocrates.Views;
 using System.IO;
@@ -56,6 +58,59 @@ namespace MyHippocrates
             catch { }
 
             return "root";
+        }
+
+        private void ReceiptsGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (BtnViewReceiptItems != null)
+                BtnViewReceiptItems.IsEnabled = ReceiptsGrid.SelectedItem is Receipt;
+        }
+
+        // ── Открыть окно позиций чека ─────────────────────────────────────
+        private void ViewReceiptItems_Click(object sender, RoutedEventArgs e)
+        {
+            if (ReceiptsGrid.SelectedItem is not Receipt selected) return;
+            if (DataContext is not MainViewModel vm) return;
+
+            // Загружаем чек со всеми навигационными свойствами
+            vm.Db.ChangeTracker.Clear();
+            var receipt = vm.Db.Receipts
+                .Include(r => r.Pharmacy)
+                .Include(r => r.Employee)
+                .Include(r => r.OrderItems)
+                    .ThenInclude(o => o.Product)
+                .FirstOrDefault(r => r.Id == selected.Id);
+
+            if (receipt == null)
+            {
+                MessageBox.Show("Чек не найден.", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var window = new MyHippocrates.Views.ReceiptItemsWindow(
+                vm.Db,
+                receipt,
+                vm.Receipts,
+                vm.Products,
+                vm.Pharmacies)
+            {
+                Owner = this
+            };
+
+            window.ShowDialog();
+
+            // После закрытия окна — перезагружаем чеки и позиции заказов
+            if (window.DataChanged || window.ReceiptWasDeleted)
+            {
+                vm.ReceiptsVM.Reload();
+                vm.OrderItemsVM.Reload();
+
+                // Сбрасываем выбор и блокируем кнопку
+                ReceiptsGrid.SelectedItem = null;
+                if (BtnViewReceiptItems != null)
+                    BtnViewReceiptItems.IsEnabled = false;
+            }
         }
 
         private void CreateBackup_Click(object sender, RoutedEventArgs e)
